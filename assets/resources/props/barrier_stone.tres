@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="PropBarrierDef" format=3 uid="uid://hv7aodraud8a"]
+
+[ext_resource type="Script" uid="uid://k26qc03xif6p" path="res://assets/scripts/props/definitions/prop_barrier_def.gd" id="1_def"]
+[ext_resource type="Texture2D" uid="uid://dcfmmv33rrask" path="res://assets/sprites/props/static/barrier.png" id="2_tex"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"barrier_stone"
+display_name = "Stone Barrier"
+texture = ExtResource("2_tex")

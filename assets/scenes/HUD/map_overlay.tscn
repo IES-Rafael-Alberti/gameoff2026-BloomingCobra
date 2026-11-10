@@ -1,0 +1,13 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/hud/map_overlay.gd" id="1_map"]
+[ext_resource type="Texture2D" path="res://assets/sprites/HUD/roomDiscovered.png" id="2_disc"]
+[ext_resource type="Texture2D" path="res://assets/sprites/HUD/roomUndiscovered.png" id="3_und"]
+[ext_resource type="Texture2D" path="res://assets/sprites/HUD/map.png" id="4_cur"]
+
+[node name="MapOverlay" type="CanvasLayer"]
+layer = 80
+script = ExtResource("1_map")
+discovered_texture = ExtResource("2_disc")
+undiscovered_texture = ExtResource("3_und")
+current_texture = ExtResource("4_cur")

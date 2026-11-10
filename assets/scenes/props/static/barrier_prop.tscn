@@ -1,0 +1,22 @@
+[gd_scene load_steps=4 format=3 uid="uid://c7r4dqfupp84j"]
+
+[ext_resource type="Script" path="res://assets/scripts/props/static/barrier_prop.gd" id="1_barrier"]
+[ext_resource type="Texture2D" uid="uid://dcfmmv33rrask" path="res://assets/sprites/props/static/barrier.png" id="2_tex"]
+[ext_resource type="Resource" path="res://assets/resources/props/barrier_stone.tres" id="3_def"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_barrier"]
+size = Vector2(16, 16)
+
+[node name="BarrierProp" type="StaticBody2D"]
+z_index = 1
+collision_layer = 1
+collision_mask = 0
+script = ExtResource("1_barrier")
+definition = ExtResource("3_def")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture_filter = 1
+texture = ExtResource("2_tex")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_barrier")

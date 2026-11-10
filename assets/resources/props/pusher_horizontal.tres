@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="PropPusherDef" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/props/definitions/prop_pusher_def.gd" id="1_def"]
+[ext_resource type="Texture2D" uid="uid://5mb1bg3wjw67" path="res://assets/sprites/props/dynamic/pusher.png" id="2_tex"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"pusher_horizontal"
+display_name = "Pusher Horizontal"
+texture = ExtResource("2_tex")
+collision_size = Vector2(16, 16)
+z_index = 1
+move_speed = 40.0
+travel = Vector2(64, 0)
+start_offset = 0.0

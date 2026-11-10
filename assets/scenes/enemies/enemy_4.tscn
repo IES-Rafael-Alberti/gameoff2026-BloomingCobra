@@ -1,0 +1,127 @@
+[gd_scene format=3 uid="uid://bxk5iodhcl1y1"]
+
+[ext_resource type="Script" uid="uid://c1fbuoperocxx" path="res://assets/scripts/enemies/enemy.gd" id="1_kpjfe"]
+[ext_resource type="Texture2D" uid="uid://cdu2lbk4x3oyb" path="res://assets/sprites/enemy/enemy4/Walk-Anim.png" id="2_h74ec"]
+[ext_resource type="Script" uid="uid://bgh2aslom8hdu" path="res://assets/scripts/common/damageable.gd" id="2_j5asl"]
+[ext_resource type="Texture2D" uid="uid://jgnj67pwkkwl" path="res://assets/sprites/enemy/enemy4/Sleep-Anim.png" id="3_gqm0i"]
+[ext_resource type="Script" uid="uid://bkoec71xnejuk" path="res://assets/scripts/common/switchable.gd" id="3_h74ec"]
+[ext_resource type="Script" uid="uid://hyer0s0jqcmx" path="res://assets/scripts/enemies/movement/bouncer/bouncer.gd" id="4_gqm0i"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_akui1"]
+atlas = ExtResource("2_h74ec")
+region = Rect2(0, 0, 32, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xwrwn"]
+atlas = ExtResource("2_h74ec")
+region = Rect2(32, 0, 32, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_lws5t"]
+atlas = ExtResource("2_h74ec")
+region = Rect2(64, 0, 32, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5rro6"]
+atlas = ExtResource("2_h74ec")
+region = Rect2(96, 0, 32, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_nhtvk"]
+atlas = ExtResource("2_h74ec")
+region = Rect2(128, 0, 32, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_otbrx"]
+atlas = ExtResource("2_h74ec")
+region = Rect2(160, 0, 32, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_o3lfu"]
+atlas = ExtResource("2_h74ec")
+region = Rect2(192, 0, 32, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5kh3m"]
+atlas = ExtResource("2_h74ec")
+region = Rect2(224, 0, 32, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_c3m5a"]
+atlas = ExtResource("3_gqm0i")
+region = Rect2(0, 0, 32, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3avw0"]
+atlas = ExtResource("3_gqm0i")
+region = Rect2(32, 0, 32, 48)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_akui1"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_akui1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xwrwn")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_lws5t")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5rro6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_nhtvk")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_otbrx")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_o3lfu")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5kh3m")
+}],
+"loop": 1,
+"name": &"floating",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_c3m5a")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3avw0")
+}],
+"loop": 1,
+"name": &"inactive",
+"speed": 5.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_xwrwn"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_bwm3p"]
+radius = 7.0
+
+[node name="Enemy4" type="CharacterBody2D" unique_id=1171050525]
+script = ExtResource("1_kpjfe")
+max_health = 3
+move_speed = 60.0
+attack_cooldown = 0.0
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1304020782]
+sprite_frames = SubResource("SpriteFrames_akui1")
+animation = &"floating"
+frame_progress = 0.08328262
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=2010100391]
+position = Vector2(0, -10)
+shape = SubResource("CircleShape2D_xwrwn")
+
+[node name="Hurtbox" type="Area2D" parent="." unique_id=1699306316]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox" unique_id=1533888870]
+position = Vector2(0, -10)
+shape = SubResource("CircleShape2D_bwm3p")
+
+[node name="Damageable" type="Node2D" parent="." unique_id=1847440650]
+script = ExtResource("2_j5asl")
+
+[node name="Switchable" type="Node2D" parent="." unique_id=1339734756]
+script = ExtResource("3_h74ec")
+
+[node name="Bouncer" type="Node2D" parent="." unique_id=1367370899]
+position = Vector2(0, -6)
+script = ExtResource("4_gqm0i")

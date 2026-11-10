@@ -1,0 +1,41 @@
+[gd_scene load_steps=5 format=3 uid="uid://dw3rcxopoegnt"]
+
+[ext_resource type="Script" path="res://assets/scripts/props/static/breakable_prop.gd" id="1_break"]
+[ext_resource type="Script" uid="uid://bgh2aslom8hdu" path="res://assets/scripts/common/damageable.gd" id="2_dmg"]
+[ext_resource type="Texture2D" uid="uid://di8gre5ioftg0" path="res://assets/sprites/props/static/breakable.png" id="2_tex"]
+[ext_resource type="Resource" path="res://assets/resources/props/breakable_crate.tres" id="3_def"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_break"]
+size = Vector2(16, 16)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hurt"]
+size = Vector2(16, 16)
+
+[node name="BreakableProp" type="CharacterBody2D"]
+z_index = 1
+collision_layer = 69
+collision_mask = 0
+motion_mode = 1
+script = ExtResource("1_break")
+definition = ExtResource("3_def")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture_filter = 1
+texture = ExtResource("2_tex")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_break")
+
+[node name="Hurtbox" type="Area2D" parent="."]
+collision_layer = 64
+collision_mask = 0
+monitoring = false
+monitorable = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox"]
+shape = SubResource("RectangleShape2D_hurt")
+
+[node name="Damageable" type="Node2D" parent="."]
+script = ExtResource("2_dmg")
+max_health = 1
+invulnerability_time = 0.05
