@@ -2,16 +2,16 @@
 
 [ext_resource type="Script" uid="uid://bgh2aslom8hdu" path="res://assets/scripts/common/damageable.gd" id="1_3850e"]
 [ext_resource type="Script" uid="uid://c1fbuoperocxx" path="res://assets/scripts/enemies/enemy.gd" id="1_enemy"]
-[ext_resource type="Texture2D" uid="uid://b6mav236bluw" path="res://assets/sprites/enemy/enemy2/Attack-Anim.png" id="1_xfvwa"]
+[ext_resource type="Texture2D" uid="uid://b0ffp4hbifn68" path="res://assets/sprittesheets/enemy/placeholders/enemy2/Attack-Anim.png" id="1_xfvwa"]
 [ext_resource type="Script" uid="uid://bkoec71xnejuk" path="res://assets/scripts/common/switchable.gd" id="2_bp46k"]
-[ext_resource type="Texture2D" uid="uid://f6m36gclkpe8" path="res://assets/sprites/enemy/enemy2/Idle-Anim.png" id="2_f7rxk"]
+[ext_resource type="Texture2D" uid="uid://byiyst8t75q8k" path="res://assets/sprittesheets/enemy/placeholders/enemy2/Idle-Anim.png" id="2_f7rxk"]
 [ext_resource type="Script" uid="uid://rieolv1vcgou" path="res://assets/scripts/enemies/movement/ranger/ranger.gd" id="3_e0lwv"]
 [ext_resource type="Script" path="res://assets/scripts/enemies/movement/ranger/idle.gd" id="3_ranger_idle"]
 [ext_resource type="Script" path="res://assets/scripts/enemies/movement/ranger/aggressive.gd" id="3_ranger_aggro"]
-[ext_resource type="Texture2D" uid="uid://b8hwg6tv2un2m" path="res://assets/sprites/enemy/enemy2/Sleep-Anim.png" id="3_lvmi4"]
-[ext_resource type="Texture2D" uid="uid://bl5g7mcbvd2k7" path="res://assets/sprites/enemy/enemy2/Walk-Anim.png" id="4_sjtrc"]
+[ext_resource type="Texture2D" uid="uid://cl3dxnit1eglu" path="res://assets/sprittesheets/enemy/placeholders/enemy2/Sleep-Anim.png" id="3_lvmi4"]
+[ext_resource type="Texture2D" uid="uid://vhvd3jwmhbcp" path="res://assets/sprittesheets/enemy/placeholders/enemy2/Walk-Anim.png" id="4_sjtrc"]
 [ext_resource type="Script" uid="uid://bxe57tgh8cpt0" path="res://assets/scripts/enemies/projectile.gd" id="5_proj"]
-[ext_resource type="Texture2D" uid="uid://mia7bdalg8n4" path="res://assets/sprites/enemy/enemy2/projectile.png" id="6_sjtrc"]
+[ext_resource type="Texture2D" uid="uid://df0q2xfxfejwq" path="res://assets/sprittesheets/enemy/placeholders/enemy2/projectile.png" id="6_sjtrc"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_0wv2c"]
 atlas = ExtResource("1_xfvwa")

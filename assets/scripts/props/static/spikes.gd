@@ -9,7 +9,7 @@ const LAYER_SPIKES_ENEMY := 1 << 5 # physics layer 6
 @export var damage: int = 1
 ## Seconds between damage ticks while the player remains on the spikes.
 @export var damage_interval: float = 0.55
-@export var texture: Texture2D = preload("res://assets/sprites/props/static/spikes.png")
+@export var texture: Texture2D = preload("res://assets/sprittesheets/props/placeholders/static/spikes.png")
 
 @onready var sprite: Sprite2D = get_node_or_null("Sprite2D") as Sprite2D
 

@@ -6,10 +6,10 @@
 [ext_resource type="Script" path="res://assets/scripts/enemies/movement/hunter/idle.gd" id="2_hunter_idle"]
 [ext_resource type="Script" path="res://assets/scripts/enemies/movement/hunter/aggressive.gd" id="2_hunter_aggro"]
 [ext_resource type="Script" uid="uid://bkoec71xnejuk" path="res://assets/scripts/common/switchable.gd" id="2_switch"]
-[ext_resource type="Texture2D" uid="uid://wkauqmpqqh0h" path="res://assets/sprites/enemy/enemy1/Attack-Anim.png" id="2_t2q6g"]
-[ext_resource type="Texture2D" uid="uid://dp51uog7b3w1i" path="res://assets/sprites/enemy/enemy1/Idle-Anim.png" id="3_o3hxu"]
-[ext_resource type="Texture2D" uid="uid://cf51expyu84i8" path="res://assets/sprites/enemy/enemy1/Sleep-Anim.png" id="4_yyvcd"]
-[ext_resource type="Texture2D" uid="uid://cse2qdgi7ayfr" path="res://assets/sprites/enemy/enemy1/Walk-Anim.png" id="5_4t03u"]
+[ext_resource type="Texture2D" uid="uid://ccgohp51hvyoy" path="res://assets/sprittesheets/enemy/placeholders/enemy1/Attack-Anim.png" id="2_t2q6g"]
+[ext_resource type="Texture2D" uid="uid://v2e51cu0g5ei" path="res://assets/sprittesheets/enemy/placeholders/enemy1/Idle-Anim.png" id="3_o3hxu"]
+[ext_resource type="Texture2D" uid="uid://5tlcl5p75wud" path="res://assets/sprittesheets/enemy/placeholders/enemy1/Sleep-Anim.png" id="4_yyvcd"]
+[ext_resource type="Texture2D" uid="uid://cpbsoj5t1dgxt" path="res://assets/sprittesheets/enemy/placeholders/enemy1/Walk-Anim.png" id="5_4t03u"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_37lg7"]
 atlas = ExtResource("2_t2q6g")

@@ -1,3 +1,6 @@
+# Runtime error logs
+logs/
+
 # Godot 4.2+ specific ignores
 ~*.dll
 

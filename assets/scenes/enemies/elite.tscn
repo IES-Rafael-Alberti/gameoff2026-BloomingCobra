@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://d0bcr6ctny2xs"]
 
-[ext_resource type="Texture2D" uid="uid://b4spwrw6md7cl" path="res://assets/sprites/enemy/enemy5/Charge-Anim.png" id="1_0ih17"]
+[ext_resource type="Texture2D" uid="uid://e4xk6dbq1oer" path="res://assets/sprittesheets/enemy/placeholders/enemy5/Charge-Anim.png" id="1_0ih17"]
 [ext_resource type="Script" uid="uid://bgh2aslom8hdu" path="res://assets/scripts/common/damageable.gd" id="1_gsd7t"]
 [ext_resource type="Script" uid="uid://c1fbuoperocxx" path="res://assets/scripts/enemies/enemy.gd" id="1_enemy"]
 [ext_resource type="Script" uid="uid://bkoec71xnejuk" path="res://assets/scripts/common/switchable.gd" id="2_1ngwm"]
@@ -11,11 +11,11 @@
 [ext_resource type="Script" path="res://assets/scripts/enemies/movement/elite/charge_attack.gd" id="11_charge"]
 [ext_resource type="Script" path="res://assets/scripts/enemies/movement/elite/shield.gd" id="12_shield"]
 [ext_resource type="Script" path="res://assets/scripts/enemies/movement/elite/circular_attack.gd" id="13_circ"]
-[ext_resource type="Texture2D" uid="uid://f87dhmg3u6sd" path="res://assets/sprites/enemy/enemy5/Idle-Anim.png" id="2_sb28e"]
-[ext_resource type="Texture2D" uid="uid://bo3jx6crhy04" path="res://assets/sprites/enemy/enemy5/Hurt-Anim.png" id="3_bp0bn"]
-[ext_resource type="Texture2D" uid="uid://c5qlrc8hc45p6" path="res://assets/sprites/enemy/enemy5/Sleep-Anim.png" id="4_7suka"]
-[ext_resource type="Texture2D" uid="uid://5tajpdunewrc" path="res://assets/sprites/enemy/enemy5/Rotate-Anim.png" id="5_0dy8t"]
-[ext_resource type="Texture2D" uid="uid://b0m40p4xovhi1" path="res://assets/sprites/enemy/enemy5/Walk-Anim.png" id="6_3likd"]
+[ext_resource type="Texture2D" uid="uid://c6x2pcw8tqh7x" path="res://assets/sprittesheets/enemy/placeholders/enemy5/Idle-Anim.png" id="2_sb28e"]
+[ext_resource type="Texture2D" uid="uid://bdqpna5ibhwy2" path="res://assets/sprittesheets/enemy/placeholders/enemy5/Hurt-Anim.png" id="3_bp0bn"]
+[ext_resource type="Texture2D" uid="uid://1445ud11g7nq" path="res://assets/sprittesheets/enemy/placeholders/enemy5/Sleep-Anim.png" id="4_7suka"]
+[ext_resource type="Texture2D" uid="uid://cl1wunyn4ky8i" path="res://assets/sprittesheets/enemy/placeholders/enemy5/Rotate-Anim.png" id="5_0dy8t"]
+[ext_resource type="Texture2D" uid="uid://bi7g08h2imv5t" path="res://assets/sprittesheets/enemy/placeholders/enemy5/Walk-Anim.png" id="6_3likd"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_ns5qo"]
 atlas = ExtResource("1_0ih17")

@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="PropPusherDef" load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://assets/scripts/props/definitions/prop_pusher_def.gd" id="1_def"]
-[ext_resource type="Texture2D" uid="uid://5mb1bg3wjw67" path="res://assets/sprites/props/dynamic/pusher.png" id="2_tex"]
+[ext_resource type="Texture2D" uid="uid://loppe0kg8phw" path="res://assets/sprittesheets/props/placeholders/dynamic/pusher.png" id="2_tex"]
 
 [resource]
 script = ExtResource("1_def")

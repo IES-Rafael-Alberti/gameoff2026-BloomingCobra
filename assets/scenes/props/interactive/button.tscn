@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://assets/scripts/props/interactive/button.gd" id="1_btn"]
-[ext_resource type="Texture2D" path="res://assets/sprites/props/interactive/unpressed_button.png" id="2_tex"]
+[ext_resource uid="uid://bfciiheqm5dnv" type="Texture2D" path="res://assets/sprittesheets/props/placeholders/interactive/unpressed_button.png" id="2_tex"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_btn"]
 size = Vector2(16, 16)

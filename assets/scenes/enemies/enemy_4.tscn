@@ -1,9 +1,9 @@
 [gd_scene format=3 uid="uid://bxk5iodhcl1y1"]
 
 [ext_resource type="Script" uid="uid://c1fbuoperocxx" path="res://assets/scripts/enemies/enemy.gd" id="1_kpjfe"]
-[ext_resource type="Texture2D" uid="uid://cdu2lbk4x3oyb" path="res://assets/sprites/enemy/enemy4/Walk-Anim.png" id="2_h74ec"]
+[ext_resource type="Texture2D" uid="uid://dx634wwswaoia" path="res://assets/sprittesheets/enemy/placeholders/enemy4/Walk-Anim.png" id="2_h74ec"]
 [ext_resource type="Script" uid="uid://bgh2aslom8hdu" path="res://assets/scripts/common/damageable.gd" id="2_j5asl"]
-[ext_resource type="Texture2D" uid="uid://jgnj67pwkkwl" path="res://assets/sprites/enemy/enemy4/Sleep-Anim.png" id="3_gqm0i"]
+[ext_resource type="Texture2D" uid="uid://cseire07wg86u" path="res://assets/sprittesheets/enemy/placeholders/enemy4/Sleep-Anim.png" id="3_gqm0i"]
 [ext_resource type="Script" uid="uid://bkoec71xnejuk" path="res://assets/scripts/common/switchable.gd" id="3_h74ec"]
 [ext_resource type="Script" uid="uid://hyer0s0jqcmx" path="res://assets/scripts/enemies/movement/bouncer/bouncer.gd" id="4_gqm0i"]
 

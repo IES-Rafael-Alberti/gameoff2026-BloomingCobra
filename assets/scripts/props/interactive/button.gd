@@ -6,8 +6,8 @@ extends Area2D
 signal pressed
 signal released
 
-@export var unpressed_texture: Texture2D = preload("res://assets/sprites/props/interactive/unpressed_button.png")
-@export var pressed_texture: Texture2D = preload("res://assets/sprites/props/interactive/pressed_button.png")
+@export var unpressed_texture: Texture2D = preload("res://assets/sprittesheets/props/placeholders/interactive/unpressed_button.png")
+@export var pressed_texture: Texture2D = preload("res://assets/sprittesheets/props/placeholders/interactive/pressed_button.png")
 ## If true, stays down after stepping off until reset() (e.g. void fall) or commit().
 @export var stay_pressed: bool = true
 @export var one_shot: bool = false

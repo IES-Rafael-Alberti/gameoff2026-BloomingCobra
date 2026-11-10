@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://c7r4dqfupp84j"]
 
 [ext_resource type="Script" path="res://assets/scripts/props/static/barrier_prop.gd" id="1_barrier"]
-[ext_resource type="Texture2D" uid="uid://dcfmmv33rrask" path="res://assets/sprites/props/static/barrier.png" id="2_tex"]
+[ext_resource type="Texture2D" uid="uid://b8rxqit0mv22n" path="res://assets/sprittesheets/props/placeholders/static/barrier.png" id="2_tex"]
 [ext_resource type="Resource" path="res://assets/resources/props/barrier_stone.tres" id="3_def"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_barrier"]

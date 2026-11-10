@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://qt0m0d8adih7"]
 
 [ext_resource type="Script" path="res://assets/scripts/props/static/decorative_prop.gd" id="1_decor"]
-[ext_resource type="Texture2D" uid="uid://inlyljyu848u" path="res://assets/sprites/props/static/decorative.png" id="2_tex"]
+[ext_resource type="Texture2D" uid="uid://dhmpgc8osr1se" path="res://assets/sprittesheets/props/placeholders/static/decorative.png" id="2_tex"]
 [ext_resource type="Resource" path="res://assets/resources/props/decorative_lamp.tres" id="3_def"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_decor"]

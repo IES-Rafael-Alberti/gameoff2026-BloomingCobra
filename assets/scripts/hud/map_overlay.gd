@@ -56,11 +56,11 @@ func _set_open(open: bool) -> void:
 
 func _ensure_textures() -> void:
 	if discovered_texture == null:
-		discovered_texture = load("res://assets/sprites/HUD/roomDiscovered.png") as Texture2D
+		discovered_texture = load("res://assets/sprittesheets/HUD/placeholders/roomDiscovered.png") as Texture2D
 	if undiscovered_texture == null:
-		undiscovered_texture = load("res://assets/sprites/HUD/roomUndiscovered.png") as Texture2D
+		undiscovered_texture = load("res://assets/sprittesheets/HUD/placeholders/roomUndiscovered.png") as Texture2D
 	if current_texture == null:
-		current_texture = load("res://assets/sprites/HUD/map.png") as Texture2D
+		current_texture = load("res://assets/sprittesheets/HUD/placeholders/map.png") as Texture2D
 
 
 func _build_ui() -> void:

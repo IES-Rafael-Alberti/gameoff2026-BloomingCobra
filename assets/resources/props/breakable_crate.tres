@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="PropBreakableDef" format=3 uid="uid://dy5qm5xjx2ii8"]
 
 [ext_resource type="Script" uid="uid://bex6oanpsgqmo" path="res://assets/scripts/props/definitions/prop_breakable_def.gd" id="1_def"]
-[ext_resource type="Texture2D" uid="uid://di8gre5ioftg0" path="res://assets/sprites/props/static/breakable.png" id="2_tex"]
+[ext_resource type="Texture2D" uid="uid://6mrn31at78mv" path="res://assets/sprittesheets/props/placeholders/static/breakable.png" id="2_tex"]
 
 [resource]
 script = ExtResource("1_def")
