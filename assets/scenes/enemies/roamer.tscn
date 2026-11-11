@@ -7,6 +7,7 @@
 [ext_resource type="Script" uid="uid://bgh2aslom8hdu" path="res://assets/scripts/common/damageable.gd" id="5_hhqxl"]
 [ext_resource type="Script" uid="uid://dy2j0dnedteod" path="res://assets/scripts/enemies/movement/roamer/roamer.gd" id="6_otr5t"]
 [ext_resource type="Script" uid="uid://bkoec71xnejuk" path="res://assets/scripts/common/switchable.gd" id="7_2cfc3"]
+[ext_resource type="Script" path="res://assets/scripts/common/sfx_player.gd" id="8_sfx"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_c7n7d"]
 atlas = ExtResource("2_8dxaa")
@@ -168,7 +169,7 @@ radius = 6.0
 [sub_resource type="CircleShape2D" id="CircleShape2D_0qoo8"]
 radius = 6.0827627
 
-[node name="Enemy_3" type="CharacterBody2D" unique_id=632087891]
+[node name="Roamer" type="CharacterBody2D" unique_id=632087891]
 script = ExtResource("1_85lem")
 max_health = 3
 move_speed = 35.0
@@ -194,3 +195,6 @@ script = ExtResource("6_otr5t")
 
 [node name="Switchable" type="Node2D" parent="." unique_id=1378354913]
 script = ExtResource("7_2cfc3")
+
+[node name="SfxPlayer" type="Node2D" parent="."]
+script = ExtResource("8_sfx")

@@ -5,6 +5,7 @@
 [ext_resource type="Texture2D" uid="uid://bl1ujdw1irbo7" path="res://assets/sprittesheets/cat/placeholders/Walk-Anim.png" id="2_wslfk"]
 [ext_resource type="Script" uid="uid://bkoec71xnejuk" path="res://assets/scripts/common/switchable.gd" id="3_jkp1k"]
 [ext_resource type="Script" uid="uid://cfgre6gf3l2ic" path="res://assets/scripts/enemies/movement/runner/runner.gd" id="4_k2fky"]
+[ext_resource type="Script" path="res://assets/scripts/common/sfx_player.gd" id="5_sfx"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_m7ii3"]
 atlas = ExtResource("1_81vxb")
@@ -255,6 +256,9 @@ shape = SubResource("CircleShape2D_22ttu")
 
 [node name="Switchable" type="Node2D" parent="." unique_id=51200773]
 script = ExtResource("3_jkp1k")
+
+[node name="SfxPlayer" type="Node2D" parent="."]
+script = ExtResource("5_sfx")
 
 [node name="Runner" type="Node2D" parent="." unique_id=1805770312]
 script = ExtResource("4_k2fky")

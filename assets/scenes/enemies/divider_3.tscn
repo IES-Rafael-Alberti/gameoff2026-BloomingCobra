@@ -9,6 +9,7 @@
 [ext_resource type="Texture2D" uid="uid://dqgfphwoqabn8" path="res://assets/sprittesheets/enemy/placeholders/divider/divider3/Sleep-Anim.png" id="4_ennrq"]
 [ext_resource type="Texture2D" uid="uid://c7t171rvpi8oo" path="res://assets/sprittesheets/enemy/placeholders/divider/divider3/Walk-Anim.png" id="5_p20tx"]
 [ext_resource type="Script" path="res://assets/scripts/enemies/divisible.gd" id="6_div"]
+[ext_resource type="Script" path="res://assets/scripts/common/sfx_player.gd" id="6_sfx"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_rgxq0"]
 atlas = ExtResource("2_okyql")
@@ -395,6 +396,9 @@ script = ExtResource("2_s26gj")
 
 [node name="Switchable" type="Node2D" parent="." unique_id=59190317]
 script = ExtResource("3_alryq")
+
+[node name="SfxPlayer" type="Node2D" parent="."]
+script = ExtResource("6_sfx")
 
 [node name="Dividisible" type="Node2D" parent="." unique_id=573549905]
 position = Vector2(0, -3)

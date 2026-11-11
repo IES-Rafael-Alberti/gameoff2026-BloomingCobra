@@ -14,10 +14,10 @@ enum EnemyType {
 }
 
 const TYPE_SCENES := {
-	EnemyType.HUNTER: "res://assets/scenes/enemies/enemy.tscn",
-	EnemyType.RANGER: "res://assets/scenes/enemies/enemy_2.tscn",
-	EnemyType.ROAMER: "res://assets/scenes/enemies/enemy_3.tscn",
-	EnemyType.BOUNCER: "res://assets/scenes/enemies/enemy_4.tscn",
+	EnemyType.HUNTER: "res://assets/scenes/enemies/hunter.tscn",
+	EnemyType.RANGER: "res://assets/scenes/enemies/ranger.tscn",
+	EnemyType.ROAMER: "res://assets/scenes/enemies/roamer.tscn",
+	EnemyType.BOUNCER: "res://assets/scenes/enemies/bouncer.tscn",
 	EnemyType.ELITE: "res://assets/scenes/enemies/elite.tscn",
 	EnemyType.DIVIDER: "res://assets/scenes/enemies/divider_1.tscn",
 }
