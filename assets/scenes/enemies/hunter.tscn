@@ -6,6 +6,7 @@
 [ext_resource type="Script" path="res://assets/scripts/enemies/movement/hunter/idle.gd" id="2_hunter_idle"]
 [ext_resource type="Script" path="res://assets/scripts/enemies/movement/hunter/aggressive.gd" id="2_hunter_aggro"]
 [ext_resource type="Script" uid="uid://bkoec71xnejuk" path="res://assets/scripts/common/switchable.gd" id="2_switch"]
+[ext_resource type="Script" path="res://assets/scripts/common/sfx_player.gd" id="2_sfx"]
 [ext_resource type="Texture2D" uid="uid://ccgohp51hvyoy" path="res://assets/sprittesheets/enemy/placeholders/enemy1/Attack-Anim.png" id="2_t2q6g"]
 [ext_resource type="Texture2D" uid="uid://v2e51cu0g5ei" path="res://assets/sprittesheets/enemy/placeholders/enemy1/Idle-Anim.png" id="3_o3hxu"]
 [ext_resource type="Texture2D" uid="uid://5tlcl5p75wud" path="res://assets/sprittesheets/enemy/placeholders/enemy1/Sleep-Anim.png" id="4_yyvcd"]
@@ -442,7 +443,7 @@ animations = [{
 [sub_resource type="CircleShape2D" id="CircleShape2D_r7qfn"]
 radius = 7.0
 
-[node name="Enemy" type="CharacterBody2D" unique_id=1191328024]
+[node name="Hunter" type="CharacterBody2D" unique_id=1191328024]
 script = ExtResource("1_kbpvo")
 max_health = 3
 move_speed = 55.0
@@ -468,6 +469,9 @@ script = ExtResource("2_55kjn")
 
 [node name="Switchable" type="Node2D" parent="." unique_id=1509705243]
 script = ExtResource("2_switch")
+
+[node name="SfxPlayer" type="Node2D" parent="."]
+script = ExtResource("2_sfx")
 
 [node name="Hunter" type="Node2D" parent="." unique_id=115389486]
 script = ExtResource("2_hunter")

@@ -5,10 +5,17 @@ signal caught
 
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var switchable: Node2D = $Switchable
+@onready var sfx: Node = get_node_or_null("SfxPlayer")
 
 var _movement: Node = null
 var _active: bool = true
 var _is_caught: bool = false
+
+
+func play_sfx(id: StringName) -> bool:
+	if sfx == null or not sfx.has_method("play"):
+		return false
+	return bool(sfx.call("play", id))
 
 
 func _ready() -> void:
@@ -55,6 +62,7 @@ func play_walk_animation(direction: Vector2) -> void:
 	else:
 		animated_sprite.play("walking_down")
 		animated_sprite.flip_h = false
+	play_sfx(&"walk")
 
 
 func play_gather() -> void:
@@ -66,6 +74,8 @@ func play_gather() -> void:
 		await animated_sprite.animation_finished
 	caught.emit()
 	# Advantage grant is intentionally deferred beyond this signal.
+	if sfx != null and sfx.has_method("play_detached"):
+		sfx.call("play_detached", &"caught")
 	queue_free()
 
 

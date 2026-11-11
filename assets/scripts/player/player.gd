@@ -116,6 +116,7 @@ func play_hurt_animation(direction: Vector2) -> void:
 	animated_sprite.frame = 0
 	animated_sprite.play(anim_name)
 	_sync_sprite_visual()
+	_sync_bubble_visible()
 
 
 func _on_animation_finished() -> void:
@@ -140,6 +141,7 @@ func _restore_anim_after_hurt() -> void:
 		animated_sprite.stop()
 		animated_sprite.frame = 0
 	_sync_sprite_visual()
+	_sync_bubble_visible()
 
 
 func _ensure_hurt_anims_once() -> void:
@@ -168,6 +170,7 @@ func play_attack_animation(direction: Vector2) -> void:
 		animated_sprite.play("attack_down")
 		animated_sprite.flip_h = false
 	_sync_sprite_visual()
+	_sync_bubble_visible()
 
 
 func _move_nightmare(direction: Vector2) -> void:
@@ -191,36 +194,35 @@ func _move_dream(direction: Vector2, delta: float) -> void:
 
 func _on_mode_changed(index: int) -> void:
 	_in_dream = index == 1
-	bubble.visible = _in_dream
 	if not _in_dream:
 		velocity = Vector2.ZERO
 	# Attacks only in nightmare (index 0).
 	if attack != null and attack.has_method("set_enabled"):
 		attack.set_enabled(not _in_dream)
+	# Swap idle set (nightmare <-> bubble) when the mode flips.
+	if _hurt_lock <= 0.0:
+		_play_idle_animation()
+	else:
+		_sync_bubble_visible()
+
+
+func _facing_suffix(cardinal: Vector2) -> StringName:
+	if absf(cardinal.x) >= absf(cardinal.y):
+		return &"right" if cardinal.x > 0.0 else &"left"
+	return &"up" if cardinal.y < 0.0 else &"down"
+
+
+## Bubble overlay only while walking in dream; idle_bubble already includes it.
+func _sync_bubble_visible() -> void:
+	if bubble == null:
+		return
+	var anim := str(animated_sprite.animation) if animated_sprite else ""
+	bubble.visible = _in_dream and anim.begins_with("walking")
 
 
 func _play_walk_animation(direction: Vector2) -> void:
 	var cardinal := _cardinal_from(direction)
-	if abs(cardinal.x) > abs(cardinal.y):
-		animated_sprite.play("walk_sides")
-		animated_sprite.flip_h = cardinal.x < 0
-	elif cardinal.y < 0:
-		animated_sprite.play("walk_up")
-		animated_sprite.flip_h = false
-	else:
-		animated_sprite.play("walk_down")
-		animated_sprite.flip_h = false
-	_sync_sprite_visual()
-
-
-func _play_idle_animation() -> void:
-	var cardinal := _cardinal_from(facing)
-	var anim := &"idle_down"
-	# Idle sheet has dedicated left/right clips (no flip_h).
-	if absf(cardinal.x) >= absf(cardinal.y):
-		anim = &"idle_right" if cardinal.x > 0.0 else &"idle_left"
-	elif cardinal.y < 0.0:
-		anim = &"idle_up"
+	var anim := StringName("walking_%s" % _facing_suffix(cardinal))
 	animated_sprite.flip_h = false
 	var frames := animated_sprite.sprite_frames
 	if frames == null or not frames.has_animation(anim):
@@ -228,15 +230,31 @@ func _play_idle_animation() -> void:
 	if animated_sprite.animation != anim or not animated_sprite.is_playing():
 		animated_sprite.play(anim)
 	_sync_sprite_visual()
+	_sync_bubble_visible()
 
 
-## Idle is HD (992px); walk/attack stay pixel-sized. Scale only idle so both
-## match on screen, and use linear filtering so the downsample stays smooth.
+func _play_idle_animation() -> void:
+	var cardinal := _cardinal_from(facing)
+	var prefix := "idle_bubble" if _in_dream else "idle_nightmare"
+	var anim := StringName("%s_%s" % [prefix, _facing_suffix(cardinal)])
+	# Sheets have dedicated left/right clips (no flip_h).
+	animated_sprite.flip_h = false
+	var frames := animated_sprite.sprite_frames
+	if frames == null or not frames.has_animation(anim):
+		return
+	if animated_sprite.animation != anim or not animated_sprite.is_playing():
+		animated_sprite.play(anim)
+	_sync_sprite_visual()
+	_sync_bubble_visible()
+
+
+## Idle/walk definitivo sheets are HD (992px); attack/hurt stay pixel-sized.
+## Scale HD clips down to match the old walk on-screen size.
 func _sync_sprite_visual() -> void:
 	if animated_sprite == null:
 		return
 	var anim := str(animated_sprite.animation)
-	if anim.begins_with("idle"):
+	if anim.begins_with("idle") or anim.begins_with("walking"):
 		var target_h := WALK_CONTENT_RECT.size.y * PIXEL_SPRITE_SCALE
 		var s := target_h / IDLE_CONTENT_RECT.size.y
 		animated_sprite.scale = Vector2(s, s)

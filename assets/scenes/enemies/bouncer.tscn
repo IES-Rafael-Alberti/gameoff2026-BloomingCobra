@@ -6,6 +6,7 @@
 [ext_resource type="Texture2D" uid="uid://cseire07wg86u" path="res://assets/sprittesheets/enemy/placeholders/enemy4/Sleep-Anim.png" id="3_gqm0i"]
 [ext_resource type="Script" uid="uid://bkoec71xnejuk" path="res://assets/scripts/common/switchable.gd" id="3_h74ec"]
 [ext_resource type="Script" uid="uid://hyer0s0jqcmx" path="res://assets/scripts/enemies/movement/bouncer/bouncer.gd" id="4_gqm0i"]
+[ext_resource type="Script" path="res://assets/scripts/common/sfx_player.gd" id="5_sfx"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_akui1"]
 atlas = ExtResource("2_h74ec")
@@ -95,7 +96,7 @@ animations = [{
 [sub_resource type="CircleShape2D" id="CircleShape2D_bwm3p"]
 radius = 7.0
 
-[node name="Enemy4" type="CharacterBody2D" unique_id=1171050525]
+[node name="Bouncer" type="CharacterBody2D" unique_id=1171050525]
 script = ExtResource("1_kpjfe")
 max_health = 3
 move_speed = 60.0
@@ -121,6 +122,9 @@ script = ExtResource("2_j5asl")
 
 [node name="Switchable" type="Node2D" parent="." unique_id=1339734756]
 script = ExtResource("3_h74ec")
+
+[node name="SfxPlayer" type="Node2D" parent="."]
+script = ExtResource("5_sfx")
 
 [node name="Bouncer" type="Node2D" parent="." unique_id=1367370899]
 position = Vector2(0, -6)
