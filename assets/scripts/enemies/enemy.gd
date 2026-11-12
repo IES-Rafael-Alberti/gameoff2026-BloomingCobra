@@ -16,6 +16,8 @@ extends CharacterBody2D
 @export var contact_cooldown: float = 0.65
 @export var contact_knockback: float = 100.0
 @export var hurt_anim_time: float = 0.35
+## Alpha fade after death (and optional death clip) before freeing.
+@export var death_fade_time: float = 0.55
 
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var damageable: Node2D = $Damageable
@@ -29,6 +31,7 @@ var _contact_cd: float = 0.0
 var _hurtboxes: Array[Area2D] = []
 var _hurt_lock: float = 0.0
 var _hurt_facing: Vector2 = Vector2.DOWN
+var _dying: bool = false
 
 
 func _ready() -> void:
@@ -111,6 +114,10 @@ func _push_detection_to_idle(idle: Node) -> void:
 
 
 func _physics_process(delta: float) -> void:
+	if _dying:
+		velocity = Vector2.ZERO
+		move_and_slide()
+		return
 	_contact_cd = maxf(_contact_cd - delta, 0.0)
 	if _hurt_lock > 0.0:
 		_hurt_lock = maxf(_hurt_lock - delta, 0.0)
@@ -129,7 +136,7 @@ func _physics_process(delta: float) -> void:
 
 
 func is_active() -> bool:
-	return _active
+	return _active and not _dying
 
 
 func set_attacking(value: bool) -> void:
@@ -137,23 +144,67 @@ func set_attacking(value: bool) -> void:
 
 
 func play_directional_animation(prefix: String, direction: Vector2) -> void:
-	if _hurt_lock > 0.0:
+	if _dying or _hurt_lock > 0.0:
+		return
+	var frames := animated_sprite.sprite_frames if animated_sprite != null else null
+	if frames == null:
 		return
 	if direction == Vector2.ZERO:
-		if not _attacking:
-			animated_sprite.play("idle")
+		if not _attacking and frames.has_animation(&"idle"):
+			animated_sprite.play(&"idle")
 		return
-	if abs(direction.x) > abs(direction.y):
-		animated_sprite.play("%s_sides" % prefix)
-		animated_sprite.flip_h = direction.x < 0
-	elif direction.y < 0:
-		animated_sprite.play("%s_up" % prefix)
-		animated_sprite.flip_h = false
-	else:
-		animated_sprite.play("%s_down" % prefix)
-		animated_sprite.flip_h = false
+
+	var anim := _resolve_directional_anim(prefix, direction, frames)
+	if anim.is_empty():
+		return
+	animated_sprite.play(anim)
 	if (prefix == "walking" or prefix == "walk") and sfx != null and sfx.has_method("play_walking"):
 		sfx.call("play_walking")
+
+
+## Prefer *_sides / *_up / *_down; fall back to a single shared clip (e.g. walking).
+func _resolve_directional_anim(prefix: String, direction: Vector2, frames: SpriteFrames) -> StringName:
+	var sides := StringName("%s_sides" % prefix)
+	var up := StringName("%s_up" % prefix)
+	var down := StringName("%s_down" % prefix)
+	var base := StringName(prefix)
+	var has_sides := frames.has_animation(sides)
+	var has_up := frames.has_animation(up)
+	var has_down := frames.has_animation(down)
+	var has_base := frames.has_animation(base)
+
+	if absf(direction.x) > absf(direction.y):
+		animated_sprite.flip_h = direction.x < 0.0
+		if has_sides:
+			return sides
+		if has_base:
+			return base
+		return &""
+
+	if direction.y < 0.0:
+		if has_up:
+			animated_sprite.flip_h = false
+			return up
+		if has_base:
+			if absf(direction.x) > 0.01:
+				animated_sprite.flip_h = direction.x < 0.0
+			return base
+		if has_sides:
+			animated_sprite.flip_h = direction.x < 0.0
+			return sides
+		return &""
+
+	if has_down:
+		animated_sprite.flip_h = false
+		return down
+	if has_base:
+		if absf(direction.x) > 0.01:
+			animated_sprite.flip_h = direction.x < 0.0
+		return base
+	if has_sides:
+		animated_sprite.flip_h = direction.x < 0.0
+		return sides
+	return &""
 
 
 func get_player() -> Node2D:
@@ -270,6 +321,8 @@ func _find_movement() -> Node:
 
 
 func _on_mode_changed(index: int) -> void:
+	if _dying:
+		return
 	_active = index == 0
 	if _movement and _movement.has_method("set_active"):
 		_movement.set_active(_active)
@@ -334,6 +387,41 @@ func _configure_area_tree(node: Node) -> void:
 
 
 func _on_died() -> void:
-	if sfx != null and sfx.has_method("stop_standard"):
+	if _dying:
+		return
+	_dying = true
+	_active = false
+	_attacking = false
+	_hurt_lock = 999.0
+	velocity = Vector2.ZERO
+	_set_hitboxes_enabled(false)
+	if sfx != null and sfx.has_method("stop_all"):
+		sfx.call("stop_all")
+	elif sfx != null and sfx.has_method("stop_standard"):
 		sfx.call("stop_standard")
+
+	var played_death := _play_death_animation()
+	var fade := create_tween()
+	fade.set_parallel(false)
+	fade.tween_property(self, "modulate:a", 0.0, maxf(death_fade_time, 0.05))
+
+	if played_death and animated_sprite != null:
+		await animated_sprite.animation_finished
+	if is_instance_valid(fade) and fade.is_running():
+		await fade.finished
+	elif modulate.a > 0.0:
+		modulate.a = 0.0
 	queue_free()
+
+
+func _play_death_animation() -> bool:
+	if animated_sprite == null or animated_sprite.sprite_frames == null:
+		return false
+	var frames := animated_sprite.sprite_frames
+	for anim_name in [&"dead", &"death", &"die"]:
+		if not frames.has_animation(anim_name):
+			continue
+		frames.set_animation_loop(anim_name, false)
+		animated_sprite.play(anim_name)
+		return true
+	return false
