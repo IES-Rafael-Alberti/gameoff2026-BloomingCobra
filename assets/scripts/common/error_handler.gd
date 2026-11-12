@@ -25,6 +25,7 @@ func _ensure_input_actions() -> void:
 	_rebind_key_action(&"switch", [KEY_SHIFT])
 	_bind_key_action(&"toggle_map", [KEY_TAB])
 	_bind_key_action(&"debug_hitboxes", [KEY_F1])
+	_bind_key_action(&"debug_god_mode", [KEY_F2])
 	_bind_mouse_action(&"attack", MOUSE_BUTTON_LEFT)
 
 
