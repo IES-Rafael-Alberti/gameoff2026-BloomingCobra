@@ -22,6 +22,7 @@ const IDLE_CONTENT_RECT := Rect2(245, 153, 509, 720)
 @onready var damageable: Node2D = $Damageable
 @onready var attack: Node2D = $Attack
 @onready var sfx: Node = get_node_or_null("SfxPlayer")
+@onready var _audio_listener: AudioListener2D = get_node_or_null("AudioListener2D")
 
 @export var hurt_anim_time: float = 0.55
 @export var charge_shake_amplitude: float = 1.2
@@ -51,6 +52,7 @@ func _ready() -> void:
 	collision_layer = 1 << 1
 	collision_mask = (1 << 0) | (1 << 2) | (1 << 4)
 	_sprite_base_pos = animated_sprite.position
+	_ensure_audio_listener()
 	_setup_white_flash_material()
 	if switchable.has_signal("mode_changed"):
 		switchable.mode_changed.connect(_on_mode_changed)
@@ -218,6 +220,15 @@ func cancel_attack_charge() -> void:
 
 func play_attack_animation(direction: Vector2) -> void:
 	play_attack_release(direction)
+
+
+func _ensure_audio_listener() -> void:
+	# Positional AudioStreamPlayer2D needs a current listener (or screen center).
+	if _audio_listener == null:
+		_audio_listener = AudioListener2D.new()
+		_audio_listener.name = "AudioListener2D"
+		add_child(_audio_listener)
+	_audio_listener.make_current()
 
 
 func _setup_white_flash_material() -> void:

@@ -276,6 +276,9 @@ func _on_mode_changed(index: int) -> void:
 	_set_hitboxes_enabled(_active)
 	if sfx != null and sfx.has_method("set_active"):
 		sfx.call("set_active", _active)
+	elif sfx != null and not _active and sfx.has_method("stop_all"):
+		# Ensure room-global one-shots (hunter steps, etc.) die on mode flip.
+		sfx.call("stop_all")
 	if not _active:
 		velocity = Vector2.ZERO
 		_attacking = false

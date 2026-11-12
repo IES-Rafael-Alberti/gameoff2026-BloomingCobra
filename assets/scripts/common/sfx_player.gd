@@ -5,7 +5,8 @@ extends Node2D
 ## (G) = room-global AudioStreamPlayer · (P) = proximity AudioStreamPlayer2D
 
 @export_group("Proximity")
-@export var proximity_max_distance: float = 160.0
+## World-pixel radius. Keep larger than a room viewport (~480 with zoom 4).
+@export var proximity_max_distance: float = 720.0
 @export_range(0.0, 4.0, 0.05) var proximity_attenuation: float = 1.0
 
 @export_group("Playback")
@@ -26,7 +27,9 @@ func _ready() -> void:
 	_standard = AudioStreamPlayer2D.new()
 	_standard.name = "StandardLoop"
 	_standard.bus = String(bus)
+	_standard.max_polyphony = 1
 	_apply_proximity(_standard)
+	_standard.finished.connect(_on_standard_finished)
 	add_child(_standard)
 
 
@@ -52,13 +55,27 @@ func play_proximity(stream: AudioStream, key: StringName = &"", min_interval: fl
 
 
 func play_global_random(streams: Array[AudioStream], key: StringName = &"", min_interval: float = 0.0) -> bool:
+	var pick := _pick_stream(streams)
+	if pick == null:
+		return false
+	return play_global(pick, key, min_interval)
+
+
+func play_proximity_random(streams: Array[AudioStream], key: StringName = &"", min_interval: float = 0.0) -> bool:
+	var pick := _pick_stream(streams)
+	if pick == null:
+		return false
+	return play_proximity(pick, key, min_interval)
+
+
+func _pick_stream(streams: Array[AudioStream]) -> AudioStream:
 	var options: Array[AudioStream] = []
 	for stream in streams:
 		if stream != null:
 			options.append(stream)
 	if options.is_empty():
-		return false
-	return play_global(options[randi() % options.size()], key, min_interval)
+		return null
+	return options[randi() % options.size()]
 
 
 ## One-shot that survives this node being freed (death / caught / split).
@@ -92,7 +109,8 @@ func start_standard(stream: AudioStream) -> void:
 		return
 	_standard_source = stream
 	_standard.stream = _as_looping(stream)
-	_standard.play()
+	# Defer so AudioListener2D / camera are current when enemies activate in _ready.
+	_standard.call_deferred("play")
 
 
 func _as_looping(stream: AudioStream) -> AudioStream:
@@ -100,14 +118,32 @@ func _as_looping(stream: AudioStream) -> AudioStream:
 	var copy := stream.duplicate()
 	if copy is AudioStreamOggVorbis:
 		(copy as AudioStreamOggVorbis).loop = true
-	elif copy is AudioStreamWAV:
-		(copy as AudioStreamWAV).loop_mode = AudioStreamWAV.LOOP_FORWARD
 	elif copy is AudioStreamMP3:
 		(copy as AudioStreamMP3).loop = true
+	elif copy is AudioStreamWAV:
+		var wav := copy as AudioStreamWAV
+		wav.loop_mode = AudioStreamWAV.LOOP_FORWARD
+		wav.loop_begin = 0
+		# Import often leaves loop_end at -1 / 0, which disables LOOP_FORWARD.
+		var end_frame := wav.loop_end
+		if end_frame <= wav.loop_begin:
+			var rate := maxi(wav.mix_rate, 1)
+			end_frame = maxi(int(ceil(wav.get_length() * float(rate))) - 1, 1)
+		wav.loop_end = end_frame
 	return copy
 
 
+func _on_standard_finished() -> void:
+	# Fallback for formats that refuse native looping (e.g. some compressed WAV).
+	if _standard == null or _standard_source == null:
+		return
+	if _standard.stream == null:
+		return
+	_standard.play()
+
+
 func stop_standard() -> void:
+	_standard_source = null
 	if _standard != null and _standard.playing:
 		_standard.stop()
 

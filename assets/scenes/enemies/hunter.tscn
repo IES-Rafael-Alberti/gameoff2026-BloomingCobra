@@ -474,7 +474,7 @@ script = ExtResource("2_switch")
 script = ExtResource("2_sfx")
 walking = ExtResource("9_s32gh")
 standard = ExtResource("10_uudjq")
-proximity_max_distance = 50000.44
+proximity_max_distance = 720.0
 
 [node name="Hunter" type="Node2D" parent="." unique_id=115389486]
 script = ExtResource("2_hunter")

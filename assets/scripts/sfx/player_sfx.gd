@@ -17,7 +17,6 @@ extends SfxPlayer
 @export_group("Walking")
 @export var steps_vigil: AudioStream ## dream / bubble mode
 @export var steps_nightmare: AudioStream
-@export_range(0.05, 2.0, 0.01) var steps_interval: float = 0.28
 
 @export_group("Items")
 @export var max_health_pickup: AudioStream
@@ -60,18 +59,16 @@ func play_projectile_hit() -> void:
 	play_global(projectile_hit)
 
 
+## Starts / keeps a looping step bed while the player is walking.
 func play_steps(in_dream: bool) -> void:
 	var stream := steps_vigil if in_dream else steps_nightmare
 	if stream == null or _steps_voice == null:
 		return
-	# Mode flip mid-walk: swap clip immediately.
-	if _steps_dream != in_dream and _steps_voice.playing:
-		_steps_voice.stop()
-	_steps_dream = in_dream
-	if not _interval_ok(&"steps", steps_interval):
+	if _steps_voice.playing and _steps_dream == in_dream:
 		return
+	_steps_dream = in_dream
 	_steps_voice.bus = String(bus)
-	_steps_voice.stream = stream
+	_steps_voice.stream = _as_looping(stream)
 	_steps_voice.play()
 
 
