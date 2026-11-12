@@ -7,7 +7,8 @@
 [ext_resource type="Script" uid="uid://bgh2aslom8hdu" path="res://assets/scripts/common/damageable.gd" id="5_hhqxl"]
 [ext_resource type="Script" uid="uid://dy2j0dnedteod" path="res://assets/scripts/enemies/movement/roamer/roamer.gd" id="6_otr5t"]
 [ext_resource type="Script" uid="uid://bkoec71xnejuk" path="res://assets/scripts/common/switchable.gd" id="7_2cfc3"]
-[ext_resource type="Script" path="res://assets/scripts/sfx/roamer_sfx.gd" id="8_sfx"]
+[ext_resource type="Script" uid="uid://ci7abkhx26tl4" path="res://assets/scripts/sfx/roamer_sfx.gd" id="8_sfx"]
+[ext_resource type="AudioStream" uid="uid://bp4bq27ucopfh" path="res://assets/audio/enemies/Wanderer.wav" id="9_djgtl"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_c7n7d"]
 atlas = ExtResource("2_8dxaa")
@@ -171,9 +172,7 @@ radius = 6.0827627
 
 [node name="Roamer" type="CharacterBody2D" unique_id=632087891]
 script = ExtResource("1_85lem")
-max_health = 3
 move_speed = 35.0
-attack_cooldown = 0.0
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1549397864]
 sprite_frames = SubResource("SpriteFrames_bhbtl")
@@ -196,5 +195,6 @@ script = ExtResource("6_otr5t")
 [node name="Switchable" type="Node2D" parent="." unique_id=1378354913]
 script = ExtResource("7_2cfc3")
 
-[node name="SfxPlayer" type="Node2D" parent="."]
+[node name="SfxPlayer" type="Node2D" parent="." unique_id=904837767]
 script = ExtResource("8_sfx")
+standard = ExtResource("9_djgtl")

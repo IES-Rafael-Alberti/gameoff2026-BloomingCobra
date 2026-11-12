@@ -9,9 +9,11 @@
 [ext_resource type="Texture2D" uid="uid://s8blmirnhkn4" path="res://assets/sprittesheets/enemy/placeholders/divider/divider2/Idle-Anim.png" id="4_4pkce"]
 [ext_resource type="Texture2D" uid="uid://byw57pf2q8v27" path="res://assets/sprittesheets/enemy/placeholders/divider/divider2/Sleep-Anim.png" id="5_cucnw"]
 [ext_resource type="Texture2D" uid="uid://dryeswqrwcy2l" path="res://assets/sprittesheets/enemy/placeholders/divider/divider2/Walk-Anim.png" id="6_qaxaa"]
-[ext_resource type="Script" path="res://assets/scripts/enemies/divisible.gd" id="7_div"]
-[ext_resource type="Script" path="res://assets/scripts/sfx/divider_sfx.gd" id="7_sfx"]
+[ext_resource type="Script" uid="uid://d248nineciw88" path="res://assets/scripts/enemies/divisible.gd" id="7_div"]
+[ext_resource type="Script" uid="uid://uwb0b0cjbggp" path="res://assets/scripts/sfx/divider_sfx.gd" id="7_sfx"]
 [ext_resource type="PackedScene" uid="uid://cb5pu6ti4a8mg" path="res://assets/scenes/enemies/divider_3.tscn" id="8_div3"]
+[ext_resource type="AudioStream" uid="uid://cpsr0mynmar7c" path="res://assets/audio/enemies/Duplicator.mp3" id="11_ig65f"]
+[ext_resource type="AudioStream" uid="uid://2xm266kp7l33" path="res://assets/audio/enemies/DuplicatorDuplication.wav" id="12_crmqk"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_ig65f"]
 atlas = ExtResource("2_pa6nr")
@@ -468,9 +470,7 @@ radius = 8.0
 
 [node name="Divider_2" type="CharacterBody2D" unique_id=1299799807]
 script = ExtResource("1_4cjgm")
-max_health = 3
 move_speed = 35.0
-attack_cooldown = 0.0
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1132272824]
 sprite_frames = SubResource("SpriteFrames_k745b")
@@ -495,8 +495,10 @@ script = ExtResource("2_4cjgm")
 [node name="Switchable" type="Node2D" parent="." unique_id=59190317]
 script = ExtResource("3_qytdv")
 
-[node name="SfxPlayer" type="Node2D" parent="."]
+[node name="SfxPlayer" type="Node2D" parent="." unique_id=957626939]
 script = ExtResource("7_sfx")
+standard = ExtResource("11_ig65f")
+duplication = ExtResource("12_crmqk")
 
 [node name="Dividisible" type="Node2D" parent="." unique_id=573549905]
 position = Vector2(2, 1)

@@ -4,15 +4,17 @@
 [ext_resource type="Script" uid="uid://c1fbuoperocxx" path="res://assets/scripts/enemies/enemy.gd" id="1_enemy"]
 [ext_resource type="Texture2D" uid="uid://b0ffp4hbifn68" path="res://assets/sprittesheets/enemy/placeholders/enemy2/Attack-Anim.png" id="1_xfvwa"]
 [ext_resource type="Script" uid="uid://bkoec71xnejuk" path="res://assets/scripts/common/switchable.gd" id="2_bp46k"]
-[ext_resource type="Script" path="res://assets/scripts/sfx/ranger_sfx.gd" id="2_sfx"]
 [ext_resource type="Texture2D" uid="uid://byiyst8t75q8k" path="res://assets/sprittesheets/enemy/placeholders/enemy2/Idle-Anim.png" id="2_f7rxk"]
+[ext_resource type="Script" uid="uid://cvn5aud1jp620" path="res://assets/scripts/sfx/ranger_sfx.gd" id="2_sfx"]
 [ext_resource type="Script" uid="uid://rieolv1vcgou" path="res://assets/scripts/enemies/movement/ranger/ranger.gd" id="3_e0lwv"]
-[ext_resource type="Script" path="res://assets/scripts/enemies/movement/ranger/idle.gd" id="3_ranger_idle"]
-[ext_resource type="Script" path="res://assets/scripts/enemies/movement/ranger/aggressive.gd" id="3_ranger_aggro"]
 [ext_resource type="Texture2D" uid="uid://cl3dxnit1eglu" path="res://assets/sprittesheets/enemy/placeholders/enemy2/Sleep-Anim.png" id="3_lvmi4"]
+[ext_resource type="Script" uid="uid://dqvmcv1uwhva0" path="res://assets/scripts/enemies/movement/ranger/aggressive.gd" id="3_ranger_aggro"]
+[ext_resource type="Script" uid="uid://b8810e35d6di0" path="res://assets/scripts/enemies/movement/ranger/idle.gd" id="3_ranger_idle"]
 [ext_resource type="Texture2D" uid="uid://vhvd3jwmhbcp" path="res://assets/sprittesheets/enemy/placeholders/enemy2/Walk-Anim.png" id="4_sjtrc"]
 [ext_resource type="Script" uid="uid://bxe57tgh8cpt0" path="res://assets/scripts/enemies/projectile.gd" id="5_proj"]
 [ext_resource type="Texture2D" uid="uid://df0q2xfxfejwq" path="res://assets/sprittesheets/enemy/placeholders/enemy2/projectile.png" id="6_sjtrc"]
+[ext_resource type="AudioStream" uid="uid://uv0praqyu47e" path="res://assets/audio/enemies/RangedAttack1.wav" id="11_sx5ru"]
+[ext_resource type="AudioStream" uid="uid://bxgddgmhbwlgu" path="res://assets/audio/enemies/RangedAttack2.wav" id="12_25wfk"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_0wv2c"]
 atlas = ExtResource("1_xfvwa")
@@ -548,7 +550,6 @@ radius = 4.0
 
 [node name="Ranger" type="CharacterBody2D" unique_id=463419045]
 script = ExtResource("1_enemy")
-max_health = 3
 move_speed = 45.0
 attack_cooldown = 1.2
 
@@ -580,15 +581,17 @@ script = ExtResource("1_3850e")
 [node name="Switchable" type="Node2D" parent="." unique_id=978861600]
 script = ExtResource("2_bp46k")
 
-[node name="SfxPlayer" type="Node2D" parent="."]
+[node name="SfxPlayer" type="Node2D" parent="." unique_id=1417245867]
 script = ExtResource("2_sfx")
+attack_1 = ExtResource("11_sx5ru")
+attack_2 = ExtResource("12_25wfk")
 
 [node name="Ranger" type="Node2D" parent="." unique_id=870965863]
 position = Vector2(-1, -2)
 script = ExtResource("3_e0lwv")
 
-[node name="Idle" type="Node2D" parent="Ranger"]
+[node name="Idle" type="Node2D" parent="Ranger" unique_id=674398593]
 script = ExtResource("3_ranger_idle")
 
-[node name="Aggresive" type="Node2D" parent="Ranger"]
+[node name="Aggresive" type="Node2D" parent="Ranger" unique_id=1042774830]
 script = ExtResource("3_ranger_aggro")
