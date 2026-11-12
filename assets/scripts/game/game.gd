@@ -13,6 +13,11 @@ func _ready() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("toggle_fullscreen") and not event.is_echo():
+		_toggle_fullscreen()
+		get_viewport().set_input_as_handled()
+		return
+
 	if event.is_action_pressed("switch") and not event.is_echo():
 		if sfx_general != null and sfx_general.has_method("play_switch"):
 			sfx_general.call("play_switch")
@@ -38,3 +43,11 @@ func _unhandled_input(event: InputEvent) -> void:
 			var on: bool = bool(vit.call("toggle_invulnerable"))
 			print("[Debug] God mode (no vitality loss): ", on)
 		get_viewport().set_input_as_handled()
+
+
+func _toggle_fullscreen() -> void:
+	var mode := DisplayServer.window_get_mode()
+	if mode == DisplayServer.WINDOW_MODE_FULLSCREEN or mode == DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN:
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
+	else:
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)

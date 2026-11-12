@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
+		<title>$GODOT_PROJECT_NAME</title>
+		<style>
+html, body, #canvas {
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+
+body {
+	color: white;
+	background-color: black;
+	overflow: hidden;
+	touch-action: none;
+	font-family: 'Noto Sans', 'Droid Sans', Arial, sans-serif;
+}
+
+#canvas {
+	display: block;
+}
+
+#canvas:focus {
+	outline: none;
+}
+
+#status, #status-splash, #status-progress {
+	position: absolute;
+	left: 0;
+	right: 0;
+}
+
+#status, #status-splash {
+	top: 0;
+	bottom: 0;
+}
+
+#status {
+	background-color: $GODOT_SPLASH_COLOR;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	visibility: hidden;
+}
+
+#status-splash {
+	max-height: 100%;
+	max-width: 100%;
+	margin: auto;
+}
+
+#status-splash.show-image--false {
+	display: none;
+}
+
+#status-splash.fullsize--true {
+	height: 100%;
+	width: 100%;
+	object-fit: contain;
+}
+
+#status-splash.use-filter--false {
+	image-rendering: pixelated;
+}
+
+#status-progress, #status-notice {
+	display: none;
+}
+
+#status-progress {
+	bottom: 10%;
+	width: 50%;
+	margin: 0 auto;
+}
+
+#status-notice {
+	background-color: #5b3943;
+	border-radius: 0.5rem;
+	border: 1px solid #9b3943;
+	color: #e0e0e0;
+	line-height: 1.3;
+	margin: 0 2rem;
+	overflow: hidden;
+	padding: 1rem;
+	text-align: center;
+	z-index: 1;
+}
+
+#fullscreen-btn {
+	position: fixed;
+	right: 12px;
+	bottom: 12px;
+	z-index: 1000;
+	border: 1px solid rgba(255, 255, 255, 0.35);
+	border-radius: 6px;
+	background: rgba(0, 0, 0, 0.72);
+	color: #f2f2f2;
+	font-size: 13px;
+	font-weight: 600;
+	letter-spacing: 0.02em;
+	padding: 8px 12px;
+	cursor: pointer;
+	user-select: none;
+	backdrop-filter: blur(4px);
+}
+
+#fullscreen-btn:hover {
+	background: rgba(20, 20, 20, 0.9);
+	border-color: rgba(255, 255, 255, 0.55);
+}
+
+#fullscreen-btn:focus {
+	outline: 2px solid #8ec8ff;
+	outline-offset: 2px;
+}
+		</style>
+		$GODOT_HEAD_INCLUDE
+	</head>
+	<body>
+		<canvas id="canvas">
+			Your browser does not support the canvas tag.
+		</canvas>
+
+		<button id="fullscreen-btn" type="button" title="Toggle fullscreen (also F11 in-game)">Fullscreen</button>
+
+		<noscript>
+			Your browser does not support JavaScript.
+		</noscript>
+
+		<div id="status">
+			<img id="status-splash" class="$GODOT_SPLASH_CLASSES" src="$GODOT_SPLASH" alt="">
+			<progress id="status-progress"></progress>
+			<div id="status-notice"></div>
+		</div>
+
+		<script src="$GODOT_URL"></script>
+		<script>
+const GODOT_CONFIG = $GODOT_CONFIG;
+const GODOT_THREADS_ENABLED = $GODOT_THREADS_ENABLED;
+const engine = new Engine(GODOT_CONFIG);
+
+(function () {
+	const statusOverlay = document.getElementById('status');
+	const statusProgress = document.getElementById('status-progress');
+	const statusNotice = document.getElementById('status-notice');
+	const canvas = document.getElementById('canvas');
+	const fullscreenBtn = document.getElementById('fullscreen-btn');
+
+	let initializing = true;
+	let statusMode = '';
+
+	function isFullscreen() {
+		return !!(document.fullscreenElement || document.webkitFullscreenElement);
+	}
+
+	function updateFullscreenLabel() {
+		fullscreenBtn.textContent = isFullscreen() ? 'Exit Fullscreen' : 'Fullscreen';
+	}
+
+	function requestFs(el) {
+		if (el.requestFullscreen) {
+			return el.requestFullscreen();
+		}
+		if (el.webkitRequestFullscreen) {
+			return el.webkitRequestFullscreen();
+		}
+		return Promise.reject(new Error('Fullscreen API unavailable'));
+	}
+
+	function exitFs() {
+		if (document.exitFullscreen) {
+			return document.exitFullscreen();
+		}
+		if (document.webkitExitFullscreen) {
+			return document.webkitExitFullscreen();
+		}
+		return Promise.resolve();
+	}
+
+	function toggleFullscreen() {
+		const target = canvas || document.documentElement;
+		const done = isFullscreen() ? exitFs() : requestFs(target);
+		Promise.resolve(done).then(() => {
+			// Keep keyboard/gamepad focus on the game after itch/browser fullscreen.
+			if (canvas) {
+				canvas.focus();
+			}
+			updateFullscreenLabel();
+		}).catch((err) => {
+			console.warn('Fullscreen toggle failed:', err);
+		});
+	}
+
+	fullscreenBtn.addEventListener('click', (event) => {
+		event.preventDefault();
+		event.stopPropagation();
+		toggleFullscreen();
+	});
+	document.addEventListener('fullscreenchange', updateFullscreenLabel);
+	document.addEventListener('webkitfullscreenchange', updateFullscreenLabel);
+	updateFullscreenLabel();
+
+	function setStatusMode(mode) {
+		if (statusMode === mode || !initializing) {
+			return;
+		}
+		if (mode === 'hidden') {
+			statusOverlay.remove();
+			initializing = false;
+			return;
+		}
+		statusOverlay.style.visibility = 'visible';
+		statusProgress.style.display = mode === 'progress' ? 'block' : 'none';
+		statusNotice.style.display = mode === 'notice' ? 'block' : 'none';
+		statusMode = mode;
+	}
+
+	function setStatusNotice(text) {
+		while (statusNotice.lastChild) {
+			statusNotice.removeChild(statusNotice.lastChild);
+		}
+		const lines = text.split('\n');
+		lines.forEach((line) => {
+			statusNotice.appendChild(document.createTextNode(line));
+			statusNotice.appendChild(document.createElement('br'));
+		});
+	}
+
+	function displayFailureNotice(err) {
+		console.error(err);
+		if (err instanceof Error) {
+			setStatusNotice(err.message);
+		} else if (typeof err === 'string') {
+			setStatusNotice(err);
+		} else {
+			setStatusNotice('An unknown error occurred.');
+		}
+		setStatusMode('notice');
+		initializing = false;
+	}
+
+	const missing = Engine.getMissingFeatures({
+		threads: GODOT_THREADS_ENABLED,
+	});
+
+	if (missing.length !== 0) {
+		if (GODOT_CONFIG['serviceWorker'] && GODOT_CONFIG['ensureCrossOriginIsolationHeaders'] && 'serviceWorker' in navigator) {
+			let serviceWorkerRegistrationPromise;
+			try {
+				serviceWorkerRegistrationPromise = navigator.serviceWorker.getRegistration();
+			} catch (err) {
+				serviceWorkerRegistrationPromise = Promise.reject(new Error('Service worker registration failed.'));
+			}
+			Promise.race([
+				serviceWorkerRegistrationPromise.then((registration) => {
+					if (registration != null) {
+						return Promise.reject(new Error('Service worker already exists.'));
+					}
+					return registration;
+				}).then(() => engine.installServiceWorker()),
+				new Promise((resolve) => {
+					setTimeout(() => resolve(), 2000);
+				}),
+			]).then(() => {
+				window.location.reload();
+			}).catch((err) => {
+				console.error('Error while registering service worker:', err);
+			});
+		} else {
+			const missingMsg = 'Error\nThe following features required to run Godot projects on the Web are missing:\n';
+			displayFailureNotice(missingMsg + missing.join('\n'));
+		}
+	} else {
+		setStatusMode('progress');
+		engine.startGame({
+			'onProgress': function (current, total) {
+				if (current > 0 && total > 0) {
+					statusProgress.value = current;
+					statusProgress.max = total;
+				} else {
+					statusProgress.removeAttribute('value');
+					statusProgress.removeAttribute('max');
+				}
+			},
+		}).then(() => {
+			setStatusMode('hidden');
+			if (canvas) {
+				canvas.focus();
+			}
+		}, displayFailureNotice);
+	}
+}());
+		</script>
+	</body>
+</html>
