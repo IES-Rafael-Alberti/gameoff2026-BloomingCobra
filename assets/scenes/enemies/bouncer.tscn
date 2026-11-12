@@ -6,7 +6,10 @@
 [ext_resource type="Texture2D" uid="uid://cseire07wg86u" path="res://assets/sprittesheets/enemy/placeholders/enemy4/Sleep-Anim.png" id="3_gqm0i"]
 [ext_resource type="Script" uid="uid://bkoec71xnejuk" path="res://assets/scripts/common/switchable.gd" id="3_h74ec"]
 [ext_resource type="Script" uid="uid://hyer0s0jqcmx" path="res://assets/scripts/enemies/movement/bouncer/bouncer.gd" id="4_gqm0i"]
-[ext_resource type="Script" path="res://assets/scripts/sfx/bouncer_sfx.gd" id="5_sfx"]
+[ext_resource type="Script" uid="uid://crv20txmkr0pc" path="res://assets/scripts/sfx/bouncer_sfx.gd" id="5_sfx"]
+[ext_resource type="AudioStream" uid="uid://gqy8ahhioayb" path="res://assets/audio/enemies/BouncerBounce1.wav" id="7_c1622"]
+[ext_resource type="AudioStream" uid="uid://biu8i33dciac" path="res://assets/audio/enemies/BouncerBounce2.wav" id="8_eui82"]
+[ext_resource type="AudioStream" uid="uid://wdrth601lb6s" path="res://assets/audio/enemies/BouncerBounce3.wav" id="9_4uj5d"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_akui1"]
 atlas = ExtResource("2_h74ec")
@@ -98,9 +101,7 @@ radius = 7.0
 
 [node name="Bouncer" type="CharacterBody2D" unique_id=1171050525]
 script = ExtResource("1_kpjfe")
-max_health = 3
 move_speed = 60.0
-attack_cooldown = 0.0
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1304020782]
 sprite_frames = SubResource("SpriteFrames_akui1")
@@ -123,8 +124,11 @@ script = ExtResource("2_j5asl")
 [node name="Switchable" type="Node2D" parent="." unique_id=1339734756]
 script = ExtResource("3_h74ec")
 
-[node name="SfxPlayer" type="Node2D" parent="."]
+[node name="SfxPlayer" type="Node2D" parent="." unique_id=2074189107]
 script = ExtResource("5_sfx")
+bounce_1 = ExtResource("7_c1622")
+bounce_2 = ExtResource("8_eui82")
+bounce_3 = ExtResource("9_4uj5d")
 
 [node name="Bouncer" type="Node2D" parent="." unique_id=1367370899]
 position = Vector2(0, -6)

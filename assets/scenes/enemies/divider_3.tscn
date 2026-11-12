@@ -8,8 +8,10 @@
 [ext_resource type="Script" uid="uid://bkoec71xnejuk" path="res://assets/scripts/common/switchable.gd" id="3_alryq"]
 [ext_resource type="Texture2D" uid="uid://dqgfphwoqabn8" path="res://assets/sprittesheets/enemy/placeholders/divider/divider3/Sleep-Anim.png" id="4_ennrq"]
 [ext_resource type="Texture2D" uid="uid://c7t171rvpi8oo" path="res://assets/sprittesheets/enemy/placeholders/divider/divider3/Walk-Anim.png" id="5_p20tx"]
-[ext_resource type="Script" path="res://assets/scripts/enemies/divisible.gd" id="6_div"]
-[ext_resource type="Script" path="res://assets/scripts/sfx/divider_sfx.gd" id="6_sfx"]
+[ext_resource type="Script" uid="uid://d248nineciw88" path="res://assets/scripts/enemies/divisible.gd" id="6_div"]
+[ext_resource type="Script" uid="uid://uwb0b0cjbggp" path="res://assets/scripts/sfx/divider_sfx.gd" id="6_sfx"]
+[ext_resource type="AudioStream" uid="uid://cpsr0mynmar7c" path="res://assets/audio/enemies/Duplicator.mp3" id="10_rgxq0"]
+[ext_resource type="AudioStream" uid="uid://2xm266kp7l33" path="res://assets/audio/enemies/DuplicatorDuplication.wav" id="11_a7kcy"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_rgxq0"]
 atlas = ExtResource("2_okyql")
@@ -370,9 +372,7 @@ radius = 6.0
 
 [node name="Divider_3" type="CharacterBody2D" unique_id=1299799807]
 script = ExtResource("1_s26gj")
-max_health = 3
 move_speed = 35.0
-attack_cooldown = 0.0
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1132272824]
 sprite_frames = SubResource("SpriteFrames_er4o1")
@@ -397,8 +397,10 @@ script = ExtResource("2_s26gj")
 [node name="Switchable" type="Node2D" parent="." unique_id=59190317]
 script = ExtResource("3_alryq")
 
-[node name="SfxPlayer" type="Node2D" parent="."]
+[node name="SfxPlayer" type="Node2D" parent="." unique_id=1254895626]
 script = ExtResource("6_sfx")
+standard = ExtResource("10_rgxq0")
+duplication = ExtResource("11_a7kcy")
 
 [node name="Dividisible" type="Node2D" parent="." unique_id=573549905]
 position = Vector2(0, -3)

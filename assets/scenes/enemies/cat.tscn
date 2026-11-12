@@ -1,11 +1,13 @@
 [gd_scene format=3 uid="uid://bv4cgmj36fw4k"]
 
 [ext_resource type="Texture2D" uid="uid://bvul1xk5ficsn" path="res://assets/sprittesheets/cat/placeholders/Rotate-Anim.png" id="1_81vxb"]
-[ext_resource type="Script" path="res://assets/scripts/enemies/cat.gd" id="1_wslfk"]
+[ext_resource type="Script" uid="uid://bcg5hwy6l5h2f" path="res://assets/scripts/enemies/cat.gd" id="1_wslfk"]
 [ext_resource type="Texture2D" uid="uid://bl1ujdw1irbo7" path="res://assets/sprittesheets/cat/placeholders/Walk-Anim.png" id="2_wslfk"]
 [ext_resource type="Script" uid="uid://bkoec71xnejuk" path="res://assets/scripts/common/switchable.gd" id="3_jkp1k"]
 [ext_resource type="Script" uid="uid://cfgre6gf3l2ic" path="res://assets/scripts/enemies/movement/runner/runner.gd" id="4_k2fky"]
-[ext_resource type="Script" path="res://assets/scripts/sfx/cat_sfx.gd" id="5_sfx"]
+[ext_resource type="Script" uid="uid://c7knpnjahcjqt" path="res://assets/scripts/sfx/cat_sfx.gd" id="5_sfx"]
+[ext_resource type="AudioStream" uid="uid://d3mvknn7f8g3a" path="res://assets/audio/enemies/CatStandard.wav" id="6_dl2sl"]
+[ext_resource type="AudioStream" uid="uid://ctua681kjf3pp" path="res://assets/audio/enemies/CatCaught.wav" id="7_yvj5x"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_m7ii3"]
 atlas = ExtResource("1_81vxb")
@@ -257,8 +259,10 @@ shape = SubResource("CircleShape2D_22ttu")
 [node name="Switchable" type="Node2D" parent="." unique_id=51200773]
 script = ExtResource("3_jkp1k")
 
-[node name="SfxPlayer" type="Node2D" parent="."]
+[node name="SfxPlayer" type="Node2D" parent="." unique_id=720406386]
 script = ExtResource("5_sfx")
+standard = ExtResource("6_dl2sl")
+caught = ExtResource("7_yvj5x")
 
 [node name="Runner" type="Node2D" parent="." unique_id=1805770312]
 script = ExtResource("4_k2fky")

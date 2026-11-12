@@ -5,13 +5,52 @@
 [ext_resource type="Script" uid="uid://bgh2aslom8hdu" path="res://assets/scripts/common/damageable.gd" id="1_damage"]
 [ext_resource type="Script" uid="uid://cjbqh3leyst8e" path="res://assets/scripts/sfx/player_sfx.gd" id="1_sfx"]
 [ext_resource type="Script" uid="uid://bkoec71xnejuk" path="res://assets/scripts/common/switchable.gd" id="1_switch"]
-[ext_resource type="Texture2D" uid="uid://bypcfcnb8jnwf" path="res://assets/sprittesheets/player/definitivo/attack.png" id="2_ratp2"]
+[ext_resource type="Script" path="res://assets/scripts/sfx/player_sfx.gd" id="1_sfx"]
+[ext_resource type="Texture2D" uid="uid://c1ppi4f3mwnwe" path="res://assets/sprittesheets/player/placeholders/attack.png" id="2_0gfpk"]
 [ext_resource type="Texture2D" uid="uid://d1ie6f5p8dswh" path="res://assets/sprittesheets/player/placeholders/charging.png" id="3_0hrit"]
 [ext_resource type="Texture2D" uid="uid://c0jcvr47mp2vw" path="res://assets/sprittesheets/player/definitivo/idle.png" id="5_84enu"]
 [ext_resource type="Texture2D" uid="uid://d3urhwm4yt11l" path="res://assets/sprittesheets/player/definitivo/idle_vigilia.png" id="5_cd4ww"]
 [ext_resource type="Texture2D" uid="uid://ktgkeaht36da" path="res://assets/sprittesheets/player/placeholders/bubble.png" id="6_0gfpk"]
 [ext_resource type="Texture2D" uid="uid://dwh00hi4p2iv2" path="res://assets/sprittesheets/player/definitivo/walking.png" id="7_cd4ww"]
-[ext_resource type="Texture2D" uid="uid://no8bg5jiirva" path="res://assets/sprittesheets/player/definitivo/bubble_walk.png" id="8_bwalk"]
+[ext_resource type="Texture2D" uid="uid://crilqom8fmch0" path="res://assets/sprittesheets/player/placeholders/attacks/swipe.png" id="7_swipe"]
+[ext_resource type="Texture2D" uid="uid://1rkwo0t8b0us" path="res://assets/sprittesheets/player/placeholders/attacks/piercing.png" id="8_pierce"]
+[ext_resource type="Texture2D" uid="uid://cjakw38c6hsl3" path="res://assets/sprittesheets/player/placeholders/attacks/Projectile.png" id="9_proj"]
+[ext_resource type="Texture2D" uid="uid://bo7f8jkv5ehjj" path="res://assets/sprittesheets/HUD/placeholders/emptyCharge.png" id="10_empty"]
+[ext_resource type="Texture2D" uid="uid://brtdf3sfxl5ee" path="res://assets/sprittesheets/HUD/placeholders/greenCharge.png" id="11_green"]
+[ext_resource type="Texture2D" uid="uid://cnmm3haak1d3k" path="res://assets/sprittesheets/HUD/placeholders/fullcharge.png" id="12_full"]
+[ext_resource type="Texture2D" uid="uid://bwo84ss4d5b0y" path="res://assets/sprittesheets/HUD/placeholders/halfCharge.png" id="13_half"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_60g6h"]
+atlas = ExtResource("2_0gfpk")
+region = Rect2(0, 0, 72, 72)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hrrj1"]
+atlas = ExtResource("2_0gfpk")
+region = Rect2(72, 0, 72, 72)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_c6vv5"]
+atlas = ExtResource("2_0gfpk")
+region = Rect2(144, 0, 72, 72)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_nh07x"]
+atlas = ExtResource("2_0gfpk")
+region = Rect2(216, 0, 72, 72)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_00pic"]
+atlas = ExtResource("2_0gfpk")
+region = Rect2(288, 0, 72, 72)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0bskb"]
+atlas = ExtResource("2_0gfpk")
+region = Rect2(360, 0, 72, 72)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1dmvh"]
+atlas = ExtResource("2_0gfpk")
+region = Rect2(432, 0, 72, 72)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ratp2"]
+atlas = ExtResource("2_0gfpk")
+region = Rect2(504, 0, 72, 72)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_84enu"]
 atlas = ExtResource("2_ratp2")
@@ -1085,8 +1124,18 @@ texture = ExtResource("6_0gfpk")
 [node name="Switchable" type="Node2D" parent="." unique_id=1509705244]
 script = ExtResource("1_switch")
 
-[node name="SfxPlayer" type="Node2D" parent="." unique_id=1677145875]
+[node name="SfxPlayer" type="Node2D" parent="."]
 script = ExtResource("1_sfx")
+slash = ExtResource("11_6luef")
+slash_hit = ExtResource("12_gmant")
+stab = ExtResource("13_omckb")
+stab_hit = ExtResource("14_uqo28")
+projectile = ExtResource("15_5eo68")
+steps_vigil = ExtResource("16_fiote")
+steps_nightmare = ExtResource("17_5308x")
+max_health_pickup = ExtResource("18_1hryd")
+memory_pickup = ExtResource("19_0rf7b")
+item_pickup = ExtResource("20_anufl")
 
 [node name="Damageable" type="Node2D" parent="." unique_id=651315614]
 script = ExtResource("1_damage")

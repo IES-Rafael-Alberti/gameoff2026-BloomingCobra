@@ -3,14 +3,16 @@
 [ext_resource type="Script" uid="uid://c1fbuoperocxx" path="res://assets/scripts/enemies/enemy.gd" id="1_kbpvo"]
 [ext_resource type="Script" uid="uid://bgh2aslom8hdu" path="res://assets/scripts/common/damageable.gd" id="2_55kjn"]
 [ext_resource type="Script" uid="uid://ctisdxhye00na" path="res://assets/scripts/enemies/movement/hunter/hunter.gd" id="2_hunter"]
-[ext_resource type="Script" path="res://assets/scripts/enemies/movement/hunter/idle.gd" id="2_hunter_idle"]
-[ext_resource type="Script" path="res://assets/scripts/enemies/movement/hunter/aggressive.gd" id="2_hunter_aggro"]
+[ext_resource type="Script" uid="uid://djgxqfyo0xy47" path="res://assets/scripts/enemies/movement/hunter/aggressive.gd" id="2_hunter_aggro"]
+[ext_resource type="Script" uid="uid://btw3x7kvnab5q" path="res://assets/scripts/enemies/movement/hunter/idle.gd" id="2_hunter_idle"]
+[ext_resource type="Script" uid="uid://cp37o8jf3a7qw" path="res://assets/scripts/sfx/hunter_sfx.gd" id="2_sfx"]
 [ext_resource type="Script" uid="uid://bkoec71xnejuk" path="res://assets/scripts/common/switchable.gd" id="2_switch"]
-[ext_resource type="Script" path="res://assets/scripts/sfx/hunter_sfx.gd" id="2_sfx"]
 [ext_resource type="Texture2D" uid="uid://ccgohp51hvyoy" path="res://assets/sprittesheets/enemy/placeholders/enemy1/Attack-Anim.png" id="2_t2q6g"]
 [ext_resource type="Texture2D" uid="uid://v2e51cu0g5ei" path="res://assets/sprittesheets/enemy/placeholders/enemy1/Idle-Anim.png" id="3_o3hxu"]
 [ext_resource type="Texture2D" uid="uid://5tlcl5p75wud" path="res://assets/sprittesheets/enemy/placeholders/enemy1/Sleep-Anim.png" id="4_yyvcd"]
 [ext_resource type="Texture2D" uid="uid://cpbsoj5t1dgxt" path="res://assets/sprittesheets/enemy/placeholders/enemy1/Walk-Anim.png" id="5_4t03u"]
+[ext_resource type="AudioStream" uid="uid://cxckvko3o3bwc" path="res://assets/audio/enemies/HunterWalking.wav" id="9_s32gh"]
+[ext_resource type="AudioStream" uid="uid://cs3idbbl33pj0" path="res://assets/audio/enemies/HunterSounds.wav" id="10_uudjq"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_37lg7"]
 atlas = ExtResource("2_t2q6g")
@@ -445,8 +447,6 @@ radius = 7.0
 
 [node name="Hunter" type="CharacterBody2D" unique_id=1191328024]
 script = ExtResource("1_kbpvo")
-max_health = 3
-move_speed = 55.0
 attack_cooldown = 0.8
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=818412766]
@@ -470,14 +470,17 @@ script = ExtResource("2_55kjn")
 [node name="Switchable" type="Node2D" parent="." unique_id=1509705243]
 script = ExtResource("2_switch")
 
-[node name="SfxPlayer" type="Node2D" parent="."]
+[node name="SfxPlayer" type="Node2D" parent="." unique_id=397222947]
 script = ExtResource("2_sfx")
+walking = ExtResource("9_s32gh")
+standard = ExtResource("10_uudjq")
+proximity_max_distance = 50000.44
 
 [node name="Hunter" type="Node2D" parent="." unique_id=115389486]
 script = ExtResource("2_hunter")
 
-[node name="Idle" type="Node2D" parent="Hunter"]
+[node name="Idle" type="Node2D" parent="Hunter" unique_id=730449868]
 script = ExtResource("2_hunter_idle")
 
-[node name="Aggresive" type="Node2D" parent="Hunter"]
+[node name="Aggresive" type="Node2D" parent="Hunter" unique_id=1614052019]
 script = ExtResource("2_hunter_aggro")
