@@ -1,0 +1,78 @@
+name: Publish to itch.io
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  GODOT_VERSION: "4.7-stable"
+  ITCH_USER: blooming-cobra-studio
+  ITCH_GAME: dreamshift
+
+jobs:
+  export-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Export Godot builds
+        id: export
+        uses: firebelley/godot-export@v8.0.0
+        with:
+          godot_executable_download_url: https://github.com/godotengine/godot/releases/download/${{ env.GODOT_VERSION }}/Godot_v${{ env.GODOT_VERSION }}_linux.x86_64.zip
+          godot_export_templates_download_url: https://github.com/godotengine/godot/releases/download/${{ env.GODOT_VERSION }}/Godot_v${{ env.GODOT_VERSION }}_export_templates.tpz
+          relative_project_path: ./
+          archive_output: true
+          cache: true
+          verbose: true
+
+      - name: List export archives
+        run: ls -la "${{ steps.export.outputs.archive_directory }}"
+
+      - name: Install butler
+        run: |
+          curl -L -o butler.zip https://broth.itch.zone/butler/linux-amd64/LATEST/archive/default
+          unzip -o butler.zip
+          chmod +x butler
+          ./butler -V
+
+      - name: Push Web (HTML5) to itch.io
+        env:
+          # Prefer ITCHIO_API_KEY; fall back to BUTLER_API_KEY if that's how the secret was named.
+          BUTLER_API_KEY: ${{ secrets.ITCHIO_API_KEY || secrets.BUTLER_API_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -z "${BUTLER_API_KEY:-}" ]; then
+            echo "Missing secret ITCHIO_API_KEY (or BUTLER_API_KEY)."
+            exit 1
+          fi
+          ARCHIVE_DIR="${{ steps.export.outputs.archive_directory }}"
+          WEB_ZIP="$(find "$ARCHIVE_DIR" -maxdepth 1 -type f -iname '*web*.zip' | head -n 1)"
+          if [ -z "$WEB_ZIP" ]; then
+            echo "No Web archive found in $ARCHIVE_DIR"
+            ls -la "$ARCHIVE_DIR"
+            exit 1
+          fi
+          echo "Pushing $WEB_ZIP -> ${ITCH_USER}/${ITCH_GAME}:html5"
+          ./butler push "$WEB_ZIP" "${ITCH_USER}/${ITCH_GAME}:html5" --userversion "${GITHUB_SHA::7}"
+
+      - name: Push Windows to itch.io
+        env:
+          BUTLER_API_KEY: ${{ secrets.ITCHIO_API_KEY || secrets.BUTLER_API_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -z "${BUTLER_API_KEY:-}" ]; then
+            echo "Missing secret ITCHIO_API_KEY (or BUTLER_API_KEY)."
+            exit 1
+          fi
+          ARCHIVE_DIR="${{ steps.export.outputs.archive_directory }}"
+          WIN_ZIP="$(find "$ARCHIVE_DIR" -maxdepth 1 -type f \( -iname '*windows*.zip' -o -iname '*desktop*.zip' \) | head -n 1)"
+          if [ -z "$WIN_ZIP" ]; then
+            echo "No Windows archive found in $ARCHIVE_DIR"
+            ls -la "$ARCHIVE_DIR"
+            exit 1
+          fi
+          echo "Pushing $WIN_ZIP -> ${ITCH_USER}/${ITCH_GAME}:windows"
+          ./butler push "$WIN_ZIP" "${ITCH_USER}/${ITCH_GAME}:windows" --userversion "${GITHUB_SHA::7}"
