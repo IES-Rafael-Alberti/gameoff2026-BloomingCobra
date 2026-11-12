@@ -1115,6 +1115,9 @@ region = Rect2(3968, 2976, 992, 992)
 script = ExtResource("1_8sknh")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=635096296]
+texture_filter = 2
+scale = Vector2(0.035139, 0.035139)
+offset = Vector2(0, -48.304)
 sprite_frames = SubResource("SpriteFrames_bhbtl")
 animation = &"idle_nightmare_down"
 
