@@ -1,12 +1,12 @@
 extends SfxPlayer
 
-## Ranged: randomized attack one-shots when firing (room-global).
+## Ranged: attack one-shots fill the current room only.
 
 @export_group("Ranged SFX")
-@export var attack_1: AudioStream ## (G)
-@export var attack_2: AudioStream ## (G)
+@export var attack_1: AudioStream ## (R)
+@export var attack_2: AudioStream ## (R)
 
 
 func play_attack() -> void:
 	var streams: Array[AudioStream] = [attack_1, attack_2]
-	play_global_random(streams, &"attack")
+	play_room_random(streams, &"attack")

@@ -1,10 +1,10 @@
 extends SfxPlayer
 
-## Duplicator: proximity ambient + global duplication when it splits.
+## Duplicator: proximity ambient + room duplication sting.
 
 @export_group("Duplicator SFX")
 @export var standard: AudioStream ## (P)
-@export var duplication: AudioStream ## (G) on split / spawn copies
+@export var duplication: AudioStream ## (R) on split / spawn copies
 
 
 func set_active(active: bool) -> void:
@@ -12,8 +12,8 @@ func set_active(active: bool) -> void:
 		start_standard(standard)
 	else:
 		stop_standard()
+		stop_all()
 
 
 func play_duplication() -> void:
-	# Detached so it keeps playing after this enemy is freed.
-	play_global_detached(duplication)
+	play_room_detached(duplication)

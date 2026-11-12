@@ -1,10 +1,10 @@
 extends SfxPlayer
 
-## Cat: proximity ambient + global caught sting.
+## Cat: proximity ambient + room caught sting.
 
 @export_group("Cat SFX")
 @export var standard: AudioStream ## (P)
-@export var caught: AudioStream ## (G)
+@export var caught: AudioStream ## (R)
 
 
 func set_active(active: bool) -> void:
@@ -12,8 +12,9 @@ func set_active(active: bool) -> void:
 		start_standard(standard)
 	else:
 		stop_standard()
+		stop_all()
 
 
 func play_caught() -> void:
 	stop_standard()
-	play_global_detached(caught)
+	play_room_detached(caught)

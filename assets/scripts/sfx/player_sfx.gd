@@ -1,6 +1,6 @@
 extends SfxPlayer
 
-## Player combat / footsteps / item pickups (all treated as room-global UI/player feedback).
+## Player combat / footsteps / item pickups (UI — always hear yourself).
 
 @export_group("Slash")
 @export var slash: AudioStream

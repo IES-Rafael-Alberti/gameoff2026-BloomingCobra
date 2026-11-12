@@ -11,3 +11,4 @@ func set_active(active: bool) -> void:
 		start_standard(standard)
 	else:
 		stop_standard()
+		stop_all()
