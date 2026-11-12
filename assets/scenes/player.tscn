@@ -27,6 +27,7 @@
 [ext_resource type="AudioStream" uid="uid://74sgs8htamjh" path="res://assets/audio/general/MaxHealthPickUp.wav" id="18_1hryd"]
 [ext_resource type="AudioStream" uid="uid://c344c0jmg533v" path="res://assets/audio/general/MemoryPickUp.wav" id="19_0rf7b"]
 [ext_resource type="AudioStream" uid="uid://dthb0rvdrgnnk" path="res://assets/audio/general/ItemPickUp.wav" id="20_anufl"]
+[ext_resource type="AudioStream" uid="uid://cumhcpab81cdl" path="res://assets/audio/protagonist/Damage.wav" id="21_hurt"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_60g6h"]
 atlas = ExtResource("2_0gfpk")
@@ -1142,6 +1143,7 @@ slash_hit = ExtResource("12_gmant")
 stab = ExtResource("13_omckb")
 stab_hit = ExtResource("14_uqo28")
 projectile = ExtResource("15_5eo68")
+hurt = ExtResource("21_hurt")
 steps_vigil = ExtResource("16_fiote")
 steps_nightmare = ExtResource("17_5308x")
 max_health_pickup = ExtResource("18_1hryd")

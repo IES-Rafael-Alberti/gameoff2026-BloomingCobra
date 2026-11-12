@@ -340,18 +340,19 @@ func _on_mode_changed(index: int) -> void:
 
 
 func _set_hitboxes_enabled(enabled: bool) -> void:
+	# Death / mode flips can run mid physics query flush (hitbox callbacks).
 	var body_shape := _find_body_shape()
 	if body_shape != null:
-		body_shape.disabled = not enabled
+		body_shape.set_deferred("disabled", not enabled)
 
 	for child in get_children():
 		if child is Area2D and child.name != "Projectile":
 			var area := child as Area2D
-			area.monitoring = enabled
-			area.monitorable = false
+			area.set_deferred("monitoring", enabled)
+			area.set_deferred("monitorable", false)
 			for shape in area.get_children():
 				if shape is CollisionShape2D:
-					shape.disabled = not enabled
+					shape.set_deferred("disabled", not enabled)
 
 
 func _find_body_shape() -> CollisionShape2D:

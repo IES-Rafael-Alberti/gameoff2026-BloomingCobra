@@ -1,34 +1,51 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://assets/scripts/hud/health_bar.gd" id="1_hb"]
-[ext_resource type="Texture2D" uid="uid://x4jdupqlytig" path="res://assets/sprittesheets/HUD/placeholders/healthbarEmpty.png" id="2_empty"]
-[ext_resource type="Texture2D" uid="uid://0iwkpoumtkuu" path="res://assets/sprittesheets/HUD/placeholders/HealthbarFull.png" id="3_full"]
+[ext_resource type="Texture2D" path="res://assets/sprittesheets/HUD/definitivo/ui_barra_body.png" id="2_body"]
+[ext_resource type="Texture2D" path="res://assets/sprittesheets/HUD/definitivo/ui_barra_fill.png" id="3_fill"]
+[ext_resource type="Texture2D" uid="uid://bbkoh3r512v6g" path="res://assets/sprittesheets/HUD/definitivo/ui_ojo.png" id="4_eye"]
 
 [node name="HealthBar" type="CanvasLayer"]
 layer = 60
 script = ExtResource("1_hb")
-empty_texture = ExtResource("2_empty")
-full_texture = ExtResource("3_full")
-bar_scale = 3.0
+body_texture = ExtResource("2_body")
+fill_texture = ExtResource("3_fill")
+eye_sheet = ExtResource("4_eye")
+bar_scale = 0.55
+eye_scale = 0.28
 
 [node name="Margin" type="MarginContainer" parent="."]
 anchors_preset = 0
-offset_left = 12.0
-offset_top = 12.0
-offset_right = 220.0
-offset_bottom = 72.0
-theme_override_constants/margin_left = 0
-theme_override_constants/margin_top = 0
-theme_override_constants/margin_right = 0
-theme_override_constants/margin_bottom = 0
+offset_left = 10.0
+offset_top = 8.0
+offset_right = 420.0
+offset_bottom = 120.0
 
-[node name="Bar" type="TextureProgressBar" parent="Margin"]
+[node name="Row" type="HBoxContainer" parent="Margin"]
 layout_mode = 2
-custom_minimum_size = Vector2(192, 48)
-size_flags_horizontal = 0
-size_flags_vertical = 0
+theme_override_constants/separation = -8
+alignment = 0
+
+[node name="Eye" type="TextureRect" parent="Margin/Row"]
+layout_mode = 2
+custom_minimum_size = Vector2(120, 120)
+size_flags_vertical = 4
+
+[node name="BarRoot" type="Control" parent="Margin/Row"]
+clip_contents = false
+layout_mode = 2
+custom_minimum_size = Vector2(210, 89)
+size_flags_vertical = 4
+
+[node name="Body" type="TextureRect" parent="Margin/Row/BarRoot"]
+z_index = 0
+layout_mode = 0
+mouse_filter = 2
+
+[node name="Fill" type="TextureProgressBar" parent="Margin/Row/BarRoot"]
+z_index = 1
+layout_mode = 0
+mouse_filter = 2
 max_value = 1.0
 step = 0.0
 value = 1.0
-texture_under = ExtResource("2_empty")
-texture_progress = ExtResource("3_full")

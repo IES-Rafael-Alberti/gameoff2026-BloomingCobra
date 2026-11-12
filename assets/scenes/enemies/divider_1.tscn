@@ -12,6 +12,8 @@
 [ext_resource type="Script" uid="uid://d248nineciw88" path="res://assets/scripts/enemies/divisible.gd" id="7_div"]
 [ext_resource type="Script" uid="uid://blpk6ae6eemnw" path="res://assets/scripts/sfx/divider_sfx.gd" id="7_sfx"]
 [ext_resource type="PackedScene" uid="uid://by51xwqcvt3vq" path="res://assets/scenes/enemies/divider_2.tscn" id="8_div2"]
+[ext_resource type="AudioStream" uid="uid://cpsr0mynmar7c" path="res://assets/audio/enemies/Duplicator.mp3" id="9_dup_std"]
+[ext_resource type="AudioStream" uid="uid://2xm266kp7l33" path="res://assets/audio/enemies/DuplicatorDuplication.wav" id="10_dup_split"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_0y3g1"]
 atlas = ExtResource("2_k745b")
@@ -471,6 +473,8 @@ script = ExtResource("3_l1i15")
 
 [node name="SfxPlayer" type="Node2D" parent="." unique_id=1306199011]
 script = ExtResource("7_sfx")
+standard = ExtResource("9_dup_std")
+duplication = ExtResource("10_dup_split")
 
 [node name="Dividisible" type="Node2D" parent="." unique_id=639123389]
 script = ExtResource("7_div")

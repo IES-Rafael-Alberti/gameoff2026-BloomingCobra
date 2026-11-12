@@ -86,10 +86,10 @@ func physics_update(delta: float) -> bool:
 func _set_area(enabled: bool) -> void:
 	if _attack_area == null:
 		return
-	_attack_area.monitoring = enabled
+	_attack_area.set_deferred("monitoring", enabled)
 	for child in _attack_area.get_children():
 		if child is CollisionShape2D:
-			child.disabled = not enabled
+			child.set_deferred("disabled", not enabled)
 
 
 func _on_body_entered(body: Node2D) -> void:

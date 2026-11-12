@@ -14,6 +14,9 @@ extends SfxPlayer
 @export var projectile: AudioStream
 @export var projectile_hit: AudioStream
 
+@export_group("Hurt")
+@export var hurt: AudioStream ## (UI) when the player takes a hit
+
 @export_group("Walking")
 @export var steps_vigil: AudioStream ## dream / bubble mode
 @export var steps_nightmare: AudioStream
@@ -57,6 +60,10 @@ func play_projectile() -> void:
 
 func play_projectile_hit() -> void:
 	play_global(projectile_hit)
+
+
+func play_hurt() -> void:
+	play_global(hurt)
 
 
 ## Starts / keeps a looping step bed while the player is walking.

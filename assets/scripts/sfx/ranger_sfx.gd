@@ -7,6 +7,11 @@ extends SfxPlayer
 @export var attack_2: AudioStream ## (R)
 
 
+func set_active(active: bool) -> void:
+	if not active:
+		stop_all()
+
+
 func play_attack() -> void:
 	var streams: Array[AudioStream] = [attack_1, attack_2]
 	play_room_random(streams, &"attack")

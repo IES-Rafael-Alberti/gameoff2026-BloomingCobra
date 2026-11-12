@@ -1,55 +1,110 @@
 extends CanvasLayer
 
-## Continuous vigil life bar (empty under / full progress). Follows vitality ratio
-## smoothly so the fill never jumps in discrete chunks.
+## Body (empty bar + clouds) stays fixed. Only the dark tube fills with red.
 
-@export var empty_texture: Texture2D
-@export var full_texture: Texture2D
-@export var bar_scale: float = 3.0
-## Higher = snappier visual follow. Drain is already continuous; this softens heals.
-@export var follow_speed: float = 14.0
+const BODY_SIZE := Vector2(383, 162)
+## Dark tube inside the body — clouds are decoration, not part of the fill range.
+const FILL_ORIGIN := Vector2(27, 65)
+const FILL_SIZE := Vector2(274, 56)
+const EYE_CELL := Vector2i(427, 427)
+const EYE_FRAME_COUNT := 4
 
-@onready var _bar: TextureProgressBar = $Margin/Bar
+@export var body_texture: Texture2D
+@export var fill_texture: Texture2D
+@export var eye_sheet: Texture2D
+@export var bar_scale: float = 0.55
+@export var eye_scale: float = 0.28
 
-var _target_ratio: float = 1.0
-var _shown_ratio: float = 1.0
+@onready var _eye: TextureRect = $Margin/Row/Eye
+@onready var _root: Control = $Margin/Row/BarRoot
+@onready var _body: TextureRect = $Margin/Row/BarRoot/Body
+@onready var _fill: TextureProgressBar = $Margin/Row/BarRoot/Fill
+
 var _vitality: Node = null
+var _eye_frames: Array[AtlasTexture] = []
+var _eye_index: int = -1
 
 
 func _ready() -> void:
 	layer = 60
-	_configure_bar()
+	_configure_visuals()
 	call_deferred("_bind_player_vitality")
 
 
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	if _vitality != null and _vitality.has_method("get_ratio"):
-		_target_ratio = float(_vitality.call("get_ratio"))
-	# Exponential ease — continuous drain looks natural; heals ease in.
-	var t := 1.0 - exp(-follow_speed * delta)
-	_shown_ratio = lerpf(_shown_ratio, _target_ratio, t)
-	_bar.value = _shown_ratio
+		_set_ratio(float(_vitality.call("get_ratio")))
 
 
-func _configure_bar() -> void:
-	if empty_texture != null:
-		_bar.texture_under = empty_texture
-	if full_texture != null:
-		_bar.texture_progress = full_texture
-	_bar.min_value = 0.0
-	_bar.max_value = 1.0
-	_bar.step = 0.0
-	_bar.value = 1.0
-	_bar.fill_mode = TextureProgressBar.FILL_LEFT_TO_RIGHT
-	_bar.nine_patch_stretch = false
-	_bar.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	var tex_size := Vector2(64, 16)
-	if full_texture != null:
-		tex_size = Vector2(full_texture.get_width(), full_texture.get_height())
-	elif empty_texture != null:
-		tex_size = Vector2(empty_texture.get_width(), empty_texture.get_height())
-	_bar.custom_minimum_size = tex_size * bar_scale
-	_bar.size = _bar.custom_minimum_size
+func _configure_visuals() -> void:
+	var s := bar_scale
+	_root.custom_minimum_size = BODY_SIZE * s
+	_root.size = BODY_SIZE * s
+	_root.clip_contents = false
+
+	_body.texture = body_texture
+	_body.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	_body.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_body.stretch_mode = TextureRect.STRETCH_SCALE
+	_body.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_body.position = Vector2.ZERO
+	_body.size = BODY_SIZE
+	_body.scale = Vector2(s, s)
+	_body.z_index = 0
+
+	_fill.min_value = 0.0
+	_fill.max_value = 1.0
+	_fill.step = 0.0
+	_fill.value = 1.0
+	_fill.fill_mode = TextureProgressBar.FILL_LEFT_TO_RIGHT
+	_fill.nine_patch_stretch = false
+	_fill.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	_fill.texture_under = null
+	_fill.texture_over = null
+	_fill.texture_progress = fill_texture
+	_fill.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	## Native tube pixels, then same scale as body — 0%..100% = tube only.
+	_fill.position = FILL_ORIGIN * s
+	_fill.size = FILL_SIZE
+	_fill.scale = Vector2(s, s)
+	_fill.z_index = 1
+
+	_eye_frames.clear()
+	if eye_sheet != null:
+		for i in EYE_FRAME_COUNT:
+			_eye_frames.append(_atlas(eye_sheet, Rect2(i * EYE_CELL.x, 0, EYE_CELL.x, EYE_CELL.y)))
+	_eye.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	_eye.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_eye.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	var eye_size := Vector2(EYE_CELL) * eye_scale
+	_eye.custom_minimum_size = eye_size
+	_eye.size = eye_size
+
+	_set_ratio(1.0)
+
+
+func _atlas(sheet: Texture2D, region: Rect2) -> AtlasTexture:
+	var atlas := AtlasTexture.new()
+	atlas.atlas = sheet
+	atlas.region = region
+	return atlas
+
+
+func _set_ratio(ratio: float) -> void:
+	var r := clampf(ratio, 0.0, 1.0)
+	_fill.value = r
+	_update_eye(r)
+
+
+func _update_eye(ratio: float) -> void:
+	if _eye_frames.is_empty():
+		return
+	var n := _eye_frames.size()
+	var idx := clampi(int(round(clampf(ratio, 0.0, 1.0) * float(n - 1))), 0, n - 1)
+	if idx == _eye_index:
+		return
+	_eye_index = idx
+	_eye.texture = _eye_frames[idx]
 
 
 func _bind_player_vitality() -> void:
@@ -65,10 +120,8 @@ func _bind_player_vitality() -> void:
 	if vit.has_signal("vitality_changed") and not vit.vitality_changed.is_connected(_on_vitality_changed):
 		vit.vitality_changed.connect(_on_vitality_changed)
 	if vit.has_method("get_ratio"):
-		_target_ratio = float(vit.call("get_ratio"))
-		_shown_ratio = _target_ratio
-		_bar.value = _shown_ratio
+		_set_ratio(float(vit.call("get_ratio")))
 
 
 func _on_vitality_changed(_current: float, _max_vitality: float, ratio: float) -> void:
-	_target_ratio = clampf(ratio, 0.0, 1.0)
+	_set_ratio(ratio)

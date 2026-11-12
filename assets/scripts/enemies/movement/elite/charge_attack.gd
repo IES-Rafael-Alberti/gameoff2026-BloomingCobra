@@ -107,10 +107,10 @@ func _finish() -> void:
 func _set_hurtbox(enabled: bool) -> void:
 	if _hurtbox == null:
 		return
-	_hurtbox.monitoring = enabled
+	_hurtbox.set_deferred("monitoring", enabled)
 	for child in _hurtbox.get_children():
 		if child is CollisionShape2D:
-			child.disabled = not enabled
+			child.set_deferred("disabled", not enabled)
 
 
 func _on_hurtbox_body_entered(body: Node2D) -> void:

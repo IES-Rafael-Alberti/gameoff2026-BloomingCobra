@@ -24,7 +24,6 @@ var _next_proximity: int = 0
 var _standard: AudioStreamPlayer2D
 var _standard_source: AudioStream
 var _last_played_sec: Dictionary = {} # StringName -> float
-var _cached_room: Node = null
 
 
 func _ready() -> void:
@@ -37,16 +36,17 @@ func _ready() -> void:
 	_apply_proximity(_standard)
 	_standard.finished.connect(_on_standard_finished)
 	add_child(_standard)
-	_cached_room = _resolve_room()
 
 
 func _physics_process(_delta: float) -> void:
-	# Silence spatial/room voices if the player left this room.
+	# Resume / silence spatial audio as the player enters or leaves this room.
+	# Pre-placed enemies (e.g. Elite under Game/Enemy) often call start_standard
+	# before the player shares the room — keep the desired loop and start later.
 	if _player_in_same_room():
+		_resume_standard_if_needed()
 		return
-	stop_standard()
-	_stop_spatial_voices()
-	if not _any_spatial_playing():
+	_pause_spatial_for_room_leave()
+	if _standard_source == null and not _any_spatial_playing():
 		set_physics_process(false)
 
 
@@ -151,19 +151,37 @@ func start_standard(stream: AudioStream) -> void:
 	if _standard == null:
 		return
 	if stream == null:
-		_standard_source = null
 		stop_standard()
 		return
+	var same_already_playing := _standard_source == stream and _standard.playing
+	_standard_source = stream
+	set_physics_process(true)
 	if not _player_in_same_room():
-		stop_standard()
+		if _standard.playing:
+			_standard.stop()
+		return
+	if same_already_playing:
 		return
 	_apply_proximity(_standard)
-	if _standard_source == stream and _standard.playing:
-		return
-	_standard_source = stream
 	_standard.stream = _as_looping(stream)
-	set_physics_process(true)
 	_standard.call_deferred("play")
+
+
+func _resume_standard_if_needed() -> void:
+	if _standard == null or _standard_source == null:
+		return
+	if _standard.playing:
+		return
+	_apply_proximity(_standard)
+	_standard.stream = _as_looping(_standard_source)
+	_standard.play()
+
+
+func _pause_spatial_for_room_leave() -> void:
+	# Keep `_standard_source` so ambient can resume when the player returns.
+	if _standard != null and _standard.playing:
+		_standard.stop()
+	_stop_spatial_voices()
 
 
 func _as_looping(stream: AudioStream) -> AudioStream:
@@ -174,6 +192,10 @@ func _as_looping(stream: AudioStream) -> AudioStream:
 		(copy as AudioStreamMP3).loop = true
 	elif copy is AudioStreamWAV:
 		var wav := copy as AudioStreamWAV
+		# IMA-ADPCM + a bad loop_end can mute immediately. Prefer finished→replay.
+		if wav.format == AudioStreamWAV.FORMAT_IMA_ADPCM:
+			wav.loop_mode = AudioStreamWAV.LOOP_DISABLED
+			return copy
 		wav.loop_mode = AudioStreamWAV.LOOP_FORWARD
 		wav.loop_begin = 0
 		var end_frame := wav.loop_end
@@ -188,7 +210,7 @@ func _on_standard_finished() -> void:
 	if _standard == null or _standard_source == null or _standard.stream == null:
 		return
 	if not _player_in_same_room():
-		stop_standard()
+		# Keep desired source; physics watcher will resume on re-enter.
 		return
 	_standard.play()
 
@@ -288,35 +310,50 @@ func _player_in_same_room() -> bool:
 	var player := tree.get_first_node_in_group("player") as Node2D
 	if player == null:
 		return false
-	var room := _resolve_room()
-	if room != null:
-		if room.has_method("is_active") and bool(room.call("is_active")):
-			return true
-		if room.has_method("contains_world_point"):
-			return bool(room.call("contains_world_point", player.global_position))
+
+	var self_room := _get_own_room()
 	var player_room := _find_room_at(player.global_position)
-	var self_room := _find_room_at(global_position)
-	return player_room != null and player_room == self_room
+	if self_room != null and player_room != null:
+		return self_room == player_room
+
+	# Spawned enemies live under an inactive Room until the player enters.
+	if self_room != null and self_room.has_method("is_active") and bool(self_room.call("is_active")):
+		return true
+
+	# Last resort for pre-placed foes sitting just outside tile bounds.
+	if self_room != null and self_room.has_method("contains_world_point"):
+		return bool(self_room.call("contains_world_point", player.global_position, 48.0))
+	return false
 
 
-func _resolve_room() -> Node:
-	if _cached_room != null and is_instance_valid(_cached_room):
-		return _cached_room
+## Room that owns this emitter: parent Room if spawned, else room under our feet.
+func _get_own_room() -> Node:
 	var node: Node = self
 	while node != null:
 		if node is Room or node.is_in_group("rooms"):
-			_cached_room = node
-			return _cached_room
+			return node
 		node = node.get_parent()
-	_cached_room = _find_room_at(global_position)
-	return _cached_room
+	return _find_room_at(global_position)
 
 
 func _find_room_at(point: Vector2) -> Node:
 	var tree := get_tree()
 	if tree == null:
 		return null
+	var best: Node = null
+	var best_area := INF
 	for room in tree.get_nodes_in_group("rooms"):
-		if room != null and room.has_method("contains_world_point") and bool(room.call("contains_world_point", point)):
-			return room
-	return null
+		if room == null or not room.has_method("contains_world_point"):
+			continue
+		# Wider margin than gameplay (8px) so doorway / offset placements still match.
+		if not bool(room.call("contains_world_point", point, 48.0)):
+			continue
+		var area := INF
+		if room.has_method("get_camera_bounds"):
+			var bounds: Rect2 = room.call("get_camera_bounds")
+			if bounds.size != Vector2.ZERO:
+				area = absf(bounds.get_area())
+		if area < best_area:
+			best_area = area
+			best = room
+	return best

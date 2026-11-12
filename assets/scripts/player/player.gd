@@ -145,9 +145,9 @@ func _on_vitality_depleted() -> void:
 	_stop_steps()
 	if attack != null and attack.has_method("set_enabled"):
 		attack.set_enabled(false)
-	# Hold hurt pose as a simple death beat, then restart the run.
+	# Brief death beat, then restart the run.
 	play_hurt_animation(facing)
-	await get_tree().create_timer(0.85).timeout
+	await get_tree().create_timer(0.35).timeout
 	get_tree().reload_current_scene()
 
 
@@ -164,6 +164,12 @@ func _on_damaged(amount: int, _current_health: int) -> void:
 		_playing_before_hurt = animated_sprite.is_playing()
 	_hurt_lock = hurt_anim_time
 	play_hurt_animation(facing)
+	_play_hurt_sfx()
+
+
+func _play_hurt_sfx() -> void:
+	if sfx != null and sfx.has_method("play_hurt"):
+		sfx.call("play_hurt")
 
 
 func play_hurt_animation(direction: Vector2) -> void:
