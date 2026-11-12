@@ -4,6 +4,7 @@
 [ext_resource type="Script" uid="uid://bkoec71xnejuk" path="res://assets/scripts/common/switchable.gd" id="2_nkxtl"]
 [ext_resource type="Texture2D" uid="uid://clsh17dljxm24" path="res://assets/scenary/TilesetField.png" id="3_1xvxb"]
 [ext_resource type="Script" uid="uid://ctoj8a51fem1a" path="res://assets/scripts/rooms/door.gd" id="4_og2wd"]
+[ext_resource type="PackedScene" path="res://assets/scenes/props/pickups/pickup_heal.tscn" id="4_u5ixf"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_0b2by"]
 texture = ExtResource("3_1xvxb")
@@ -210,6 +211,9 @@ shape = SubResource("RectangleShape2D_t3rxn")
 [node name="CollisionShape2D9" type="CollisionShape2D" parent="Walls" unique_id=1287819118]
 position = Vector2(165.25, -55)
 shape = SubResource("RectangleShape2D_t3rxn")
+
+[node name="PickupHeal" parent="Walls" unique_id=916276545 instance=ExtResource("4_u5ixf")]
+position = Vector2(-2, 0)
 
 [node name="Door" type="StaticBody2D" parent="." unique_id=879425557]
 position = Vector2(-34, -83)
