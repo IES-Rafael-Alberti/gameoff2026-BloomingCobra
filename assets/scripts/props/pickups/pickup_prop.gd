@@ -37,3 +37,13 @@ func get_pickup_amount() -> int:
 	if definition != null:
 		return definition.amount
 	return 1
+
+
+## Call from collect logic when the player picks this up.
+func play_collect_sfx() -> void:
+	var player := get_tree().get_first_node_in_group("player")
+	if player == null:
+		return
+	var sfx := player.get_node_or_null("SfxPlayer")
+	if sfx != null and sfx.has_method("play_pickup"):
+		sfx.call("play_pickup", get_pickup_type())

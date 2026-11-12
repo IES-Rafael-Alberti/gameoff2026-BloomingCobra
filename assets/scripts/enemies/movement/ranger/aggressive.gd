@@ -88,6 +88,9 @@ func _update_aligned(to_player: Vector2, aligned_horizontal: bool) -> void:
 		_cooldown_left = fire_cooldown
 		enemy.call("set_attacking", true)
 		enemy.call("play_directional_animation", "attacking", axis_dir)
+		var sfx := enemy.get_node_or_null("SfxPlayer")
+		if sfx != null and sfx.has_method("play_attack"):
+			sfx.call("play_attack")
 		_fire(axis_dir)
 	elif axis_distance > attack_range:
 		enemy.call("set_attacking", false)

@@ -10,7 +10,7 @@
 [ext_resource type="Texture2D" uid="uid://dyertdbe1xnty" path="res://assets/sprittesheets/enemy/placeholders/divider/divider1/Sleep-Anim.png" id="5_rcmt5"]
 [ext_resource type="Texture2D" uid="uid://daam03c7e3le5" path="res://assets/sprittesheets/enemy/placeholders/divider/divider1/Walk-Anim.png" id="6_raq0g"]
 [ext_resource type="Script" uid="uid://d248nineciw88" path="res://assets/scripts/enemies/divisible.gd" id="7_div"]
-[ext_resource type="Script" uid="uid://blpk6ae6eemnw" path="res://assets/scripts/common/sfx_player.gd" id="7_sfx"]
+[ext_resource type="Script" uid="uid://blpk6ae6eemnw" path="res://assets/scripts/sfx/divider_sfx.gd" id="7_sfx"]
 [ext_resource type="PackedScene" uid="uid://by51xwqcvt3vq" path="res://assets/scenes/enemies/divider_2.tscn" id="8_div2"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_0y3g1"]

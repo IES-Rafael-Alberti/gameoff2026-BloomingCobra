@@ -4,7 +4,7 @@
 [ext_resource type="Script" uid="uid://c1fbuoperocxx" path="res://assets/scripts/enemies/enemy.gd" id="1_enemy"]
 [ext_resource type="Texture2D" uid="uid://b0ffp4hbifn68" path="res://assets/sprittesheets/enemy/placeholders/enemy2/Attack-Anim.png" id="1_xfvwa"]
 [ext_resource type="Script" uid="uid://bkoec71xnejuk" path="res://assets/scripts/common/switchable.gd" id="2_bp46k"]
-[ext_resource type="Script" path="res://assets/scripts/common/sfx_player.gd" id="2_sfx"]
+[ext_resource type="Script" path="res://assets/scripts/sfx/ranger_sfx.gd" id="2_sfx"]
 [ext_resource type="Texture2D" uid="uid://byiyst8t75q8k" path="res://assets/sprittesheets/enemy/placeholders/enemy2/Idle-Anim.png" id="2_f7rxk"]
 [ext_resource type="Script" uid="uid://rieolv1vcgou" path="res://assets/scripts/enemies/movement/ranger/ranger.gd" id="3_e0lwv"]
 [ext_resource type="Script" path="res://assets/scripts/enemies/movement/ranger/idle.gd" id="3_ranger_idle"]

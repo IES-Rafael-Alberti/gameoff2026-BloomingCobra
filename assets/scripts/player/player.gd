@@ -21,6 +21,7 @@ const IDLE_CONTENT_RECT := Rect2(245, 153, 509, 720)
 @onready var switchable: Node2D = $Switchable
 @onready var damageable: Node2D = $Damageable
 @onready var attack: Node2D = $Attack
+@onready var sfx: Node = get_node_or_null("SfxPlayer")
 
 @export var hurt_anim_time: float = 0.55
 
@@ -229,6 +230,8 @@ func _play_walk_animation(direction: Vector2) -> void:
 		return
 	if animated_sprite.animation != anim or not animated_sprite.is_playing():
 		animated_sprite.play(anim)
+	if sfx != null and sfx.has_method("play_steps"):
+		sfx.call("play_steps", _in_dream)
 	_sync_sprite_visual()
 	_sync_bubble_visible()
 

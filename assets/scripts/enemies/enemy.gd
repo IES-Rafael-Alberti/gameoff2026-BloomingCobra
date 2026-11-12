@@ -52,13 +52,6 @@ func _ready() -> void:
 		_on_mode_changed(switchable.get_mode())
 
 
-## Optional SfxPlayer child: only plays if that cue was added in the Inspector.
-func play_sfx(id: StringName) -> bool:
-	if sfx == null or not sfx.has_method("play"):
-		return false
-	return bool(sfx.call("play", id))
-
-
 func _apply_stats() -> void:
 	if damageable != null:
 		damageable.max_health = maxi(max_health, 1)
@@ -150,7 +143,6 @@ func play_directional_animation(prefix: String, direction: Vector2) -> void:
 		if not _attacking:
 			animated_sprite.play("idle")
 		return
-	var prev_anim := animated_sprite.animation
 	if abs(direction.x) > abs(direction.y):
 		animated_sprite.play("%s_sides" % prefix)
 		animated_sprite.flip_h = direction.x < 0
@@ -160,11 +152,8 @@ func play_directional_animation(prefix: String, direction: Vector2) -> void:
 	else:
 		animated_sprite.play("%s_down" % prefix)
 		animated_sprite.flip_h = false
-	# walk: spam-safe via SfxCue.min_interval. Other prefixes: once when clip changes.
-	if prefix == "walking" or prefix == "walk":
-		play_sfx(&"walk")
-	elif animated_sprite.animation != prev_anim:
-		play_sfx(StringName(prefix))
+	if (prefix == "walking" or prefix == "walk") and sfx != null and sfx.has_method("play_walking"):
+		sfx.call("play_walking")
 
 
 func get_player() -> Node2D:
@@ -247,7 +236,6 @@ func play_hurt_animation(direction: Vector2) -> void:
 	if frames != null and frames.has_animation(anim_name):
 		frames.set_animation_loop(anim_name, false)
 		animated_sprite.play(anim_name)
-	play_sfx(&"hurt")
 
 
 func _cardinal_from(dir: Vector2) -> Vector2:
@@ -286,6 +274,8 @@ func _on_mode_changed(index: int) -> void:
 	if _movement and _movement.has_method("set_active"):
 		_movement.set_active(_active)
 	_set_hitboxes_enabled(_active)
+	if sfx != null and sfx.has_method("set_active"):
+		sfx.call("set_active", _active)
 	if not _active:
 		velocity = Vector2.ZERO
 		_attacking = false
@@ -341,6 +331,6 @@ func _configure_area_tree(node: Node) -> void:
 
 
 func _on_died() -> void:
-	if sfx != null and sfx.has_method("play_detached"):
-		sfx.call("play_detached", &"death")
+	if sfx != null and sfx.has_method("stop_standard"):
+		sfx.call("stop_standard")
 	queue_free()

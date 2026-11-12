@@ -4,7 +4,7 @@
 [ext_resource type="Script" uid="uid://bgh2aslom8hdu" path="res://assets/scripts/common/damageable.gd" id="1_gsd7t"]
 [ext_resource type="Script" uid="uid://c1fbuoperocxx" path="res://assets/scripts/enemies/enemy.gd" id="1_enemy"]
 [ext_resource type="Script" uid="uid://bkoec71xnejuk" path="res://assets/scripts/common/switchable.gd" id="2_1ngwm"]
-[ext_resource type="Script" path="res://assets/scripts/common/sfx_player.gd" id="2_sfx"]
+[ext_resource type="Script" path="res://assets/scripts/sfx/elite_sfx.gd" id="2_sfx"]
 [ext_resource type="Script" path="res://assets/scripts/enemies/movement/elite/elite.gd" id="7_elite"]
 [ext_resource type="Script" path="res://assets/scripts/enemies/movement/elite/idle.gd" id="8_idle"]
 [ext_resource type="Script" path="res://assets/scripts/enemies/movement/elite/aggressive.gd" id="9_aggro"]

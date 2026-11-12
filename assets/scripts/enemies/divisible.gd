@@ -43,6 +43,10 @@ func _begin_split() -> void:
 	if _enemy.has_method("clear_hurt_lock"):
 		_enemy.call("clear_hurt_lock")
 
+	var sfx := _enemy.get_node_or_null("SfxPlayer")
+	if sfx != null and sfx.has_method("play_duplication"):
+		sfx.call("play_duplication")
+
 	if play_divide_animation:
 		await _play_divide()
 

@@ -12,12 +12,6 @@ var _active: bool = true
 var _is_caught: bool = false
 
 
-func play_sfx(id: StringName) -> bool:
-	if sfx == null or not sfx.has_method("play"):
-		return false
-	return bool(sfx.call("play", id))
-
-
 func _ready() -> void:
 	add_to_group("cat")
 	# Catchable by proximity; no solid push vs player.
@@ -62,20 +56,19 @@ func play_walk_animation(direction: Vector2) -> void:
 	else:
 		animated_sprite.play("walking_down")
 		animated_sprite.flip_h = false
-	play_sfx(&"walk")
 
 
 func play_gather() -> void:
 	_is_caught = true
 	velocity = Vector2.ZERO
+	if sfx != null and sfx.has_method("play_caught"):
+		sfx.call("play_caught")
 	if animated_sprite.sprite_frames.has_animation("gather"):
 		animated_sprite.sprite_frames.set_animation_loop("gather", false)
 		animated_sprite.play("gather")
 		await animated_sprite.animation_finished
 	caught.emit()
 	# Advantage grant is intentionally deferred beyond this signal.
-	if sfx != null and sfx.has_method("play_detached"):
-		sfx.call("play_detached", &"caught")
 	queue_free()
 
 
@@ -88,6 +81,8 @@ func _on_mode_changed(index: int) -> void:
 	_active = index == 0 and not _is_caught
 	if _movement and _movement.has_method("set_active"):
 		_movement.set_active(_active)
+	if sfx != null and sfx.has_method("set_active"):
+		sfx.call("set_active", _active)
 
 	if not _active:
 		velocity = Vector2.ZERO

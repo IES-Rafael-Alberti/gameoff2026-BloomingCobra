@@ -30,7 +30,17 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func trigger() -> void:
 	print("[Memory] ", memory_text)
+	_play_pickup_sfx()
 	memory_triggered.emit(memory_text)
+
+
+func _play_pickup_sfx() -> void:
+	var player := get_tree().get_first_node_in_group("player")
+	if player == null:
+		return
+	var sfx := player.get_node_or_null("SfxPlayer")
+	if sfx != null and sfx.has_method("play_pickup"):
+		sfx.call("play_pickup", &"memory")
 
 
 func _on_body_entered(body: Node) -> void:

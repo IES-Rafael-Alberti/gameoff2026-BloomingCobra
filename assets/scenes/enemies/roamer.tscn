@@ -7,7 +7,7 @@
 [ext_resource type="Script" uid="uid://bgh2aslom8hdu" path="res://assets/scripts/common/damageable.gd" id="5_hhqxl"]
 [ext_resource type="Script" uid="uid://dy2j0dnedteod" path="res://assets/scripts/enemies/movement/roamer/roamer.gd" id="6_otr5t"]
 [ext_resource type="Script" uid="uid://bkoec71xnejuk" path="res://assets/scripts/common/switchable.gd" id="7_2cfc3"]
-[ext_resource type="Script" path="res://assets/scripts/common/sfx_player.gd" id="8_sfx"]
+[ext_resource type="Script" path="res://assets/scripts/sfx/roamer_sfx.gd" id="8_sfx"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_c7n7d"]
 atlas = ExtResource("2_8dxaa")

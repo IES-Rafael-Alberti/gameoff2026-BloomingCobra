@@ -32,10 +32,19 @@ func physics_update(_delta: float) -> void:
 	if not _active or _enemy == null:
 		return
 
+	var bounced := false
 	for i in _enemy.get_slide_collision_count():
 		var collision: KinematicCollision2D = _enemy.get_slide_collision(i)
-		_direction = _direction.bounce(collision.get_normal()).normalized()
+		var next := _direction.bounce(collision.get_normal()).normalized()
+		if next.distance_squared_to(_direction) > 0.0001:
+			bounced = true
+		_direction = next
 		break
+
+	if bounced:
+		var sfx := _enemy.get_node_or_null("SfxPlayer")
+		if sfx != null and sfx.has_method("play_bounce"):
+			sfx.call("play_bounce")
 
 	_enemy.velocity = _direction * speed
 	_play_float()

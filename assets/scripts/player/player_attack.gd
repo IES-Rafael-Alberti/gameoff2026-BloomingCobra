@@ -28,6 +28,7 @@ var _slash_hitbox: Area2D
 var _thrust_hitbox: Area2D
 var _fx: Sprite2D
 var _charge_bar: Node2D
+var _active_kind: AttackKind = AttackKind.NONE
 
 
 func setup(player: CharacterBody2D) -> void:
@@ -98,9 +99,11 @@ func _cancel_charge() -> void:
 func _perform(kind: AttackKind) -> void:
 	_busy = true
 	_hit_ids.clear()
+	_active_kind = kind
 	var facing := _cardinal_facing()
 
 	_player.call("play_attack_animation", facing)
+	_play_attack_sfx(kind)
 
 	match kind:
 		AttackKind.SLASH:
@@ -115,7 +118,47 @@ func _perform(kind: AttackKind) -> void:
 
 	_disable_hitboxes()
 	_fx.visible = false
+	_active_kind = AttackKind.NONE
 	_busy = false
+
+
+func _player_sfx() -> Node:
+	if _player == null:
+		return null
+	return _player.get_node_or_null("SfxPlayer")
+
+
+func _play_attack_sfx(kind: AttackKind) -> void:
+	var sfx := _player_sfx()
+	if sfx == null:
+		return
+	match kind:
+		AttackKind.SLASH:
+			if sfx.has_method("play_slash"):
+				sfx.call("play_slash")
+		AttackKind.THRUST:
+			if sfx.has_method("play_stab"):
+				sfx.call("play_stab")
+		AttackKind.PROJECTILE:
+			if sfx.has_method("play_projectile"):
+				sfx.call("play_projectile")
+		_:
+			pass
+
+
+func _play_hit_sfx() -> void:
+	var sfx := _player_sfx()
+	if sfx == null:
+		return
+	match _active_kind:
+		AttackKind.SLASH:
+			if sfx.has_method("play_slash_hit"):
+				sfx.call("play_slash_hit")
+		AttackKind.THRUST:
+			if sfx.has_method("play_stab_hit"):
+				sfx.call("play_stab_hit")
+		_:
+			pass
 
 
 func _activate_melee(
@@ -267,6 +310,7 @@ func _try_hit_target(target: Node2D, hitbox: Area2D) -> void:
 		return
 	_hit_ids[id] = true
 	var amount := int(hitbox.get_meta("damage", slash_damage))
+	_play_hit_sfx()
 	_apply_hit(target, amount)
 
 

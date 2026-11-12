@@ -84,6 +84,7 @@ func _handle_hit(body: Object) -> void:
 			queue_free()
 			return
 		_hit[id] = true
+		_play_hit_sfx()
 		var origin := global_position
 		if node.has_method("try_receive_hit"):
 			node.call("try_receive_hit", damage, origin)
@@ -92,3 +93,12 @@ func _handle_hit(body: Object) -> void:
 			if dmg != null and dmg.has_method("take_damage"):
 				dmg.take_damage(damage)
 	queue_free()
+
+
+func _play_hit_sfx() -> void:
+	var player := get_tree().get_first_node_in_group("player")
+	if player == null:
+		return
+	var sfx := player.get_node_or_null("SfxPlayer")
+	if sfx != null and sfx.has_method("play_projectile_hit"):
+		sfx.call("play_projectile_hit")

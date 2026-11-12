@@ -5,6 +5,7 @@
 [ext_resource type="Script" uid="uid://0irle418cwat" path="res://assets/scripts/hud/charge_bar.gd" id="1_charge"]
 [ext_resource type="Script" uid="uid://bgh2aslom8hdu" path="res://assets/scripts/common/damageable.gd" id="1_damage"]
 [ext_resource type="Script" uid="uid://bkoec71xnejuk" path="res://assets/scripts/common/switchable.gd" id="1_switch"]
+[ext_resource type="Script" path="res://assets/scripts/sfx/player_sfx.gd" id="1_sfx"]
 [ext_resource type="Texture2D" uid="uid://c1ppi4f3mwnwe" path="res://assets/sprittesheets/player/placeholders/attack.png" id="2_0gfpk"]
 [ext_resource type="Texture2D" uid="uid://d1ie6f5p8dswh" path="res://assets/sprittesheets/player/placeholders/charging.png" id="3_0hrit"]
 [ext_resource type="Texture2D" uid="uid://bic3jfp0es6k" path="res://assets/sprittesheets/player/placeholders/hurt.png" id="4_o5c66"]
@@ -983,7 +984,7 @@ animations = [{
 }]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_gfef2"]
-size = Vector2(9, 10)
+size = Vector2(11, 10)
 
 [node name="Player" type="CharacterBody2D" unique_id=268950689]
 script = ExtResource("1_8sknh")
@@ -993,7 +994,7 @@ sprite_frames = SubResource("SpriteFrames_bhbtl")
 animation = &"idle_bubble_down"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1234165900]
-position = Vector2(-0.5, -2)
+position = Vector2(-1.5, -2)
 shape = SubResource("RectangleShape2D_gfef2")
 
 [node name="Bubble" type="Node2D" parent="." unique_id=1844617268]
@@ -1005,6 +1006,9 @@ texture = ExtResource("6_0gfpk")
 
 [node name="Switchable" type="Node2D" parent="." unique_id=1509705244]
 script = ExtResource("1_switch")
+
+[node name="SfxPlayer" type="Node2D" parent="."]
+script = ExtResource("1_sfx")
 
 [node name="Damageable" type="Node2D" parent="." unique_id=651315614]
 script = ExtResource("1_damage")

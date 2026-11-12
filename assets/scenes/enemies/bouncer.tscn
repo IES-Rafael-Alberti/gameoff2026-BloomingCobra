@@ -6,7 +6,7 @@
 [ext_resource type="Texture2D" uid="uid://cseire07wg86u" path="res://assets/sprittesheets/enemy/placeholders/enemy4/Sleep-Anim.png" id="3_gqm0i"]
 [ext_resource type="Script" uid="uid://bkoec71xnejuk" path="res://assets/scripts/common/switchable.gd" id="3_h74ec"]
 [ext_resource type="Script" uid="uid://hyer0s0jqcmx" path="res://assets/scripts/enemies/movement/bouncer/bouncer.gd" id="4_gqm0i"]
-[ext_resource type="Script" path="res://assets/scripts/common/sfx_player.gd" id="5_sfx"]
+[ext_resource type="Script" path="res://assets/scripts/sfx/bouncer_sfx.gd" id="5_sfx"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_akui1"]
 atlas = ExtResource("2_h74ec")
