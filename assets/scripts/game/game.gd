@@ -27,3 +27,14 @@ func _unhandled_input(event: InputEvent) -> void:
 			var on: bool = _hitbox_debug.toggle()
 			print("[Debug] Hitboxes visible: ", on)
 		get_viewport().set_input_as_handled()
+		return
+
+	if event.is_action_pressed("debug_god_mode") and not event.is_echo():
+		var player := get_tree().get_first_node_in_group("player")
+		var vit: Node = null
+		if player != null:
+			vit = player.get_node_or_null("Vitality")
+		if vit != null and vit.has_method("toggle_invulnerable"):
+			var on: bool = bool(vit.call("toggle_invulnerable"))
+			print("[Debug] God mode (no vitality loss): ", on)
+		get_viewport().set_input_as_handled()

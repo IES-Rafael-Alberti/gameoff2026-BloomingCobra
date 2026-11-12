@@ -17,6 +17,8 @@ signal depleted
 var current: float = 100.0
 
 var _dead: bool = false
+## Debug: ignore drain and hit damage.
+var _invulnerable: bool = false
 
 
 func _ready() -> void:
@@ -31,7 +33,7 @@ func _bootstrap() -> void:
 
 
 func tick(delta: float, in_vigil: bool) -> void:
-	if _dead:
+	if _dead or _invulnerable:
 		return
 	if not in_vigil or current <= 0.0 or drain_per_second <= 0.0:
 		return
@@ -40,9 +42,22 @@ func tick(delta: float, in_vigil: bool) -> void:
 
 ## Enemy / spike / hazard hits routed from Damageable.damaged.
 func apply_hit_damage(amount: int) -> float:
-	if _dead or amount <= 0:
+	if _dead or _invulnerable or amount <= 0:
 		return 0.0
 	return _lose(float(amount) * maxf(vitality_per_damage_point, 0.0))
+
+
+func set_invulnerable(enabled: bool) -> void:
+	_invulnerable = enabled
+
+
+func is_invulnerable() -> bool:
+	return _invulnerable
+
+
+func toggle_invulnerable() -> bool:
+	_invulnerable = not _invulnerable
+	return _invulnerable
 
 
 func heal(amount: float) -> float:
@@ -71,7 +86,7 @@ func is_depleted() -> bool:
 
 
 func _lose(amount: float) -> float:
-	if _dead or amount <= 0.0 or current <= 0.0:
+	if _dead or _invulnerable or amount <= 0.0 or current <= 0.0:
 		return 0.0
 	var before := current
 	current = maxf(current - amount, 0.0)
