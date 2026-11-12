@@ -24,6 +24,17 @@ extends SfxPlayer
 @export var memory_pickup: AudioStream
 @export var item_pickup: AudioStream
 
+var _steps_voice: AudioStreamPlayer
+var _steps_dream: bool = false
+
+
+func _ready() -> void:
+	super._ready()
+	_steps_voice = AudioStreamPlayer.new()
+	_steps_voice.name = "StepsVoice"
+	_steps_voice.bus = String(bus)
+	add_child(_steps_voice)
+
 
 func play_slash() -> void:
 	play_global(slash)
@@ -51,7 +62,22 @@ func play_projectile_hit() -> void:
 
 func play_steps(in_dream: bool) -> void:
 	var stream := steps_vigil if in_dream else steps_nightmare
-	play_global(stream, &"steps", steps_interval)
+	if stream == null or _steps_voice == null:
+		return
+	# Mode flip mid-walk: swap clip immediately.
+	if _steps_dream != in_dream and _steps_voice.playing:
+		_steps_voice.stop()
+	_steps_dream = in_dream
+	if not _interval_ok(&"steps", steps_interval):
+		return
+	_steps_voice.bus = String(bus)
+	_steps_voice.stream = stream
+	_steps_voice.play()
+
+
+func stop_steps() -> void:
+	if _steps_voice != null and _steps_voice.playing:
+		_steps_voice.stop()
 
 
 func play_pickup(pickup_type: StringName) -> void:

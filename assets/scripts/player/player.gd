@@ -89,11 +89,15 @@ func _physics_process(delta: float) -> void:
 		_move_nightmare(direction)
 
 	var attacking: bool = attack != null and attack.has_method("is_busy") and bool(attack.call("is_busy"))
+	var walking := false
 	if _hurt_lock <= 0.0 and not attacking and _knockback.length() <= 5.0:
 		if direction:
+			walking = true
 			_play_walk_animation(direction)
 		elif velocity.length() < 8.0:
 			_play_idle_animation()
+	if not walking:
+		_stop_steps()
 
 	_update_charge_feedback(delta)
 	move_and_slide()
@@ -348,7 +352,13 @@ func _play_walk_animation(direction: Vector2) -> void:
 	_sync_bubble_visible()
 
 
+func _stop_steps() -> void:
+	if sfx != null and sfx.has_method("stop_steps"):
+		sfx.call("stop_steps")
+
+
 func _play_idle_animation() -> void:
+	_stop_steps()
 	var cardinal := _cardinal_from(facing)
 	var prefix := "idle_bubble" if _in_dream else "idle_nightmare"
 	var anim := StringName("%s_%s" % [prefix, _facing_suffix(cardinal)])
