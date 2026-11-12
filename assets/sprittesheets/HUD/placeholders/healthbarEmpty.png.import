@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://brtdf3sfxl5ee"
-path="res://.godot/imported/greenCharge.png-985a70d7718c192c1a220727fdce9fc2.ctex"
+uid="uid://x4jdupqlytig"
+path="res://.godot/imported/healthbarEmpty.png-a81cc795068267ab04c9094148ce5860.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprittesheets/HUD/placeholders/greenCharge.png"
-dest_files=["res://.godot/imported/greenCharge.png-985a70d7718c192c1a220727fdce9fc2.ctex"]
+source_file="res://assets/sprittesheets/HUD/placeholders/healthbarEmpty.png"
+dest_files=["res://.godot/imported/healthbarEmpty.png-a81cc795068267ab04c9094148ce5860.ctex"]
 
 [params]
 

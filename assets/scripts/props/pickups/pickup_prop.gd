@@ -1,12 +1,14 @@
 class_name PickupProp
 extends Area2D
 
-## Stub pickup prop. Collect logic comes later.
+## Collectible prop. Heal pickups restore vigil vitality.
 
 @export var definition: PropPickupDef
 
 @onready var sprite: Sprite2D = $Sprite2D
 @onready var collision_shape: CollisionShape2D = $CollisionShape2D
+
+var _collected: bool = false
 
 
 func _ready() -> void:
@@ -16,6 +18,8 @@ func _ready() -> void:
 	monitoring = true
 	monitorable = false
 	apply_definition()
+	if not body_entered.is_connected(_on_body_entered):
+		body_entered.connect(_on_body_entered)
 
 
 func apply_definition() -> void:
@@ -37,6 +41,29 @@ func get_pickup_amount() -> int:
 	if definition != null:
 		return definition.amount
 	return 1
+
+
+func _on_body_entered(body: Node2D) -> void:
+	if _collected or body == null:
+		return
+	if not body.is_in_group("player"):
+		return
+	_collected = true
+	_apply_pickup(body)
+	play_collect_sfx()
+	queue_free()
+
+
+func _apply_pickup(player: Node) -> void:
+	var kind := get_pickup_type()
+	var amount := float(get_pickup_amount())
+	if kind == &"heal" or kind == &"max_health" or kind == &"maxhealth":
+		if player.has_method("heal_vitality"):
+			player.call("heal_vitality", amount)
+		elif player.has_node("Vitality"):
+			var vit: Node = player.get_node("Vitality")
+			if vit.has_method("heal"):
+				vit.call("heal", amount)
 
 
 ## Call from collect logic when the player picks this up.

@@ -68,8 +68,18 @@ func play_gather() -> void:
 		animated_sprite.play("gather")
 		await animated_sprite.animation_finished
 	caught.emit()
-	# Advantage grant is intentionally deferred beyond this signal.
+	_grant_catch_heal()
 	queue_free()
+
+
+func _grant_catch_heal() -> void:
+	var player := get_player()
+	if player == null:
+		return
+	if player.has_method("heal_vitality_from_cat"):
+		player.call("heal_vitality_from_cat")
+	elif player.has_method("heal_vitality"):
+		player.call("heal_vitality", 40.0)
 
 
 func get_player() -> Node2D:

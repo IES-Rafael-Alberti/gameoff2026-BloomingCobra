@@ -18,10 +18,19 @@
 [ext_resource type="PackedScene" uid="uid://biqe6ous6m14k" path="res://assets/scenes/enemies/roamer.tscn" id="14_kc0sw"]
 [ext_resource type="PackedScene" uid="uid://dsapw6jvuy0uq" path="res://assets/scenes/enemies/divider_1.tscn" id="15_fc420"]
 [ext_resource type="PackedScene" path="res://assets/scenes/HUD/map_overlay.tscn" id="16_map"]
+[ext_resource type="PackedScene" path="res://assets/scenes/HUD/health_bar.tscn" id="17_hp"]
+[ext_resource type="Script" path="res://assets/scripts/sfx/general_sfx.gd" id="18_sfx"]
+[ext_resource type="AudioStream" uid="uid://crbieoj4wi1fq" path="res://assets/audio/general/Shift.wav" id="19_shift"]
 
 [node name="Game" type="Node2D" unique_id=139143478]
 position = Vector2(-130, -76)
 script = ExtResource("1_game")
+
+[node name="SfxGeneral" type="Node2D" parent="."]
+script = ExtResource("18_sfx")
+switch_sfx = ExtResource("19_shift")
+
+[node name="HealthBar" parent="." instance=ExtResource("17_hp")]
 
 [node name="MapOverlay" parent="." unique_id=939454518 instance=ExtResource("16_map")]
 

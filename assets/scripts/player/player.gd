@@ -21,6 +21,7 @@ const IDLE_CONTENT_RECT := Rect2(245, 153, 509, 720)
 @onready var switchable: Node2D = $Switchable
 @onready var damageable: Node2D = $Damageable
 @onready var attack: Node2D = $Attack
+@onready var vitality: Node = get_node_or_null("Vitality")
 @onready var sfx: Node = get_node_or_null("SfxPlayer")
 @onready var _audio_listener: AudioListener2D = get_node_or_null("AudioListener2D")
 
@@ -41,6 +42,7 @@ var _charge_shake: bool = false
 var _charge_flash: float = 0.0
 var _sprite_base_pos: Vector2 = Vector2.ZERO
 var _flash_mat: ShaderMaterial
+var _dead: bool = false
 
 
 func _ready() -> void:
@@ -65,6 +67,8 @@ func _ready() -> void:
 		damageable.invulnerability_time = maxf(hurt_anim_time, 0.55)
 	if damageable.has_signal("damaged"):
 		damageable.damaged.connect(_on_damaged)
+	if vitality != null and vitality.has_signal("depleted"):
+		vitality.depleted.connect(_on_vitality_depleted)
 	if not animated_sprite.animation_finished.is_connected(_on_animation_finished):
 		animated_sprite.animation_finished.connect(_on_animation_finished)
 	_ensure_attack_anims_once()
@@ -73,6 +77,12 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	if _dead:
+		velocity = Vector2.ZERO
+		_stop_steps()
+		move_and_slide()
+		return
+
 	var direction := Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	if direction != Vector2.ZERO:
 		facing = _cardinal_from(direction)
@@ -102,10 +112,52 @@ func _physics_process(delta: float) -> void:
 		_stop_steps()
 
 	_update_charge_feedback(delta)
+	if vitality != null and vitality.has_method("tick"):
+		vitality.call("tick", delta, _in_dream)
 	move_and_slide()
 
 
-func _on_damaged(_amount: int, _current_health: int) -> void:
+func get_vitality() -> Node:
+	return vitality
+
+
+func heal_vitality(amount: float) -> float:
+	if _dead or vitality == null or not vitality.has_method("heal"):
+		return 0.0
+	return float(vitality.call("heal", amount))
+
+
+func heal_vitality_from_cat() -> float:
+	if _dead:
+		return 0.0
+	if vitality != null and vitality.has_method("heal_from_cat"):
+		return float(vitality.call("heal_from_cat"))
+	return heal_vitality(40.0)
+
+
+func _on_vitality_depleted() -> void:
+	if _dead:
+		return
+	_dead = true
+	velocity = Vector2.ZERO
+	_knockback = Vector2.ZERO
+	_clear_charge_feedback()
+	_stop_steps()
+	if attack != null and attack.has_method("set_enabled"):
+		attack.set_enabled(false)
+	# Hold hurt pose as a simple death beat, then restart the run.
+	play_hurt_animation(facing)
+	await get_tree().create_timer(0.85).timeout
+	get_tree().reload_current_scene()
+
+
+func _on_damaged(amount: int, _current_health: int) -> void:
+	if _dead:
+		return
+	if vitality != null and vitality.has_method("apply_hit_damage"):
+		vitality.call("apply_hit_damage", amount)
+	if _dead:
+		return
 	if _hurt_lock <= 0.0:
 		_anim_before_hurt = animated_sprite.animation
 		_flip_before_hurt = animated_sprite.flip_h

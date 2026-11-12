@@ -2,6 +2,8 @@ extends Node2D
 
 var _hitbox_debug: Node2D
 
+@onready var sfx_general: Node = get_node_or_null("SfxGeneral")
+
 
 func _ready() -> void:
 	_hitbox_debug = Node2D.new()
@@ -12,6 +14,8 @@ func _ready() -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("switch") and not event.is_echo():
+		if sfx_general != null and sfx_general.has_method("play_switch"):
+			sfx_general.call("play_switch")
 		for node in get_tree().get_nodes_in_group("switchable"):
 			if node.has_method("toggle"):
 				node.toggle()

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bwo84ss4d5b0y"
-path="res://.godot/imported/halfCharge.png-e1e2a50c2461998a370022ce2213b015.ctex"
+uid="uid://0iwkpoumtkuu"
+path="res://.godot/imported/HealthbarFull.png-ed10fd7eeb6180df08f7b977cdec96b6.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprittesheets/HUD/placeholders/halfCharge.png"
-dest_files=["res://.godot/imported/halfCharge.png-e1e2a50c2461998a370022ce2213b015.ctex"]
+source_file="res://assets/sprittesheets/HUD/placeholders/HealthbarFull.png"
+dest_files=["res://.godot/imported/HealthbarFull.png-ed10fd7eeb6180df08f7b977cdec96b6.ctex"]
 
 [params]
 
