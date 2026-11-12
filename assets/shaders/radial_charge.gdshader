@@ -1,7 +1,7 @@
 shader_type canvas_item;
 
-## Progressive green reveal over transparent empty.
-## Starts at top center, fills counterclockwise.
+// Progressive green reveal over transparent empty.
+// Starts at top center, fills counterclockwise.
 uniform float progress : hint_range(0.0, 1.0) = 0.0;
 
 void fragment() {

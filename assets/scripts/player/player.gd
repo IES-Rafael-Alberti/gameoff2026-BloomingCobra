@@ -24,6 +24,8 @@ const IDLE_CONTENT_RECT := Rect2(245, 153, 509, 720)
 @onready var sfx: Node = get_node_or_null("SfxPlayer")
 
 @export var hurt_anim_time: float = 0.55
+@export var charge_shake_amplitude: float = 1.2
+@export var charge_ready_flash_time: float = 0.28
 
 ## Last non-zero move facing used by attacks.
 var facing: Vector2 = Vector2.DOWN
@@ -33,6 +35,11 @@ var _hurt_lock: float = 0.0
 var _anim_before_hurt: StringName = &""
 var _flip_before_hurt: bool = false
 var _playing_before_hurt: bool = false
+var _charging_attack: bool = false
+var _charge_shake: bool = false
+var _charge_flash: float = 0.0
+var _sprite_base_pos: Vector2 = Vector2.ZERO
+var _flash_mat: ShaderMaterial
 
 
 func _ready() -> void:
@@ -43,6 +50,8 @@ func _ready() -> void:
 	# Does NOT collide with spikes_enemy — player can step on spikes for damage.
 	collision_layer = 1 << 1
 	collision_mask = (1 << 0) | (1 << 2) | (1 << 4)
+	_sprite_base_pos = animated_sprite.position
+	_setup_white_flash_material()
 	if switchable.has_signal("mode_changed"):
 		switchable.mode_changed.connect(_on_mode_changed)
 		_on_mode_changed(switchable.get_mode())
@@ -56,6 +65,7 @@ func _ready() -> void:
 		damageable.damaged.connect(_on_damaged)
 	if not animated_sprite.animation_finished.is_connected(_on_animation_finished):
 		animated_sprite.animation_finished.connect(_on_animation_finished)
+	_ensure_attack_anims_once()
 	_ensure_hurt_anims_once()
 	_sync_sprite_visual()
 
@@ -85,6 +95,7 @@ func _physics_process(delta: float) -> void:
 		elif velocity.length() < 8.0:
 			_play_idle_animation()
 
+	_update_charge_feedback(delta)
 	move_and_slide()
 
 
@@ -98,16 +109,10 @@ func _on_damaged(_amount: int, _current_health: int) -> void:
 
 
 func play_hurt_animation(direction: Vector2) -> void:
+	_clear_charge_feedback()
 	var dir := direction if direction != Vector2.ZERO else Vector2.DOWN
-	var anim_name := &"hurt_down"
-	if absf(dir.x) > absf(dir.y):
-		anim_name = &"hurt_sides"
-		animated_sprite.flip_h = dir.x < 0.0
-	elif dir.y < 0.0:
-		anim_name = &"hurt_up"
-		animated_sprite.flip_h = false
-	else:
-		animated_sprite.flip_h = false
+	var anim_name := StringName("hurt_%s" % _facing_suffix(_cardinal_from(dir)))
+	animated_sprite.flip_h = false
 
 	var frames := animated_sprite.sprite_frames
 	if frames != null and frames.has_animation(anim_name):
@@ -149,7 +154,16 @@ func _ensure_hurt_anims_once() -> void:
 	var frames := animated_sprite.sprite_frames
 	if frames == null:
 		return
-	for anim_name in [&"hurt_down", &"hurt_sides", &"hurt_up"]:
+	for anim_name in [&"hurt_down", &"hurt_left", &"hurt_right", &"hurt_up"]:
+		if frames.has_animation(anim_name):
+			frames.set_animation_loop(anim_name, false)
+
+
+func _ensure_attack_anims_once() -> void:
+	var frames := animated_sprite.sprite_frames
+	if frames == null:
+		return
+	for anim_name in [&"attack_down", &"attack_left", &"attack_right", &"attack_up"]:
 		if frames.has_animation(anim_name):
 			frames.set_animation_loop(anim_name, false)
 
@@ -160,18 +174,113 @@ func apply_knockback(direction: Vector2, force: float) -> void:
 	_knockback = direction.normalized() * force
 
 
+## Hold frame 0 of attack_* while charging starts.
+func begin_attack_charge(direction: Vector2) -> void:
+	_charging_attack = true
+	_charge_shake = false
+	_set_attack_pose(direction, 0)
+
+
+## Frames 0-1 = charge. Frame 1 vibrates until release.
+func update_attack_charge(ratio: float, half: float = 0.5) -> void:
+	if not _charging_attack:
+		return
+	var frame := 1 if ratio >= half else 0
+	_charge_shake = frame >= 1
+	var anim := _attack_anim_name(_cardinal_from(facing))
+	if animated_sprite.animation != anim:
+		_set_attack_pose(facing, frame)
+	elif animated_sprite.frame != frame:
+		animated_sprite.frame = frame
+		animated_sprite.pause()
+
+
+func on_attack_charge_ready() -> void:
+	_charge_flash = charge_ready_flash_time
+	_set_white_flash(1.0)
+	# Extra punch: engine modulate stacks after the shader COLOR.
+	animated_sprite.modulate = Color(1.8, 1.8, 1.8, 1.0)
+
+
+func play_attack_release(direction: Vector2) -> void:
+	_charging_attack = false
+	_charge_shake = false
+	_set_attack_pose(direction, 2)
+
+
+func cancel_attack_charge() -> void:
+	_clear_charge_feedback()
+
+
 func play_attack_animation(direction: Vector2) -> void:
-	if abs(direction.x) > abs(direction.y):
-		animated_sprite.play("attack_sides")
-		animated_sprite.flip_h = direction.x < 0
-	elif direction.y < 0:
-		animated_sprite.play("attack_up")
-		animated_sprite.flip_h = false
-	else:
-		animated_sprite.play("attack_down")
-		animated_sprite.flip_h = false
+	play_attack_release(direction)
+
+
+func _setup_white_flash_material() -> void:
+	var shader := load("res://assets/shaders/white_flash.gdshader") as Shader
+	if shader == null:
+		return
+	_flash_mat = ShaderMaterial.new()
+	_flash_mat.shader = shader
+	_flash_mat.set_shader_parameter("flash", 0.0)
+	animated_sprite.material = _flash_mat
+
+
+func _set_white_flash(amount: float) -> void:
+	if _flash_mat == null:
+		return
+	_flash_mat.set_shader_parameter("flash", clampf(amount, 0.0, 1.0))
+
+
+func _set_attack_pose(direction: Vector2, frame: int) -> void:
+	var anim := _attack_anim_name(_cardinal_from(direction))
+	var frames := animated_sprite.sprite_frames
+	if frames == null or not frames.has_animation(anim):
+		return
+	frames.set_animation_loop(anim, false)
+	animated_sprite.flip_h = false
+	animated_sprite.animation = anim
+	var max_frame := maxi(frames.get_frame_count(anim) - 1, 0)
+	var clamped := clampi(frame, 0, max_frame)
+	# Hold the chosen frame (charge wind-up or strike release).
+	animated_sprite.set_frame_and_progress(clamped, 0.0)
+	animated_sprite.pause()
 	_sync_sprite_visual()
 	_sync_bubble_visible()
+
+
+func _attack_anim_name(cardinal: Vector2) -> StringName:
+	return StringName("attack_%s" % _facing_suffix(cardinal))
+
+
+func _update_charge_feedback(delta: float) -> void:
+	if _charge_flash > 0.0:
+		_charge_flash = maxf(_charge_flash - delta, 0.0)
+		var t := _charge_flash / maxf(charge_ready_flash_time, 0.01)
+		_set_white_flash(t)
+		animated_sprite.modulate = Color(1.0, 1.0, 1.0, 1.0).lerp(Color(1.8, 1.8, 1.8, 1.0), t)
+	else:
+		_set_white_flash(0.0)
+		if animated_sprite.modulate != Color.WHITE:
+			animated_sprite.modulate = Color.WHITE
+
+	if _charge_shake:
+		var shake := Vector2(
+			randf_range(-charge_shake_amplitude, charge_shake_amplitude),
+			randf_range(-charge_shake_amplitude, charge_shake_amplitude) * 0.5
+		)
+		animated_sprite.position = _sprite_base_pos + shake
+	elif animated_sprite.position != _sprite_base_pos:
+		animated_sprite.position = _sprite_base_pos
+
+
+func _clear_charge_feedback() -> void:
+	_charging_attack = false
+	_charge_shake = false
+	_charge_flash = 0.0
+	_set_white_flash(0.0)
+	animated_sprite.modulate = Color.WHITE
+	animated_sprite.position = _sprite_base_pos
 
 
 func _move_nightmare(direction: Vector2) -> void:
@@ -213,21 +322,24 @@ func _facing_suffix(cardinal: Vector2) -> StringName:
 	return &"up" if cardinal.y < 0.0 else &"down"
 
 
-## Bubble overlay only while walking in dream; idle_bubble already includes it.
+## Placeholder Bubble node is unused: idle_bubble / walking_bubble include it.
 func _sync_bubble_visible() -> void:
 	if bubble == null:
 		return
-	var anim := str(animated_sprite.animation) if animated_sprite else ""
-	bubble.visible = _in_dream and anim.begins_with("walking")
+	bubble.visible = false
 
 
 func _play_walk_animation(direction: Vector2) -> void:
 	var cardinal := _cardinal_from(direction)
-	var anim := StringName("walking_%s" % _facing_suffix(cardinal))
+	var prefix := "walking_bubble" if _in_dream else "walking"
+	var anim := StringName("%s_%s" % [prefix, _facing_suffix(cardinal)])
 	animated_sprite.flip_h = false
 	var frames := animated_sprite.sprite_frames
 	if frames == null or not frames.has_animation(anim):
-		return
+		# Fallback if bubble walk clips are missing.
+		anim = StringName("walking_%s" % _facing_suffix(cardinal))
+		if frames == null or not frames.has_animation(anim):
+			return
 	if animated_sprite.animation != anim or not animated_sprite.is_playing():
 		animated_sprite.play(anim)
 	if sfx != null and sfx.has_method("play_steps"):
@@ -251,13 +363,19 @@ func _play_idle_animation() -> void:
 	_sync_bubble_visible()
 
 
-## Idle/walk definitivo sheets are HD (992px); attack/hurt stay pixel-sized.
-## Scale HD clips down to match the old walk on-screen size.
+## Definitivo sheets (idle/walk/attack/hurt) are HD 992px cells.
+## Scale them down to match the old walk on-screen size.
 func _sync_sprite_visual() -> void:
 	if animated_sprite == null:
 		return
 	var anim := str(animated_sprite.animation)
-	if anim.begins_with("idle") or anim.begins_with("walking"):
+	var use_hd := (
+		anim.begins_with("idle")
+		or anim.begins_with("walking")
+		or anim.begins_with("attack")
+		or anim.begins_with("hurt")
+	)
+	if use_hd:
 		var target_h := WALK_CONTENT_RECT.size.y * PIXEL_SPRITE_SCALE
 		var s := target_h / IDLE_CONTENT_RECT.size.y
 		animated_sprite.scale = Vector2(s, s)

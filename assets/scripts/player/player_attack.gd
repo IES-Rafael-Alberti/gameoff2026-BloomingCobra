@@ -1,6 +1,8 @@
 extends Node2D
 
 ## Nightmare-only attacks: slash (tap), thrust (half charge), projectile (full).
+## Character attack sheet is charge+release (frames 0-1 charge, frame 2 strike).
+## Attack FX prefer multi-frame sheets (Array[Texture2D] / auto-sliced sheet).
 
 enum AttackKind { NONE, SLASH, THRUST, PROJECTILE }
 
@@ -13,8 +15,39 @@ enum AttackKind { NONE, SLASH, THRUST, PROJECTILE }
 @export var thrust_active_time: float = 0.14
 @export var attack_recover_time: float = 0.22
 @export var projectile_speed: float = 160.0
+@export var fx_fps: float = 14.0
+@export var fx_scale: float = 0.035
+## Art offsets: sheets face up; CW rotation aligns with facing.angle() (+X).
+@export var slash_fx_angle_offset: float = deg_to_rad(100.0) # 90° + 10° CW
+@export var thrust_fx_angle_offset: float = PI * 0.25
+@export var slash_fx_distance: float = 10.0
+@export var thrust_fx_distance: float = 18.0
+@export var slash_fx_scale_mul: float = 1.05
+@export var thrust_fx_scale_mul: float = 1.0
+
+@export_group("Slash FX")
+## Preferred: ordered frames from a spritesheet (AtlasTexture / cropped frames).
+@export var slash_frames: Array[Texture2D] = []
+## Optional auto-slice: horizontal/grid sheet when slash_frames is empty.
+@export var slash_sheet: Texture2D
+@export var slash_frame_size: Vector2i = Vector2i(992, 992)
+@export var slash_frame_indices: PackedInt32Array = PackedInt32Array()
+## Legacy single-icon fallback.
 @export var slash_texture: Texture2D
+
+@export_group("Thrust FX")
+@export var thrust_frames: Array[Texture2D] = []
+@export var thrust_sheet: Texture2D
+@export var thrust_frame_size: Vector2i = Vector2i(992, 992)
+@export var thrust_frame_indices: PackedInt32Array = PackedInt32Array()
 @export var thrust_texture: Texture2D
+
+@export_group("Projectile FX")
+## Frames 0..n-2 loop while flying; last frame plays on impact.
+@export var projectile_frames: Array[Texture2D] = []
+@export var projectile_sheet: Texture2D
+@export var projectile_frame_size: Vector2i = Vector2i(992, 992)
+@export var projectile_frame_indices: PackedInt32Array = PackedInt32Array()
 @export var projectile_texture: Texture2D
 
 var _player: CharacterBody2D
@@ -23,19 +56,23 @@ var _charge: float = 0.0
 var _busy: bool = false
 var _enabled: bool = true
 var _hit_ids: Dictionary = {}
+var _charge_ready_flashed: bool = false
 
 var _slash_hitbox: Area2D
 var _thrust_hitbox: Area2D
-var _fx: Sprite2D
-var _charge_bar: Node2D
+var _fx: AnimatedSprite2D
 var _active_kind: AttackKind = AttackKind.NONE
+
+var _slash_sf: SpriteFrames
+var _thrust_sf: SpriteFrames
+var _projectile_sf: SpriteFrames
 
 
 func setup(player: CharacterBody2D) -> void:
 	_player = player
+	_build_frame_resources()
 	_build_hitboxes()
 	_build_fx()
-	_charge_bar = player.get_node_or_null("ChargeBar")
 
 
 func set_enabled(enabled: bool) -> void:
@@ -45,7 +82,7 @@ func set_enabled(enabled: bool) -> void:
 
 
 func is_busy() -> bool:
-	return _busy
+	return _busy or _charging
 
 
 func _physics_process(delta: float) -> void:
@@ -62,22 +99,26 @@ func _physics_process(delta: float) -> void:
 	if Input.is_action_just_pressed("attack"):
 		_charging = true
 		_charge = 0.0
-		if _charge_bar != null and _charge_bar.has_method("show_charge"):
-			_charge_bar.show_charge(0.0)
+		_charge_ready_flashed = false
+		if _player.has_method("begin_attack_charge"):
+			_player.call("begin_attack_charge", _cardinal_facing())
 
 	if _charging:
 		if Input.is_action_pressed("attack"):
+			var prev := _charge
 			_charge = minf(_charge + delta / maxf(charge_time, 0.01), 1.0)
-			if _charge_bar != null and _charge_bar.has_method("show_charge"):
-				_charge_bar.show_charge(_charge)
+			if _player.has_method("update_attack_charge"):
+				_player.call("update_attack_charge", _charge, half_threshold)
+			if prev < 1.0 and _charge >= 1.0 and not _charge_ready_flashed:
+				_charge_ready_flashed = true
+				if _player.has_method("on_attack_charge_ready"):
+					_player.call("on_attack_charge_ready")
 		if Input.is_action_just_released("attack"):
 			_release_attack()
 
 
 func _release_attack() -> void:
 	_charging = false
-	if _charge_bar != null and _charge_bar.has_method("hide_bar"):
-		_charge_bar.hide_bar()
 
 	var kind := AttackKind.SLASH
 	if _charge >= 1.0:
@@ -92,8 +133,9 @@ func _release_attack() -> void:
 func _cancel_charge() -> void:
 	_charging = false
 	_charge = 0.0
-	if _charge_bar != null and _charge_bar.has_method("hide_bar"):
-		_charge_bar.hide_bar()
+	_charge_ready_flashed = false
+	if _player != null and _player.has_method("cancel_attack_charge"):
+		_player.call("cancel_attack_charge")
 
 
 func _perform(kind: AttackKind) -> void:
@@ -102,14 +144,37 @@ func _perform(kind: AttackKind) -> void:
 	_active_kind = kind
 	var facing := _cardinal_facing()
 
-	_player.call("play_attack_animation", facing)
+	if _player.has_method("play_attack_release"):
+		_player.call("play_attack_release", facing)
+	else:
+		_player.call("play_attack_animation", facing)
 	_play_attack_sfx(kind)
 
 	match kind:
 		AttackKind.SLASH:
-			await _activate_melee(_slash_hitbox, facing, slash_damage, slash_active_time, slash_texture, 0.85)
+			await _activate_melee(
+				_slash_hitbox,
+				facing,
+				slash_damage,
+				slash_active_time,
+				_slash_sf,
+				slash_texture,
+				slash_fx_scale_mul,
+				slash_fx_distance,
+				slash_fx_angle_offset
+			)
 		AttackKind.THRUST:
-			await _activate_melee(_thrust_hitbox, facing, thrust_damage, thrust_active_time, thrust_texture, 1.0)
+			await _activate_melee(
+				_thrust_hitbox,
+				facing,
+				thrust_damage,
+				thrust_active_time,
+				_thrust_sf,
+				thrust_texture,
+				thrust_fx_scale_mul,
+				thrust_fx_distance,
+				thrust_fx_angle_offset
+			)
 		AttackKind.PROJECTILE:
 			_spawn_projectile(facing)
 			await get_tree().create_timer(attack_recover_time).timeout
@@ -118,6 +183,7 @@ func _perform(kind: AttackKind) -> void:
 
 	_disable_hitboxes()
 	_fx.visible = false
+	_fx.stop()
 	_active_kind = AttackKind.NONE
 	_busy = false
 
@@ -166,21 +232,21 @@ func _activate_melee(
 	facing: Vector2,
 	damage: int,
 	active_time: float,
-	tex: Texture2D,
-	fx_scale: float
+	frames: SpriteFrames,
+	fallback: Texture2D,
+	scale_mul: float,
+	fx_distance: float,
+	fx_angle_offset: float
 ) -> void:
 	_disable_hitboxes()
 	hitbox.rotation = facing.angle()
+	# Push thrust hitbox a bit farther with the visual.
+	hitbox.position = facing * maxf(fx_distance - 10.0, 0.0)
 	hitbox.monitoring = true
 	hitbox.set_meta("damage", damage)
 
-	_fx.texture = tex
-	_fx.rotation = facing.angle()
-	_fx.position = facing * 10.0
-	_fx.scale = Vector2(fx_scale, fx_scale)
-	_fx.visible = true
+	_show_fx(frames, fallback, facing, fx_distance, scale_mul, fx_angle_offset)
 
-	# Signals only fire on enter; sweep bodies/areas every physics frame while active.
 	var elapsed := 0.0
 	while elapsed < active_time and hitbox.monitoring:
 		await get_tree().physics_frame
@@ -188,26 +254,61 @@ func _activate_melee(
 		_sweep_hitbox(hitbox)
 
 	hitbox.monitoring = false
+	hitbox.position = Vector2.ZERO
 	var rest := maxf(attack_recover_time - active_time, 0.0)
 	if rest > 0.0:
 		await get_tree().create_timer(rest).timeout
 
 
-func _sweep_hitbox(hitbox: Area2D) -> void:
-	for body in hitbox.get_overlapping_bodies():
-		if body is Node2D:
-			_on_hitbox_body_entered(body as Node2D, hitbox)
-	for area in hitbox.get_overlapping_areas():
-		if area is Area2D:
-			_on_hitbox_area_entered(area as Area2D, hitbox)
+func _show_fx(
+	frames: SpriteFrames,
+	fallback: Texture2D,
+	facing: Vector2,
+	distance: float,
+	scale_mul: float,
+	angle_offset: float = 0.0
+) -> void:
+	_fx.rotation = facing.angle() + angle_offset
+	_fx.position = facing * distance
+	_fx.scale = Vector2(fx_scale * scale_mul, fx_scale * scale_mul)
+	_fx.flip_h = false
+	_fx.flip_v = false
+	_fx.visible = true
+
+	if frames != null and frames.has_animation(&"fx") and frames.get_frame_count(&"fx") > 0:
+		_fx.sprite_frames = frames
+		_fx.play(&"fx")
+		return
+
+	# Legacy single texture: wrap into a 1-frame SpriteFrames.
+	if fallback != null:
+		var one := SpriteFrames.new()
+		one.add_animation(&"fx")
+		one.set_animation_loop(&"fx", false)
+		one.set_animation_speed(&"fx", fx_fps)
+		one.add_frame(&"fx", fallback)
+		_fx.sprite_frames = one
+		_fx.play(&"fx")
+		return
+
+	_fx.visible = false
 
 
 func _spawn_projectile(facing: Vector2) -> void:
 	var bolt := Area2D.new()
 	bolt.set_script(load("res://assets/scripts/player/player_projectile.gd"))
-	var sprite := Sprite2D.new()
-	sprite.texture = projectile_texture
+
+	var sprite := AnimatedSprite2D.new()
+	sprite.name = "Sprite"
+	sprite.scale = Vector2(fx_scale, fx_scale)
+	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	sprite.centered = true
+	if _projectile_sf != null:
+		sprite.sprite_frames = _projectile_sf
+	elif projectile_texture != null:
+		sprite.sprite_frames = _make_projectile_sprite_frames([projectile_texture])
 	bolt.add_child(sprite)
+
 	var shape := CollisionShape2D.new()
 	var circle := CircleShape2D.new()
 	circle.radius = 4.0
@@ -224,16 +325,107 @@ func _spawn_projectile(facing: Vector2) -> void:
 	if bolt.has_method("launch"):
 		bolt.call("launch", facing, projectile_speed)
 
-	_fx.texture = projectile_texture
-	_fx.rotation = facing.angle()
-	_fx.position = facing * 8.0
-	_fx.visible = true
+
+func _build_frame_resources() -> void:
+	_slash_sf = _make_frames(slash_frames, slash_sheet, slash_frame_size, slash_frame_indices, slash_texture)
+	_thrust_sf = _make_frames(thrust_frames, thrust_sheet, thrust_frame_size, thrust_frame_indices, thrust_texture)
+	_projectile_sf = _make_projectile_sprite_frames(
+		_collect_textures(projectile_frames, projectile_sheet, projectile_frame_size, projectile_frame_indices, projectile_texture)
+	)
+
+
+func _collect_textures(
+	explicit: Array[Texture2D],
+	sheet: Texture2D,
+	frame_size: Vector2i,
+	indices: PackedInt32Array,
+	fallback: Texture2D
+) -> Array[Texture2D]:
+	var textures: Array[Texture2D] = []
+	if explicit != null and not explicit.is_empty():
+		for tex in explicit:
+			if tex != null:
+				textures.append(tex)
+	elif sheet != null and frame_size.x > 0 and frame_size.y > 0:
+		textures = _slice_sheet(sheet, frame_size, indices)
+	elif fallback != null:
+		textures.append(fallback)
+	return textures
+
+
+func _make_frames(
+	explicit: Array[Texture2D],
+	sheet: Texture2D,
+	frame_size: Vector2i,
+	indices: PackedInt32Array,
+	fallback: Texture2D,
+	loop: bool = false
+) -> SpriteFrames:
+	var textures := _collect_textures(explicit, sheet, frame_size, indices, fallback)
+	if textures.is_empty():
+		return null
+
+	var frames := SpriteFrames.new()
+	frames.add_animation(&"fx")
+	frames.set_animation_loop(&"fx", loop)
+	frames.set_animation_speed(&"fx", fx_fps)
+	for tex in textures:
+		frames.add_frame(&"fx", tex)
+	return frames
+
+
+## fly = all but last (loop), impact = last frame. With 1 texture, fly+impact share it.
+func _make_projectile_sprite_frames(textures: Array[Texture2D]) -> SpriteFrames:
+	if textures.is_empty():
+		return null
+
+	var frames := SpriteFrames.new()
+	frames.add_animation(&"fly")
+	frames.set_animation_loop(&"fly", true)
+	frames.set_animation_speed(&"fly", fx_fps)
+	frames.add_animation(&"impact")
+	frames.set_animation_loop(&"impact", false)
+	frames.set_animation_speed(&"impact", fx_fps)
+
+	if textures.size() == 1:
+		frames.add_frame(&"fly", textures[0])
+		frames.add_frame(&"impact", textures[0])
+		return frames
+
+	for i in range(textures.size() - 1):
+		frames.add_frame(&"fly", textures[i])
+	frames.add_frame(&"impact", textures[textures.size() - 1])
+	return frames
+
+
+func _slice_sheet(sheet: Texture2D, frame_size: Vector2i, indices: PackedInt32Array) -> Array[Texture2D]:
+	var out: Array[Texture2D] = []
+	var size := sheet.get_size()
+	var cols := maxi(int(size.x) / frame_size.x, 1)
+	var rows := maxi(int(size.y) / frame_size.y, 1)
+	var total := cols * rows
+
+	var order: PackedInt32Array = indices
+	if order.is_empty():
+		order = PackedInt32Array()
+		for i in total:
+			order.append(i)
+
+	for idx in order:
+		if idx < 0 or idx >= total:
+			continue
+		var col := idx % cols
+		var row := idx / cols
+		var atlas := AtlasTexture.new()
+		atlas.atlas = sheet
+		atlas.region = Rect2(col * frame_size.x, row * frame_size.y, frame_size.x, frame_size.y)
+		out.append(atlas)
+	return out
 
 
 func _build_hitboxes() -> void:
 	_slash_hitbox = _make_hitbox("SlashHitbox")
 	var slash_shape := CollisionPolygon2D.new()
-	# Arc / wedge facing +X; rotated toward facing at use time.
 	slash_shape.polygon = PackedVector2Array([
 		Vector2(2, 0),
 		Vector2(14, -16),
@@ -258,7 +450,6 @@ func _make_hitbox(node_name: String) -> Area2D:
 	var area := Area2D.new()
 	area.name = node_name
 	area.collision_layer = 0
-	# enemy bodies + breakable props
 	area.collision_mask = (1 << 2) | (1 << 6)
 	area.monitoring = false
 	area.monitorable = false
@@ -270,10 +461,12 @@ func _make_hitbox(node_name: String) -> Area2D:
 
 
 func _build_fx() -> void:
-	_fx = Sprite2D.new()
+	_fx = AnimatedSprite2D.new()
 	_fx.name = "AttackFX"
 	_fx.visible = false
 	_fx.z_index = 1
+	_fx.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	_fx.centered = true
 	add_child(_fx)
 
 
@@ -282,6 +475,15 @@ func _disable_hitboxes() -> void:
 		_slash_hitbox.monitoring = false
 	if _thrust_hitbox != null:
 		_thrust_hitbox.monitoring = false
+
+
+func _sweep_hitbox(hitbox: Area2D) -> void:
+	for body in hitbox.get_overlapping_bodies():
+		if body is Node2D:
+			_on_hitbox_body_entered(body as Node2D, hitbox)
+	for area in hitbox.get_overlapping_areas():
+		if area is Area2D:
+			_on_hitbox_area_entered(area as Area2D, hitbox)
 
 
 func _on_hitbox_body_entered(body: Node2D, hitbox: Area2D) -> void:
@@ -293,7 +495,6 @@ func _on_hitbox_body_entered(body: Node2D, hitbox: Area2D) -> void:
 func _on_hitbox_area_entered(area: Area2D, hitbox: Area2D) -> void:
 	if area == null:
 		return
-	# Prop hurtboxes: damage the owning prop body.
 	if area.is_in_group("hurtbox"):
 		var owner_body := area.get_parent()
 		if owner_body is Node2D:
