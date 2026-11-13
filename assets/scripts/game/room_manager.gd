@@ -25,6 +25,9 @@ func _physics_process(_delta: float) -> void:
 	_player = _get_player()
 	if _player == null:
 		return
+	# Don't room-hop while the player is mid void-fall animation.
+	if _player.has_method("is_void_falling") and bool(_player.call("is_void_falling")):
+		return
 	if current_room == null:
 		_bootstrap_current_room()
 		return

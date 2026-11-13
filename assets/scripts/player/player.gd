@@ -43,6 +43,8 @@ var _charge_flash: float = 0.0
 var _sprite_base_pos: Vector2 = Vector2.ZERO
 var _flash_mat: ShaderMaterial
 var _dead: bool = false
+var _void_falling: bool = false
+var _void_fall_tween: Tween
 
 
 func _ready() -> void:
@@ -77,9 +79,10 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
-	if _dead:
+	if _dead or _void_falling:
 		velocity = Vector2.ZERO
 		_stop_steps()
+		# No vitality drain during the void fall beat (vigilia / sueño).
 		move_and_slide()
 		return
 
@@ -117,6 +120,59 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 
 
+func is_void_falling() -> bool:
+	return _void_falling
+
+
+## Shrink + spin into the hole for [param duration], then leave visuals restored for respawn.
+## Vitality does not drain while this plays (caller waits before teleporting).
+func play_void_fall(duration: float = 0.7) -> void:
+	if _void_falling or _dead:
+		return
+	_void_falling = true
+	velocity = Vector2.ZERO
+	_knockback = Vector2.ZERO
+	_hurt_lock = 0.0
+	_stop_steps()
+	cancel_attack_charge()
+	if attack != null and attack.has_method("set_enabled"):
+		attack.set_enabled(false)
+
+	if _void_fall_tween != null and _void_fall_tween.is_valid():
+		_void_fall_tween.kill()
+
+	var fall_time := maxf(duration, 0.05)
+	scale = Vector2.ONE
+	rotation = 0.0
+	modulate = Color(1.0, 1.0, 1.0, 1.0)
+	_void_fall_tween = create_tween()
+	_void_fall_tween.set_parallel(true)
+	_void_fall_tween.tween_property(self, "scale", Vector2(0.05, 0.05), fall_time) \
+		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	_void_fall_tween.tween_property(self, "rotation", TAU * 2.0, fall_time) \
+		.set_trans(Tween.TRANS_LINEAR).set_ease(Tween.EASE_IN)
+	_void_fall_tween.tween_property(self, "modulate:a", 0.0, fall_time) \
+		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	await _void_fall_tween.finished
+
+
+## Called by parkour after teleporting back to the respawn marker.
+func finish_void_fall() -> void:
+	if _void_fall_tween != null and _void_fall_tween.is_valid():
+		_void_fall_tween.kill()
+	_void_fall_tween = null
+	scale = Vector2.ONE
+	rotation = 0.0
+	modulate = Color.WHITE
+	velocity = Vector2.ZERO
+	_knockback = Vector2.ZERO
+	_void_falling = false
+	if attack != null and attack.has_method("set_enabled"):
+		attack.set_enabled(not _in_dream)
+	if not _dead:
+		_play_idle_animation()
+
+
 func get_vitality() -> Node:
 	return vitality
 
@@ -152,7 +208,7 @@ func _on_vitality_depleted() -> void:
 
 
 func _on_damaged(amount: int, _current_health: int) -> void:
-	if _dead:
+	if _dead or _void_falling:
 		return
 	if vitality != null and vitality.has_method("apply_hit_damage"):
 		vitality.call("apply_hit_damage", amount)
