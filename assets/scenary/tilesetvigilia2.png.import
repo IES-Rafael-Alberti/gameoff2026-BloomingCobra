@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b5262cw3vii7n"
-path="res://.godot/imported/tilesetvigilia1.png-dea57df33ae4b4c7f9ecd678ad399846.ctex"
+uid="uid://cbegs4lf6edli"
+path="res://.godot/imported/tilesetvigilia2.png-a413f8a07161e695dc97ef2b163bd7ee.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/scenary/tilesetvigilia1.png"
-dest_files=["res://.godot/imported/tilesetvigilia1.png-dea57df33ae4b4c7f9ecd678ad399846.ctex"]
+source_file="res://assets/scenary/tilesetvigilia2.png"
+dest_files=["res://.godot/imported/tilesetvigilia2.png-a413f8a07161e695dc97ef2b163bd7ee.ctex"]
 
 [params]
 

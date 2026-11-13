@@ -23,7 +23,8 @@
 [ext_resource type="PackedScene" path="res://assets/scenes/HUD/health_bar.tscn" id="17_hp"]
 [ext_resource type="Script" uid="uid://cubeh2wh4qdcc" path="res://assets/scripts/sfx/general_sfx.gd" id="18_sfx"]
 [ext_resource type="AudioStream" uid="uid://crbieoj4wi1fq" path="res://assets/audio/general/Shift.wav" id="19_shift"]
-[ext_resource type="Script" path="res://assets/scripts/game/room_manager.gd" id="20_room_mgr"]
+[ext_resource type="Script" uid="uid://c1h4s6dj62gua" path="res://assets/scripts/game/room_manager.gd" id="20_room_mgr"]
+[ext_resource type="PackedScene" uid="uid://csq6yrw4oejoa" path="res://assets/scenes/rooms/boss/bossRoom.tscn" id="25_jdjof"]
 
 [node name="Game" type="Node2D" unique_id=139143478]
 position = Vector2(-130, -76)
@@ -35,7 +36,7 @@ music_vigil = ExtResource("3_pnywb")
 music_nightmare = ExtResource("4_fx2rd")
 switch_sfx = ExtResource("19_shift")
 
-[node name="RoomManager" type="Node" parent="."]
+[node name="RoomManager" type="Node" parent="." unique_id=1071316549]
 script = ExtResource("20_room_mgr")
 
 [node name="HealthBar" parent="." unique_id=121366271 instance=ExtResource("17_hp")]
@@ -44,47 +45,47 @@ script = ExtResource("20_room_mgr")
 
 [node name="Habitaciones" type="Node2D" parent="." unique_id=1798072966]
 
-[node name="Habitaciontest" parent="Habitaciones" unique_id=873851779 instance=ExtResource("2_s2rys") node_paths=PackedStringArray("door_targets")]
+[node name="Habitaciontest" parent="Habitaciones" unique_id=873851779 node_paths=PackedStringArray("door_targets") instance=ExtResource("2_s2rys")]
 position = Vector2(-245, -240)
 door_targets = [NodePath("../HabitacionVariada"), null, NodePath("../HabitacionDescanso"), null]
 
-[node name="HabitacionParkour" parent="Habitaciones" unique_id=1762489026 instance=ExtResource("10_k2t1h") node_paths=PackedStringArray("door_targets")]
+[node name="HabitacionParkour" parent="Habitaciones" unique_id=1762489026 node_paths=PackedStringArray("door_targets") instance=ExtResource("10_k2t1h")]
 position = Vector2(-391, 64)
 door_targets = [NodePath("../HabitacionMain"), null]
 
-[node name="HabitacionDescanso" parent="Habitaciones" unique_id=151333784 instance=ExtResource("11_phsto") node_paths=PackedStringArray("door_targets")]
+[node name="HabitacionDescanso" parent="Habitaciones" unique_id=151333784 node_paths=PackedStringArray("door_targets") instance=ExtResource("11_phsto")]
 position = Vector2(121, -239)
 door_targets = [NodePath("../Habitaciontest3"), NodePath("../HabitacionMain"), NodePath("../Habitaciontest2"), NodePath("../Habitaciontest")]
 
-[node name="HabitacionTrampa" parent="Habitaciones" unique_id=249061851 instance=ExtResource("9_k2t1h") node_paths=PackedStringArray("door_targets")]
+[node name="HabitacionTrampa" parent="Habitaciones" unique_id=249061851 node_paths=PackedStringArray("door_targets") instance=ExtResource("9_k2t1h")]
 position = Vector2(634, 65)
 spawn_enemy_scenes = Array[PackedScene]([ExtResource("6_fqk1v"), ExtResource("9_5jdip"), ExtResource("13_fc420")])
 door_targets = [NodePath("../Habitaciontest2"), null, null, NodePath("../HabitacionMain")]
 
-[node name="HabitacionVariada" parent="Habitaciones" unique_id=140121719 instance=ExtResource("2_wfsp4") node_paths=PackedStringArray("doors", "door_targets")]
+[node name="HabitacionVariada" parent="Habitaciones" unique_id=140121719 node_paths=PackedStringArray("doors", "door_targets") instance=ExtResource("2_wfsp4")]
 position = Vector2(-246, -484)
 script = ExtResource("3_wfsp4")
 doors = [NodePath("Door"), NodePath("Door2"), NodePath("Door3"), NodePath("Door4")]
 spawn_enemy_scenes = Array[PackedScene]([ExtResource("9_5jdip"), ExtResource("9_5jdip"), ExtResource("9_5jdip")])
 door_targets = [null, NodePath("../Habitaciontest"), NodePath("../Habitaciontest3"), null]
 
-[node name="HabitacionMain" parent="Habitaciones" unique_id=499444695 instance=ExtResource("2_habitacion") node_paths=PackedStringArray("door_targets")]
+[node name="HabitacionMain" parent="Habitaciones" unique_id=499444695 node_paths=PackedStringArray("door_targets") instance=ExtResource("2_habitacion")]
 position = Vector2(153, 95)
 door_targets = [NodePath("../HabitacionDescanso"), null, NodePath("../HabitacionTrampa"), NodePath("../HabitacionParkour")]
 
-[node name="Habitaciontest2" parent="Habitaciones" unique_id=1510706846 instance=ExtResource("2_s2rys") node_paths=PackedStringArray("door_targets")]
+[node name="Habitaciontest2" parent="Habitaciones" unique_id=1510706846 node_paths=PackedStringArray("door_targets") instance=ExtResource("2_s2rys")]
 position = Vector2(485, -240)
 door_targets = [NodePath("../Habitaciontest4"), NodePath("../HabitacionTrampa"), null, NodePath("../HabitacionDescanso")]
 
-[node name="Habitaciontest4" parent="Habitaciones" unique_id=679016626 instance=ExtResource("2_s2rys") node_paths=PackedStringArray("door_targets")]
+[node name="Habitaciontest4" parent="Habitaciones" unique_id=679016626 node_paths=PackedStringArray("door_targets") instance=ExtResource("2_s2rys")]
 position = Vector2(487, -473)
 door_targets = [null, NodePath("../Habitaciontest2"), null, NodePath("../Habitaciontest3")]
 
-[node name="Habitaciontest3" parent="Habitaciones" unique_id=1901903452 instance=ExtResource("2_s2rys") node_paths=PackedStringArray("door_targets")]
+[node name="Habitaciontest3" parent="Habitaciones" unique_id=1901903452 node_paths=PackedStringArray("door_targets") instance=ExtResource("2_s2rys")]
 position = Vector2(121, -478)
 door_targets = [NodePath("../Habitaciontest5"), NodePath("../HabitacionDescanso"), NodePath("../Habitaciontest4"), NodePath("../HabitacionVariada")]
 
-[node name="Habitaciontest5" parent="Habitaciones" unique_id=1649616343 instance=ExtResource("2_s2rys") node_paths=PackedStringArray("door_targets")]
+[node name="Habitaciontest5" parent="Habitaciones" unique_id=1649616343 node_paths=PackedStringArray("door_targets") instance=ExtResource("2_s2rys")]
 position = Vector2(121, -718)
 door_targets = [null, NodePath("../Habitaciontest3"), null, null]
 
@@ -92,7 +93,7 @@ door_targets = [null, NodePath("../Habitaciontest3"), null, null]
 light_mask = 3
 visibility_layer = 3
 z_index = 2
-position = Vector2(131, 69)
+position = Vector2(131, 108)
 
 [node name="Camera2D" type="Camera2D" parent="Player" unique_id=2003611831]
 zoom = Vector2(4, 4)
@@ -141,3 +142,6 @@ position = Vector2(31, -698)
 
 [node name="Divider_3" parent="Enemy/Divider" unique_id=2066769326 instance=ExtResource("15_fc420")]
 position = Vector2(194, -703)
+
+[node name="BossRoom" parent="." unique_id=1369142614 instance=ExtResource("25_jdjof")]
+position = Vector2(38, 418)
