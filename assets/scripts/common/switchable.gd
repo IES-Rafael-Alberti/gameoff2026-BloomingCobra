@@ -95,13 +95,22 @@ func _on_world_mode_changed(index: int) -> void:
 func _apply() -> void:
 	if variants.is_empty():
 		return
+	# Enable the new map before disabling the old one so the canvas never goes empty.
+	var on_map: TileMap = null
+	var off_maps: Array[TileMap] = []
 	for i in variants.size():
 		var tilemap := variants[i]
 		if tilemap == null:
 			continue
-		var on := i == _index
-		tilemap.visible = on
-		# Inactive mode tilemaps stay out of the render/process path.
-		tilemap.process_mode = (
-			Node.PROCESS_MODE_INHERIT if on else Node.PROCESS_MODE_DISABLED
-		)
+		if i == _index:
+			on_map = tilemap
+		else:
+			off_maps.append(tilemap)
+
+	if on_map != null:
+		on_map.visible = true
+		on_map.process_mode = Node.PROCESS_MODE_INHERIT
+
+	for tilemap in off_maps:
+		tilemap.visible = false
+		tilemap.process_mode = Node.PROCESS_MODE_DISABLED

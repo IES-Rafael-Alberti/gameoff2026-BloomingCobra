@@ -52,6 +52,8 @@ func _ready() -> void:
 	# (default DISABLE_MODE_REMOVE would let the player walk out of the map).
 	_keep_world_collision_when_disabled()
 	process_mode = Node.PROCESS_MODE_DISABLED
+	# PROCESS_MODE_DISABLED does not skip rendering — hide for HTML5 perf.
+	visible = false
 	call_deferred("_setup_button_unlock")
 	call_deferred("_seal_unlinked_doors")
 
@@ -76,6 +78,7 @@ func set_active(active: bool, player: Node2D = null) -> void:
 		return
 	_active = active
 	if _active:
+		visible = true
 		process_mode = Node.PROCESS_MODE_INHERIT
 		sync_mode()
 		if player != null:
@@ -91,6 +94,7 @@ func set_active(active: bool, player: Node2D = null) -> void:
 		_disable_spawned_enemies()
 		_disable_resident_enemies()
 		process_mode = Node.PROCESS_MODE_DISABLED
+		visible = false
 
 
 ## Apply WorldMode to this room's tilemaps and enemies (lazy sync on enter / active switch).
@@ -98,6 +102,11 @@ func sync_mode() -> void:
 	var room_sw := get_node_or_null("Switchable")
 	if room_sw != null and room_sw.has_method("set_mode"):
 		room_sw.call("set_mode", WorldMode.mode)
+	# Split enemy hitbox work onto the next frame so the shift hitch is smaller on web.
+	call_deferred("_sync_all_enemies_mode")
+
+
+func _sync_all_enemies_mode() -> void:
 	_sync_spawned_enemies_mode()
 	_sync_resident_enemies_mode()
 
