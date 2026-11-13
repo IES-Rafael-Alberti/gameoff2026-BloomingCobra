@@ -307,6 +307,9 @@ func _rooms_touch(a: Room, b: Room) -> bool:
 
 
 func _find_current_room() -> Room:
+	var manager := get_tree().get_first_node_in_group("room_manager")
+	if manager != null and "current_room" in manager and manager.current_room is Room:
+		return manager.current_room as Room
 	for room in _grid.keys():
 		var r := room as Room
 		if r.is_active():

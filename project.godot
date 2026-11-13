@@ -18,6 +18,7 @@ config/icon="res://icon.svg"
 [autoload]
 
 ErrorHandler="*res://assets/scripts/common/error_handler.gd"
+WorldMode="*res://assets/scripts/game/world_mode.gd"
 
 [display]
 

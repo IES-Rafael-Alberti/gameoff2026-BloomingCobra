@@ -93,26 +93,34 @@ move_speed = 35.0
 texture_filter = 2
 scale = Vector2(0.045, 0.045)
 sprite_frames = SubResource("SpriteFrames_bhbtl")
-animation = &"inactive"
-frame_progress = 0.943689
+animation = &"idle"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=885668471]
+position = Vector2(0, 6)
 shape = SubResource("CircleShape2D_t3rxn")
 
 [node name="Hurtbox" type="Area2D" parent="." unique_id=1308380636]
+position = Vector2(0, 2)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox" unique_id=2134822828]
+position = Vector2(0, 4)
 shape = SubResource("CircleShape2D_0qoo8")
 
 [node name="Damageable" type="Node2D" parent="." unique_id=212258239]
+position = Vector2(0, 4)
 script = ExtResource("5_hhqxl")
 
 [node name="Roamer" type="Node2D" parent="." unique_id=2008701317]
+position = Vector2(0, 4)
 script = ExtResource("6_otr5t")
 
 [node name="Switchable" type="Node2D" parent="." unique_id=1378354913]
+position = Vector2(0, 3)
 script = ExtResource("7_2cfc3")
+start_index = null
+mode_count = null
 
 [node name="SfxPlayer" type="Node2D" parent="." unique_id=904837767]
+position = Vector2(0, 3)
 script = ExtResource("8_sfx")
 standard = ExtResource("9_djgtl")

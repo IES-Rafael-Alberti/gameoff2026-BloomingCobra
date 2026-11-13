@@ -136,10 +136,7 @@ func _offset_for_index(index: int) -> Vector2:
 
 
 func _current_mode() -> int:
-	var switchable := _enemy.get_node_or_null("Switchable")
-	if switchable != null and switchable.has_method("get_mode"):
-		return int(switchable.call("get_mode"))
-	return 0
+	return WorldMode.mode
 
 
 func _apply_mode(half: Node, mode: int) -> void:

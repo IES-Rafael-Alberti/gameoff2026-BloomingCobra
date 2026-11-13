@@ -14,6 +14,7 @@ var _is_caught: bool = false
 
 func _ready() -> void:
 	add_to_group("cat")
+	add_to_group("enemy")
 	# Catchable by proximity; no solid push vs player.
 	collision_layer = 0
 	collision_mask = (1 << 0) | (1 << 3) | (1 << 5) # world + door_enemy + spikes_enemy
@@ -133,6 +134,9 @@ func _teleport_random_in_room() -> void:
 
 
 func _find_room_at(point: Vector2) -> Node2D:
+	var manager := get_tree().get_first_node_in_group("room_manager")
+	if manager != null and manager.has_method("get_room_at"):
+		return manager.call("get_room_at", point) as Node2D
 	var best: Node2D = null
 	var best_area := INF
 	for node in get_tree().get_nodes_in_group("rooms"):

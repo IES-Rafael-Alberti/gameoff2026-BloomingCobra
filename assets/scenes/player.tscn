@@ -1135,6 +1135,7 @@ texture = ExtResource("6_0gfpk")
 
 [node name="Switchable" type="Node2D" parent="." unique_id=1509705244]
 script = ExtResource("1_switch")
+follow_world = true
 
 [node name="SfxPlayer" type="Node2D" parent="."]
 script = ExtResource("1_sfx")

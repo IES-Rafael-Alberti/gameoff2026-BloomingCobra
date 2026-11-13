@@ -38,18 +38,10 @@ func set_mode_music(mode_index: int) -> void:
 func _bind_mode_source() -> void:
 	if _bound:
 		return
-	var tree := get_tree()
-	if tree == null:
-		return
-	for node in tree.get_nodes_in_group("switchable"):
-		if node == null or not node.has_signal("mode_changed"):
-			continue
-		if not node.mode_changed.is_connected(_on_mode_changed):
-			node.mode_changed.connect(_on_mode_changed)
-		_bound = true
-		if node.has_method("get_mode"):
-			_on_mode_changed(int(node.call("get_mode")))
-		return
+	if not WorldMode.mode_changed.is_connected(_on_mode_changed):
+		WorldMode.mode_changed.connect(_on_mode_changed)
+	_bound = true
+	_on_mode_changed(WorldMode.mode)
 
 
 func _on_mode_changed(index: int) -> void:

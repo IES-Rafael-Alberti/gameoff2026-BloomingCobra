@@ -19,11 +19,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 
 	if event.is_action_pressed("switch") and not event.is_echo():
-		if sfx_general != null and sfx_general.has_method("play_switch"):
-			sfx_general.call("play_switch")
-		for node in get_tree().get_nodes_in_group("switchable"):
-			if node.has_method("toggle"):
-				node.toggle()
+		if WorldMode.toggle():
+			if sfx_general != null and sfx_general.has_method("play_switch"):
+				sfx_general.call("play_switch")
 		get_viewport().set_input_as_handled()
 		return
 

@@ -104,9 +104,4 @@ func _emit_changed() -> void:
 
 
 func _clear_world_locks() -> void:
-	var tree := get_tree()
-	if tree == null:
-		return
-	for node in tree.get_nodes_in_group("switchable"):
-		if node != null and node.has_method("set_locked"):
-			node.call("set_locked", false)
+	WorldMode.set_locked(false)

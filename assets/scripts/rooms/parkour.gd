@@ -116,7 +116,10 @@ func _respawn_player(player: Node2D) -> void:
 			body.set("_knockback", Vector2.ZERO)
 
 	# Falling can deactivate this room; snap + re-enter so dream lock stays on.
-	if not is_active():
+	var manager := get_tree().get_first_node_in_group("room_manager")
+	if manager != null and manager.has_method("enter_room"):
+		manager.call("enter_room", self, player)
+	elif not is_active():
 		set_active(true, player)
 
 	# Void fall undoes button progress unless it was committed by leaving the room.
@@ -126,14 +129,9 @@ func _respawn_player(player: Node2D) -> void:
 
 
 func _force_dream_and_lock() -> void:
-	for node in get_tree().get_nodes_in_group("switchable"):
-		if node.has_method("set_mode"):
-			node.set_mode(1) # MODE_SUENO
-		if node.has_method("set_locked"):
-			node.set_locked(true)
+	WorldMode.set_mode(WorldMode.MODE_SUENO)
+	WorldMode.set_locked(true)
 
 
 func _unlock_switchables() -> void:
-	for node in get_tree().get_nodes_in_group("switchable"):
-		if node.has_method("set_locked"):
-			node.set_locked(false)
+	WorldMode.set_locked(false)

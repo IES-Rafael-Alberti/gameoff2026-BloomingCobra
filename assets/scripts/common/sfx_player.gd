@@ -312,7 +312,9 @@ func _player_in_same_room() -> bool:
 		return false
 
 	var self_room := _get_own_room()
-	var player_room := _find_room_at(player.global_position)
+	var player_room := _get_current_room()
+	if player_room == null:
+		player_room = _find_room_at(player.global_position)
 	if self_room != null and player_room != null:
 		return self_room == player_room
 
@@ -336,7 +338,21 @@ func _get_own_room() -> Node:
 	return _find_room_at(global_position)
 
 
+func _get_current_room() -> Node:
+	var tree := get_tree()
+	if tree == null:
+		return null
+	var manager := tree.get_first_node_in_group("room_manager")
+	if manager != null and "current_room" in manager:
+		return manager.current_room
+	return null
+
+
 func _find_room_at(point: Vector2) -> Node:
+	var manager := get_tree().get_first_node_in_group("room_manager") if get_tree() != null else null
+	if manager != null and manager.has_method("get_room_at"):
+		return manager.call("get_room_at", point, 48.0)
+
 	var tree := get_tree()
 	if tree == null:
 		return null

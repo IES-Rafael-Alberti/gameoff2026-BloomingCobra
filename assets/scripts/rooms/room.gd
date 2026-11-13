@@ -21,6 +21,10 @@ signal discovered()
 ## Leave an element empty to keep that marker's default enemy.
 @export var spawn_enemy_scenes: Array[PackedScene] = []
 
+@export_group("Navigation")
+## Destination room per door, same order as get_doors(). Empty = geometric fallback.
+@export var door_targets: Array[Room] = []
+
 @export_group("Button Unlock")
 ## When enabled, assigned buttons can open this room's doors / clear its lock.
 @export var unlock_doors_with_buttons: bool = false
@@ -32,10 +36,13 @@ signal discovered()
 var _active: bool = false
 var _discovered: bool = false
 var _spawned_enemies: Array[Node] = []
+var _resident_enemies: Array[Node] = []
 var _door_close_token: int = 0
 var _button_unlock_done: bool = false
 var _button_unlock_committed: bool = false
 var _buttons_wired: bool = false
+var _bounds_cached: bool = false
+var _cached_bounds: Rect2 = Rect2()
 
 
 func _ready() -> void:
@@ -46,6 +53,7 @@ func _ready() -> void:
 	_keep_world_collision_when_disabled()
 	process_mode = Node.PROCESS_MODE_DISABLED
 	call_deferred("_setup_button_unlock")
+	call_deferred("_seal_unlinked_doors")
 
 
 func is_active() -> bool:
@@ -69,9 +77,11 @@ func set_active(active: bool, player: Node2D = null) -> void:
 	_active = active
 	if _active:
 		process_mode = Node.PROCESS_MODE_INHERIT
+		sync_mode()
 		if player != null:
 			teleport_player_inside_from_entry(player)
 		_enable_spawned_enemies()
+		_enable_resident_enemies()
 		mark_discovered()
 		on_player_entered(player)
 		player_entered.emit(player)
@@ -79,7 +89,33 @@ func set_active(active: bool, player: Node2D = null) -> void:
 		on_player_exited(player)
 		player_exited.emit(player)
 		_disable_spawned_enemies()
+		_disable_resident_enemies()
 		process_mode = Node.PROCESS_MODE_DISABLED
+
+
+## Apply WorldMode to this room's tilemaps and enemies (lazy sync on enter / active switch).
+func sync_mode() -> void:
+	var room_sw := get_node_or_null("Switchable")
+	if room_sw != null and room_sw.has_method("set_mode"):
+		room_sw.call("set_mode", WorldMode.mode)
+	_sync_spawned_enemies_mode()
+	_sync_resident_enemies_mode()
+
+
+## Pre-placed enemies that live in this room (assigned by RoomManager).
+func register_resident(enemy: Node) -> void:
+	if enemy == null or not is_instance_valid(enemy):
+		return
+	if _resident_enemies.has(enemy):
+		return
+	_resident_enemies.append(enemy)
+	if enemy.has_signal("tree_exiting"):
+		enemy.tree_exiting.connect(_on_resident_enemy_exiting.bind(enemy), CONNECT_ONE_SHOT)
+	_sync_enemy_mode(enemy)
+	if _active:
+		enemy.process_mode = Node.PROCESS_MODE_INHERIT
+	else:
+		enemy.process_mode = Node.PROCESS_MODE_DISABLED
 
 
 ## Places the player just inside the nearest doorway so they never stand in the seal zone.
@@ -126,7 +162,7 @@ func get_entry_teleport_position(from_world: Vector2) -> Vector2:
 	return target
 
 
-func _nearest_door_to(point: Vector2) -> Door:
+func nearest_door_to(point: Vector2) -> Door:
 	var best: Door = null
 	var best_dist := INF
 	for door in get_doors():
@@ -135,6 +171,50 @@ func _nearest_door_to(point: Vector2) -> Door:
 			best_dist = dist
 			best = door
 	return best
+
+
+func _nearest_door_to(point: Vector2) -> Door:
+	return nearest_door_to(point)
+
+
+## Room linked to `door` via door_targets (same order as get_doors()). Null if unset.
+func get_door_target(door: Door) -> Room:
+	if door == null:
+		return null
+	var index := _door_index(door)
+	if index < 0:
+		return null
+	return _door_target_at(index)
+
+
+## True when this door has an authored destination room.
+func is_door_linked(door: Door) -> bool:
+	return get_door_target(door) != null
+
+
+## Doors with no door_targets entry stay closed as a permanent barrier.
+func _seal_unlinked_doors() -> void:
+	var doors := get_doors()
+	for i in doors.size():
+		if _door_target_at(i) != null:
+			continue
+		var door := doors[i]
+		door.starts_open = false
+		door.set_open(false)
+
+
+func _door_index(door: Door) -> int:
+	var doors := get_doors()
+	for i in doors.size():
+		if doors[i] == door:
+			return i
+	return -1
+
+
+func _door_target_at(index: int) -> Room:
+	if index < 0 or index >= door_targets.size():
+		return null
+	return door_targets[index]
 
 
 func _door_world_center(door: Door) -> Vector2:
@@ -170,6 +250,9 @@ func on_player_exited(_player: Node2D) -> void:
 
 
 func get_camera_bounds() -> Rect2:
+	if _bounds_cached:
+		return _cached_bounds
+
 	var tilemap := get_node_or_null("Switchable/Pesadilla") as TileMap
 	if tilemap == null or tilemap.tile_set == null:
 		return Rect2()
@@ -185,7 +268,9 @@ func get_camera_bounds() -> Rect2:
 	)
 	var top_left: Vector2 = tilemap.to_global(top_left_local)
 	var bottom_right: Vector2 = tilemap.to_global(bottom_right_local)
-	return Rect2(top_left, bottom_right - top_left)
+	_cached_bounds = Rect2(top_left, bottom_right - top_left)
+	_bounds_cached = true
+	return _cached_bounds
 
 
 func contains_world_point(point: Vector2, margin: float = 8.0) -> bool:
@@ -270,8 +355,12 @@ func register_enemy(enemy: Node) -> void:
 
 
 func set_all_doors_open(open: bool) -> void:
-	for door in get_doors():
-		door.set_open(open)
+	var doors := get_doors()
+	for i in doors.size():
+		# Unlinked doors are permanent barriers — never open them via bulk unlock.
+		if open and _door_target_at(i) == null:
+			continue
+		doors[i].set_open(open)
 
 
 func _setup_button_unlock() -> void:
@@ -409,12 +498,33 @@ func _disable_spawned_enemies() -> void:
 		enemy.process_mode = Node.PROCESS_MODE_DISABLED
 
 
+func _enable_resident_enemies() -> void:
+	_prune_resident_enemies()
+	for enemy in _resident_enemies:
+		enemy.process_mode = Node.PROCESS_MODE_INHERIT
+	_sync_resident_enemies_mode()
+
+
+func _disable_resident_enemies() -> void:
+	_prune_resident_enemies()
+	for enemy in _resident_enemies:
+		enemy.process_mode = Node.PROCESS_MODE_DISABLED
+
+
 func _prune_spawned_enemies() -> void:
 	_spawned_enemies = _spawned_enemies.filter(func(e: Node) -> bool: return is_instance_valid(e))
 
 
+func _prune_resident_enemies() -> void:
+	_resident_enemies = _resident_enemies.filter(func(e: Node) -> bool: return is_instance_valid(e))
+
+
 func _on_spawned_enemy_exiting(enemy: Node) -> void:
 	_spawned_enemies.erase(enemy)
+
+
+func _on_resident_enemy_exiting(enemy: Node) -> void:
+	_resident_enemies.erase(enemy)
 
 
 ## Keep spawned enemies in phase with the room dream/nightmare switch.
@@ -422,6 +532,12 @@ func _on_spawned_enemy_exiting(enemy: Node) -> void:
 func _sync_spawned_enemies_mode() -> void:
 	_prune_spawned_enemies()
 	for enemy in _spawned_enemies:
+		_sync_enemy_mode(enemy)
+
+
+func _sync_resident_enemies_mode() -> void:
+	_prune_resident_enemies()
+	for enemy in _resident_enemies:
 		_sync_enemy_mode(enemy)
 
 
@@ -435,16 +551,4 @@ func _sync_enemy_mode(enemy: Node) -> void:
 
 
 func _get_world_mode() -> int:
-	var room_sw := get_node_or_null("Switchable")
-	if room_sw != null and room_sw.has_method("get_mode"):
-		return int(room_sw.call("get_mode"))
-	var tree := get_tree()
-	if tree == null:
-		return 0
-	for node in tree.get_nodes_in_group("switchable"):
-		if node == null or not node.has_method("get_mode"):
-			continue
-		# Prefer tilemap switchables (rooms) over enemy-only ones.
-		if "variants" in node and node.variants is Array and not (node.variants as Array).is_empty():
-			return int(node.call("get_mode"))
-	return 0
+	return WorldMode.mode
