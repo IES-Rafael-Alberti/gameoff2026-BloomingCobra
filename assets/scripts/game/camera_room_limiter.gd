@@ -29,7 +29,7 @@ func _on_room_changed(_previous: Room, next: Room) -> void:
 
 
 func _apply_bounds(room: Room) -> void:
-	var bounds: Rect2 = room.get_camera_bounds()
+	var bounds: Rect2 = room.get_camera_limit_bounds() if room.has_method("get_camera_limit_bounds") else room.get_camera_bounds()
 	if bounds.size == Vector2.ZERO:
 		return
 	limit_left = int(floor(bounds.position.x))

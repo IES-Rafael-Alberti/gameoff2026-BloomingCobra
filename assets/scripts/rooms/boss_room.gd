@@ -12,8 +12,6 @@ extends Room
 var _boss: Boss = null
 var _fight_started: bool = false
 var _boss_defeated: bool = false
-var _bg_pesadilla: Node2D = null
-var _bg_sueno: Node2D = null
 
 
 func _ready() -> void:
@@ -21,23 +19,6 @@ func _ready() -> void:
 	_boss = get_node_or_null(boss_path) as Boss
 	if _boss != null and not _boss.defeated.is_connected(_on_boss_defeated):
 		_boss.defeated.connect(_on_boss_defeated)
-	_bg_pesadilla = get_node_or_null("BackgroundPesadilla") as Node2D
-	_bg_sueno = get_node_or_null("BackgroundSueño") as Node2D
-	_apply_backgrounds(WorldMode.mode)
-	set_process(true)
-
-
-func _process(_delta: float) -> void:
-	if not _active:
-		return
-	var player := get_tree().get_first_node_in_group("player") as Node2D
-	if player == null:
-		return
-	# Keep room backdrops locked to the player/camera.
-	if _bg_pesadilla != null and _bg_pesadilla.visible:
-		_bg_pesadilla.global_position = player.global_position
-	if _bg_sueno != null and _bg_sueno.visible:
-		_bg_sueno.global_position = player.global_position
 
 
 ## Prefer wall collision over TileMap used_rect (tileset tile_size may not match atlas 128).
@@ -50,30 +31,13 @@ func get_camera_bounds() -> Rect2:
 	return super.get_camera_bounds()
 
 
-func sync_mode() -> void:
-	super.sync_mode()
-	_apply_backgrounds(WorldMode.mode)
-
-
 func on_player_entered(player: Node2D) -> void:
-	_apply_backgrounds(WorldMode.mode)
 	if _boss_defeated:
 		set_all_doors_open(true)
 		return
 	close_doors_after_delay()
 	if auto_start_fight and not _fight_started:
 		call_deferred("_start_boss_fight", player)
-
-
-func _apply_backgrounds(mode: int) -> void:
-	if _bg_pesadilla == null:
-		_bg_pesadilla = get_node_or_null("BackgroundPesadilla") as Node2D
-	if _bg_sueno == null:
-		_bg_sueno = get_node_or_null("BackgroundSueño") as Node2D
-	if _bg_pesadilla != null:
-		_bg_pesadilla.visible = mode == WorldMode.MODE_PESADILLA
-	if _bg_sueno != null:
-		_bg_sueno.visible = mode == WorldMode.MODE_SUENO
 
 
 func _start_boss_fight(_player: Node2D) -> void:

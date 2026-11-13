@@ -5,7 +5,8 @@ signal mode_changed(index: int)
 const MODE_PESADILLA := 0
 const MODE_SUENO := 1
 
-@export var variants: Array[TileMap] = []
+## TileMap or TileMapLayer children used as mode variants.
+@export var variants: Array[Node2D] = []
 @export var start_index: int = 0
 @export var mode_count: int = 2
 ## When true, mirrors WorldMode (player). Rooms/enemies sync via Room.sync_mode().
@@ -19,7 +20,7 @@ func _ready() -> void:
 	add_to_group("switchable")
 	if variants.is_empty():
 		for child in get_children():
-			if child is TileMap:
+			if _is_tile_variant(child):
 				variants.append(child)
 
 	if follow_world:
@@ -92,15 +93,19 @@ func _on_world_mode_changed(index: int) -> void:
 	mode_changed.emit(_index)
 
 
+func _is_tile_variant(node: Node) -> bool:
+	return node is TileMap or node is TileMapLayer
+
+
 func _apply() -> void:
 	if variants.is_empty():
 		return
 	# Enable the new map before disabling the old one so the canvas never goes empty.
-	var on_map: TileMap = null
-	var off_maps: Array[TileMap] = []
+	var on_map: Node2D = null
+	var off_maps: Array[Node2D] = []
 	for i in variants.size():
 		var tilemap := variants[i]
-		if tilemap == null:
+		if tilemap == null or not _is_tile_variant(tilemap):
 			continue
 		if i == _index:
 			on_map = tilemap

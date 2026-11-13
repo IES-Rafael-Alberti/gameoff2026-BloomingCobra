@@ -33,6 +33,11 @@ signal discovered()
 ## If true, every assigned button must be pressed. If false, any one is enough.
 @export var require_all_buttons: bool = true
 
+@export_group("Camera")
+## Extra pixels beyond playable tile bounds for Camera2D limits (shows background past walls).
+## Does not affect room detection / transitions.
+@export var camera_limit_expand: float = 0.0
+
 var _active: bool = false
 var _discovered: bool = false
 var _spawned_enemies: Array[Node] = []
@@ -262,24 +267,36 @@ func get_camera_bounds() -> Rect2:
 	if _bounds_cached:
 		return _cached_bounds
 
-	var tilemap := get_node_or_null("Switchable/Pesadilla") as TileMap
-	if tilemap == null or tilemap.tile_set == null:
+	var layer := get_node_or_null("Switchable/Pesadilla")
+	if layer == null or not layer.has_method("get_used_rect"):
 		return Rect2()
 
-	var used: Rect2i = tilemap.get_used_rect()
+	var tileset: TileSet = layer.get("tile_set") as TileSet
+	if tileset == null:
+		return Rect2()
+
+	var used: Rect2i = layer.call("get_used_rect") as Rect2i
 	if used.size.x <= 0 or used.size.y <= 0:
 		return Rect2()
 
-	var tile_size := Vector2(tilemap.tile_set.tile_size)
-	var top_left_local: Vector2 = tilemap.map_to_local(used.position) - tile_size * 0.5
+	var tile_size := Vector2(tileset.tile_size)
+	var top_left_local: Vector2 = layer.call("map_to_local", used.position) as Vector2 - tile_size * 0.5
 	var bottom_right_local: Vector2 = (
-		tilemap.map_to_local(used.position + used.size - Vector2i.ONE) + tile_size * 0.5
+		layer.call("map_to_local", used.position + used.size - Vector2i.ONE) as Vector2 + tile_size * 0.5
 	)
-	var top_left: Vector2 = tilemap.to_global(top_left_local)
-	var bottom_right: Vector2 = tilemap.to_global(bottom_right_local)
+	var top_left: Vector2 = layer.to_global(top_left_local)
+	var bottom_right: Vector2 = layer.to_global(bottom_right_local)
 	_cached_bounds = Rect2(top_left, bottom_right - top_left)
 	_bounds_cached = true
 	return _cached_bounds
+
+
+## Bounds used by Camera2D limits. May be larger than playable `get_camera_bounds()`.
+func get_camera_limit_bounds() -> Rect2:
+	var bounds := get_camera_bounds()
+	if bounds.size == Vector2.ZERO or camera_limit_expand <= 0.0:
+		return bounds
+	return bounds.grow(camera_limit_expand)
 
 
 func contains_world_point(point: Vector2, margin: float = 8.0) -> bool:
