@@ -1,0 +1,24 @@
+[gd_scene format=3 uid="uid://dnqwttuflnxqa"]
+
+[ext_resource type="Script" uid="uid://bxe57tgh8cpt0" path="res://assets/scripts/enemies/projectile.gd" id="1_proj"]
+[ext_resource type="Texture2D" uid="uid://df0q2xfxfejwq" path="res://assets/sprittesheets/enemy/placeholders/enemy2/projectile.png" id="2_tex"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_proj"]
+radius = 4.0
+
+[node name="BossProjectile" type="Area2D"]
+collision_layer = 0
+collision_mask = 11
+monitoring = false
+monitorable = false
+script = ExtResource("1_proj")
+speed = 130.0
+lifetime = 3.0
+damage = 1
+knockback_force = 80.0
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_tex")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_proj")

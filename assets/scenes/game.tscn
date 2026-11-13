@@ -89,6 +89,9 @@ door_targets = [NodePath("../Habitaciontest5"), NodePath("../HabitacionDescanso"
 position = Vector2(121, -718)
 door_targets = [null, NodePath("../Habitaciontest3"), null, null]
 
+[node name="BossRoom" parent="Habitaciones" unique_id=1369142614 instance=ExtResource("25_jdjof")]
+position = Vector2(150, 394)
+
 [node name="Player" parent="." unique_id=268950689 instance=ExtResource("1_cb66b")]
 light_mask = 3
 visibility_layer = 3
@@ -142,6 +145,3 @@ position = Vector2(31, -698)
 
 [node name="Divider_3" parent="Enemy/Divider" unique_id=2066769326 instance=ExtResource("15_fc420")]
 position = Vector2(194, -703)
-
-[node name="BossRoom" parent="." unique_id=1369142614 instance=ExtResource("25_jdjof")]
-position = Vector2(38, 418)

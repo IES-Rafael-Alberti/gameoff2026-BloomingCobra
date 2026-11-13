@@ -1,0 +1,120 @@
+[gd_scene format=3 uid="uid://bgkrpyrlcewku"]
+
+[ext_resource type="Script" path="res://assets/scripts/boss/boss_hand.gd" id="1_hand"]
+[ext_resource type="Texture2D" uid="uid://dhmar1piygt52" path="res://assets/sprittesheets/boss/placeholders/manoIdle.png" id="2_idle"]
+[ext_resource type="Texture2D" uid="uid://bfpc17t4mlyg1" path="res://assets/sprittesheets/boss/placeholders/manoCarga.png" id="3_carga"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_idle0"]
+atlas = ExtResource("2_idle")
+region = Rect2(0, 0, 32, 40)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_idle1"]
+atlas = ExtResource("2_idle")
+region = Rect2(32, 0, 32, 40)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_carga0"]
+atlas = ExtResource("3_carga")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_carga1"]
+atlas = ExtResource("3_carga")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_carga2"]
+atlas = ExtResource("3_carga")
+region = Rect2(64, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_carga3"]
+atlas = ExtResource("3_carga")
+region = Rect2(96, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_carga4"]
+atlas = ExtResource("3_carga")
+region = Rect2(128, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_carga5"]
+atlas = ExtResource("3_carga")
+region = Rect2(160, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_hand"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_carga0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_carga1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_carga2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_carga3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_carga4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_carga5")
+}],
+"loop": true,
+"name": &"Cargar",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_idle0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_idle1")
+}],
+"loop": true,
+"name": &"Idle",
+"speed": 5.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_body"]
+radius = 12.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_hurt"]
+radius = 14.0
+
+[sub_resource type="Gradient" id="Gradient_shadow"]
+colors = PackedColorArray(0, 0, 0, 0.55, 0, 0, 0, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_shadow"]
+gradient = SubResource("Gradient_shadow")
+width = 64
+height = 64
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(0.5, 0.0)
+
+[node name="BossManoDerecha" type="CharacterBody2D"]
+collision_layer = 4
+collision_mask = 43
+script = ExtResource("1_hand")
+side = 1
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+flip_h = true
+sprite_frames = SubResource("SpriteFrames_hand")
+animation = &"Idle"
+autoplay = "Idle"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_body")
+
+[node name="Hurtbox" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 2
+monitoring = true
+monitorable = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox"]
+shape = SubResource("CircleShape2D_hurt")
+
+[node name="Shadow" type="Sprite2D" parent="."]
+visible = false
+z_index = -1
+texture = SubResource("GradientTexture2D_shadow")

@@ -10,11 +10,14 @@ const LAYER_SPIKES_ENEMY := 1 << 5 # physics layer 6
 ## Seconds between damage ticks while the player remains on the spikes.
 @export var damage_interval: float = 0.55
 @export var texture: Texture2D = preload("res://assets/sprittesheets/props/placeholders/static/spikes.png")
+## If >= 0, spikes only deal damage / show in that WorldMode (0 Pesadilla, 1 Sueño/Vigilia).
+@export var only_in_mode: int = -1
 
 @onready var sprite: Sprite2D = get_node_or_null("Sprite2D") as Sprite2D
 
 var _players_on: Array[Node2D] = []
 var _tick_left: float = 0.0
+var _mode_active: bool = true
 
 
 func _ready() -> void:
@@ -34,9 +37,15 @@ func _ready() -> void:
 		body_entered.connect(_on_body_entered)
 	if not body_exited.is_connected(_on_body_exited):
 		body_exited.connect(_on_body_exited)
+	if only_in_mode >= 0:
+		if not WorldMode.mode_changed.is_connected(_on_world_mode_changed):
+			WorldMode.mode_changed.connect(_on_world_mode_changed)
+		_on_world_mode_changed(WorldMode.get_mode())
 
 
 func _physics_process(delta: float) -> void:
+	if not _mode_active:
+		return
 	_prune_players()
 	if _players_on.is_empty():
 		_tick_left = 0.0
@@ -50,7 +59,26 @@ func _physics_process(delta: float) -> void:
 		_damage_player(player)
 
 
+func _on_world_mode_changed(index: int) -> void:
+	_mode_active = only_in_mode < 0 or index == only_in_mode
+	visible = _mode_active
+	monitoring = _mode_active
+	var shape := get_node_or_null("CollisionShape2D") as CollisionShape2D
+	if shape != null:
+		shape.set_deferred("disabled", not _mode_active)
+	var blocker := get_node_or_null("EnemyBlocker") as StaticBody2D
+	if blocker != null:
+		for child in blocker.get_children():
+			if child is CollisionShape2D:
+				(child as CollisionShape2D).set_deferred("disabled", not _mode_active)
+	if not _mode_active:
+		_players_on.clear()
+		_tick_left = 0.0
+
+
 func _on_body_entered(body: Node2D) -> void:
+	if not _mode_active:
+		return
 	if body == null or not body.is_in_group("player"):
 		return
 	if body in _players_on:
@@ -68,6 +96,8 @@ func _on_body_exited(body: Node2D) -> void:
 
 
 func _damage_player(player: Node2D) -> void:
+	if not _mode_active:
+		return
 	if player == null or not is_instance_valid(player):
 		return
 	var dmg := player.get_node_or_null("Damageable")

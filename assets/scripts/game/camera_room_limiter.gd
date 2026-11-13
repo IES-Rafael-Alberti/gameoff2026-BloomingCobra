@@ -4,6 +4,8 @@ var _current_room: Room = null
 
 
 func _ready() -> void:
+	enabled = true
+	make_current()
 	limit_enabled = true
 	call_deferred("_bind_room_manager")
 
@@ -23,6 +25,7 @@ func _on_room_changed(_previous: Room, next: Room) -> void:
 	if next == null:
 		return
 	_apply_bounds(next)
+	_snap_now()
 
 
 func _apply_bounds(room: Room) -> void:
@@ -33,3 +36,25 @@ func _apply_bounds(room: Room) -> void:
 	limit_top = int(floor(bounds.position.y))
 	limit_right = int(ceil(bounds.end.x))
 	limit_bottom = int(ceil(bounds.end.y))
+
+
+## Call after a forced player teleport so limits + scroll match the new room now.
+func snap_to_room(room: Room) -> void:
+	if room == null:
+		return
+	_current_room = room
+	_apply_bounds(room)
+	_snap_now()
+
+
+func _snap_now() -> void:
+	var was_limit_smoothed := limit_smoothed
+	var was_pos_smoothed := position_smoothing_enabled
+	limit_smoothed = false
+	position_smoothing_enabled = false
+	make_current()
+	reset_smoothing()
+	force_update_scroll()
+	# Restore smoothing after the snap so normal room transitions stay soft.
+	limit_smoothed = was_limit_smoothed
+	position_smoothing_enabled = was_pos_smoothed

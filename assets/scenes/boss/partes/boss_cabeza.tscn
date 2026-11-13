@@ -1,0 +1,186 @@
+[gd_scene load_steps=24 format=3 uid="uid://ccj6ql724ejnm"]
+
+[ext_resource type="Script" path="res://assets/scripts/boss/boss_head.gd" id="1_head"]
+[ext_resource type="Texture2D" uid="uid://dld5kvjwdlfsq" path="res://assets/sprittesheets/boss/placeholders/Cabezacarga.png" id="2_carga"]
+[ext_resource type="Texture2D" uid="uid://snmq62p2ou42" path="res://assets/sprittesheets/boss/placeholders/cabezaIdle.png" id="3_idle"]
+[ext_resource type="Script" uid="uid://bgh2aslom8hdu" path="res://assets/scripts/common/damageable.gd" id="4_dmg"]
+[ext_resource type="PackedScene" path="res://assets/scenes/boss/boss_projectile.tscn" id="5_proj"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_a8jr0"]
+atlas = ExtResource("2_carga")
+region = Rect2(0, 0, 40, 40)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ii0t4"]
+atlas = ExtResource("2_carga")
+region = Rect2(40, 0, 40, 40)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ajlge"]
+atlas = ExtResource("2_carga")
+region = Rect2(80, 0, 40, 40)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_k4m3g"]
+atlas = ExtResource("2_carga")
+region = Rect2(120, 0, 40, 40)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fd1e8"]
+atlas = ExtResource("2_carga")
+region = Rect2(160, 0, 40, 40)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_wrwga"]
+atlas = ExtResource("2_carga")
+region = Rect2(200, 0, 40, 40)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_defn8"]
+atlas = ExtResource("2_carga")
+region = Rect2(240, 0, 40, 40)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_10820"]
+atlas = ExtResource("2_carga")
+region = Rect2(280, 0, 40, 40)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_sxe1f"]
+atlas = ExtResource("2_carga")
+region = Rect2(320, 0, 40, 40)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_v5bmj"]
+atlas = ExtResource("2_carga")
+region = Rect2(360, 0, 40, 40)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ijmhx"]
+atlas = ExtResource("3_idle")
+region = Rect2(0, 0, 40, 40)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_y67h4"]
+atlas = ExtResource("3_idle")
+region = Rect2(40, 0, 40, 40)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_bhbtl"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_a8jr0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ii0t4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ajlge")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_k4m3g")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_fd1e8")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_wrwga")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_defn8")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_10820")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_sxe1f")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_v5bmj")
+}],
+"loop": true,
+"name": &"Cargar",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ijmhx")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_y67h4")
+}],
+"loop": true,
+"name": &"Idle",
+"speed": 5.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_body"]
+radius = 16.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_weak"]
+radius = 14.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_aoe"]
+radius = 8.0
+
+[sub_resource type="Gradient" id="Gradient_aoe"]
+colors = PackedColorArray(0.85, 0.15, 0.2, 0.35, 0.85, 0.15, 0.2, 0.0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_aoe"]
+gradient = SubResource("Gradient_aoe")
+width = 64
+height = 64
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(0.5, 0.0)
+
+[node name="BossCabeza" type="CharacterBody2D"]
+collision_layer = 4
+collision_mask = 43
+script = ExtResource("1_head")
+projectile_scene = ExtResource("5_proj")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_bhbtl")
+animation = &"Idle"
+autoplay = "Idle"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_body")
+
+[node name="Damageable" type="Node2D" parent="."]
+script = ExtResource("4_dmg")
+max_health = 8
+invulnerability_time = 0.12
+
+[node name="Weakpoint" type="Area2D" parent="."]
+visible = false
+collision_layer = 64
+collision_mask = 0
+monitoring = false
+monitorable = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Weakpoint"]
+shape = SubResource("CircleShape2D_weak")
+disabled = true
+
+[node name="Visual" type="Polygon2D" parent="Weakpoint"]
+color = Color(1, 0.25, 0.35, 0.85)
+polygon = PackedVector2Array(-6, -6, 6, -6, 6, 6, -6, 6)
+
+[node name="LaserLine" type="Line2D" parent="."]
+visible = false
+z_index = 4
+width = 4.0
+default_color = Color(1, 0.2, 0.35, 0.9)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="RayCast2D" type="RayCast2D" parent="LaserLine"]
+enabled = false
+target_position = Vector2(0, 200)
+collision_mask = 1
+
+[node name="AoeArea" type="Area2D" parent="."]
+visible = false
+collision_layer = 0
+collision_mask = 0
+monitoring = false
+monitorable = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="AoeArea"]
+shape = SubResource("CircleShape2D_aoe")
+
+[node name="Visual" type="Sprite2D" parent="AoeArea"]
+modulate = Color(1, 1, 1, 0.7)
+texture = SubResource("GradientTexture2D_aoe")

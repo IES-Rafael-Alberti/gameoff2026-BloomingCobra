@@ -1,0 +1,20 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/boss/boss.gd" id="1_boss"]
+[ext_resource type="PackedScene" uid="uid://ccj6ql724ejnm" path="res://assets/scenes/boss/partes/boss_cabeza.tscn" id="2_head"]
+[ext_resource type="PackedScene" uid="uid://cdfot8mhpuy82" path="res://assets/scenes/boss/partes/boss_mano_izquierda.tscn" id="3_left"]
+[ext_resource type="PackedScene" uid="uid://bgkrpyrlcewku" path="res://assets/scenes/boss/partes/boss_mano_derecha.tscn" id="4_right"]
+
+[node name="Boss" type="Node2D"]
+script = ExtResource("1_boss")
+
+[node name="BossCabeza" parent="." instance=ExtResource("2_head")]
+position = Vector2(0, -48)
+
+[node name="BossManoIzquierda" parent="." instance=ExtResource("3_left")]
+position = Vector2(-72, -8)
+
+[node name="BossManoDerecha" parent="." instance=ExtResource("4_right")]
+position = Vector2(72, -8)
+
+[node name="Projectiles" type="Node2D" parent="."]
