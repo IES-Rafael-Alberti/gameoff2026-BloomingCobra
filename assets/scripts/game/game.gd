@@ -1,9 +1,14 @@
 extends Node2D
 
+## 1 = fondo pegado a la cámara (sin parallax). Valores más bajos = se mueve más lento.
+@export_range(0.0, 1.0, 0.01) var background_parallax: float = 0.85
+
 var _hitbox_debug: Node2D
 var _bg_pesadilla: Sprite2D
 var _bg_sueno: Sprite2D
 var _player: Node2D
+var _bg_anchor: Vector2 = Vector2.ZERO
+var _bg_anchor_ready: bool = false
 
 @onready var sfx_general: Node = get_node_or_null("SfxGeneral")
 @onready var room_manager: Node = get_node_or_null("RoomManager")
@@ -27,7 +32,7 @@ func _process(_delta: float) -> void:
 		_player = get_tree().get_first_node_in_group("player") as Node2D
 	if _player == null:
 		return
-	_snap_backgrounds(_background_follow_target())
+	_update_backgrounds(_background_follow_target())
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -140,7 +145,7 @@ func _debug_teleport_to_boss() -> void:
 		camera.reset_smoothing()
 		camera.force_update_scroll()
 
-	_snap_backgrounds(target)
+	_recenter_backgrounds(target)
 
 	# Keep debug teleport snappy even if room_changed fired with stale/empty bounds.
 	call_deferred("_debug_resnap_camera", boss_room)
@@ -211,7 +216,7 @@ func _on_world_mode_changed_backgrounds(mode: int) -> void:
 		_bg_pesadilla.visible = mode == WorldMode.MODE_PESADILLA
 	if _bg_sueno != null:
 		_bg_sueno.visible = mode == WorldMode.MODE_SUENO
-	_snap_backgrounds(_background_follow_target())
+	_recenter_backgrounds(_background_follow_target())
 
 
 func _background_follow_target() -> Vector2:
@@ -225,12 +230,30 @@ func _background_follow_target() -> Vector2:
 	return _player.global_position
 
 
-func _snap_backgrounds(pos: Vector2) -> void:
+func _parallax_background_position(camera_pos: Vector2) -> Vector2:
+	if not _bg_anchor_ready:
+		_bg_anchor = camera_pos
+		_bg_anchor_ready = true
+	# 1 = sigue a la cámara; <1 = se desplaza menos (parallax).
+	return _bg_anchor.lerp(camera_pos, clampf(background_parallax, 0.0, 1.0))
+
+
+func _place_backgrounds(pos: Vector2) -> void:
 	if _bg_pesadilla != null:
 		_bg_pesadilla.global_position = pos
 	if _bg_sueno != null:
 		_bg_sueno.global_position = pos
 
 
+func _update_backgrounds(camera_pos: Vector2) -> void:
+	_place_backgrounds(_parallax_background_position(camera_pos))
+
+
+func _recenter_backgrounds(pos: Vector2) -> void:
+	_bg_anchor = pos
+	_bg_anchor_ready = true
+	_place_backgrounds(pos)
+
+
 func _on_room_changed_backgrounds(_previous: Room, _next: Room) -> void:
-	_snap_backgrounds(_background_follow_target())
+	_recenter_backgrounds(_background_follow_target())
