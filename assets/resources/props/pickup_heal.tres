@@ -1,7 +1,7 @@
-[gd_resource type="Resource" script_class="PropPickupDef" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="PropPickupDef" format=3 uid="uid://bqe4ykgr36wfd"]
 
-[ext_resource type="Script" path="res://assets/scripts/props/definitions/prop_pickup_def.gd" id="1_def"]
-[ext_resource type="Texture2D" uid="uid://ch38tmeognbeb" path="res://assets/sprittesheets/props/placeholders/pickups/health.png" id="2_tex"]
+[ext_resource type="Script" uid="uid://danobc8xia355" path="res://assets/scripts/props/definitions/prop_pickup_def.gd" id="1_def"]
+[ext_resource type="Texture2D" path="res://assets/resources/props/drops/drop_heal.tres" id="2_tex"]
 
 [resource]
 script = ExtResource("1_def")
@@ -9,6 +9,4 @@ id = &"pickup_heal"
 display_name = "Heal Pickup"
 texture = ExtResource("2_tex")
 collision_size = Vector2(14, 14)
-z_index = 1
-pickup_type = &"heal"
-amount = 25
+sprite_scale = 0.18

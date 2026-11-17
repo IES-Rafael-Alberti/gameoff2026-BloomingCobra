@@ -155,7 +155,7 @@ func _perform(kind: AttackKind) -> void:
 			await _activate_melee(
 				_slash_hitbox,
 				facing,
-				slash_damage,
+				slash_damage + _melee_damage_bonus(),
 				slash_active_time,
 				_slash_sf,
 				slash_texture,
@@ -167,7 +167,7 @@ func _perform(kind: AttackKind) -> void:
 			await _activate_melee(
 				_thrust_hitbox,
 				facing,
-				thrust_damage,
+				thrust_damage + _melee_damage_bonus(),
 				thrust_active_time,
 				_thrust_sf,
 				thrust_texture,
@@ -321,9 +321,29 @@ func _spawn_projectile(facing: Vector2) -> void:
 		parent = _player
 	parent.add_child(bolt)
 	bolt.global_position = _player.global_position + facing * 8.0
-	bolt.set("damage", projectile_damage)
+	bolt.set("damage", projectile_damage + _projectile_damage_bonus())
 	if bolt.has_method("launch"):
 		bolt.call("launch", facing, projectile_speed)
+
+
+func _player_buffs() -> Node:
+	if _player == null:
+		return null
+	return _player.get_node_or_null("Buffs")
+
+
+func _melee_damage_bonus() -> int:
+	var buffs := _player_buffs()
+	if buffs != null and buffs.has_method("get_melee_damage_bonus"):
+		return int(buffs.call("get_melee_damage_bonus"))
+	return 0
+
+
+func _projectile_damage_bonus() -> int:
+	var buffs := _player_buffs()
+	if buffs != null and buffs.has_method("get_projectile_damage_bonus"):
+		return int(buffs.call("get_projectile_damage_bonus"))
+	return 0
 
 
 func _build_frame_resources() -> void:

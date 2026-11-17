@@ -1,51 +1,110 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://assets/scripts/hud/health_bar.gd" id="1_hb"]
-[ext_resource type="Texture2D" path="res://assets/sprittesheets/HUD/definitivo/ui_barra_body.png" id="2_body"]
-[ext_resource type="Texture2D" path="res://assets/sprittesheets/HUD/definitivo/ui_barra_fill.png" id="3_fill"]
-[ext_resource type="Texture2D" uid="uid://bbkoh3r512v6g" path="res://assets/sprittesheets/HUD/definitivo/ui_ojo.png" id="4_eye"]
+[ext_resource type="Texture2D" uid="uid://d4wkvntrj7dp" path="res://assets/sprittesheets/HUD/definitivo/ui_barra_vida.png" id="2_sheet"]
+[ext_resource type="Texture2D" uid="uid://c08nt63r46rs5" path="res://assets/sprittesheets/HUD/definitivo/ui_iconos_bufos.png" id="3_buffs"]
 
 [node name="HealthBar" type="CanvasLayer"]
 layer = 60
 script = ExtResource("1_hb")
-body_texture = ExtResource("2_body")
-fill_texture = ExtResource("3_fill")
-eye_sheet = ExtResource("4_eye")
-bar_scale = 0.55
-eye_scale = 0.28
+sheet = ExtResource("2_sheet")
+buff_sheet = ExtResource("3_buffs")
+bar_scale = 0.42
+buff_icon_scale = 0.42
+base_max_vitality = 100.0
+vitality_per_size_tier = 20.0
+visual_drain_per_second = 0.12
+visual_rise_per_second = 0.55
 
 [node name="Margin" type="MarginContainer" parent="."]
 anchors_preset = 0
 offset_left = 10.0
 offset_top = 8.0
-offset_right = 420.0
-offset_bottom = 120.0
+offset_right = 260.0
+offset_bottom = 240.0
 
-[node name="Row" type="HBoxContainer" parent="Margin"]
+[node name="Column" type="VBoxContainer" parent="Margin"]
 layout_mode = 2
-theme_override_constants/separation = -8
-alignment = 0
+theme_override_constants/separation = -6
 
-[node name="Eye" type="TextureRect" parent="Margin/Row"]
-layout_mode = 2
-custom_minimum_size = Vector2(120, 120)
-size_flags_vertical = 4
-
-[node name="BarRoot" type="Control" parent="Margin/Row"]
+[node name="Root" type="Control" parent="Margin/Column"]
 clip_contents = false
 layout_mode = 2
-custom_minimum_size = Vector2(210, 89)
-size_flags_vertical = 4
+custom_minimum_size = Vector2(166, 88)
 
-[node name="Body" type="TextureRect" parent="Margin/Row/BarRoot"]
+[node name="Under" type="TextureRect" parent="Margin/Column/Root"]
 z_index = 0
 layout_mode = 0
 mouse_filter = 2
 
-[node name="Fill" type="TextureProgressBar" parent="Margin/Row/BarRoot"]
+[node name="Fill" type="TextureRect" parent="Margin/Column/Root"]
 z_index = 1
 layout_mode = 0
 mouse_filter = 2
-max_value = 1.0
-step = 0.0
-value = 1.0
+
+[node name="BuffRow" type="HBoxContainer" parent="Margin/Column"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Attack" type="VBoxContainer" parent="Margin/Column/BuffRow"]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = -2
+
+[node name="Icon" type="TextureRect" parent="Margin/Column/BuffRow/Attack"]
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Count" type="Label" parent="Margin/Column/BuffRow/Attack"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.05, 0.05, 0.12, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 18
+text = "x0"
+horizontal_alignment = 1
+
+[node name="Projectile" type="VBoxContainer" parent="Margin/Column/BuffRow"]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = -2
+
+[node name="Icon" type="TextureRect" parent="Margin/Column/BuffRow/Projectile"]
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Count" type="Label" parent="Margin/Column/BuffRow/Projectile"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.05, 0.05, 0.12, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 18
+text = "x0"
+horizontal_alignment = 1
+
+[node name="Shield" type="VBoxContainer" parent="Margin/Column/BuffRow"]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = -2
+
+[node name="Icon" type="TextureRect" parent="Margin/Column/BuffRow/Shield"]
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Count" type="Label" parent="Margin/Column/BuffRow/Shield"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.05, 0.05, 0.12, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 18
+text = "x0"
+horizontal_alignment = 1

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cbegs4lf6edli"
-path="res://.godot/imported/tilesetvigilia2.png-a413f8a07161e695dc97ef2b163bd7ee.ctex"
+uid="uid://hv3o43a07pdx"
+path="res://.godot/imported/ui_interruptor_1vig_2pes.png-dd67b79808c21386b0f48dce74a8ccf7.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/scenary/tilesetvigilia2.png"
-dest_files=["res://.godot/imported/tilesetvigilia2.png-a413f8a07161e695dc97ef2b163bd7ee.ctex"]
+source_file="res://assets/sprittesheets/HUD/definitivo/ui_interruptor_1vig_2pes.png"
+dest_files=["res://.godot/imported/ui_interruptor_1vig_2pes.png-dd67b79808c21386b0f48dce74a8ccf7.ctex"]
 
 [params]
 

@@ -9,6 +9,8 @@ extends Resource
 @export var modulate: Color = Color.WHITE
 @export var collision_size: Vector2 = Vector2(16, 16)
 @export var z_index: int = 1
+## Uniform scale applied to the sprite (HD sheets need ~0.15–0.2).
+@export var sprite_scale: float = 1.0
 ## Tint used when texture is missing (editor / placeholder).
 @export var placeholder_color: Color = Color(0.75, 0.75, 0.8, 1.0)
 
@@ -22,6 +24,8 @@ func apply_visual(sprite: Sprite2D, body: Node2D = null) -> void:
 		# Keep any texture already set on the scene; only invent a placeholder if empty.
 		sprite.texture = _make_placeholder_texture()
 	sprite.modulate = modulate
+	if sprite_scale > 0.0:
+		sprite.scale = Vector2(sprite_scale, sprite_scale)
 	if body != null:
 		body.z_index = z_index
 

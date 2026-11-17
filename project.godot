@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Dream Shifter"
-run/main_scene="uid://w3e38l2obsqo"
+run/main_scene="res://assets/scenes/HUD/main_menu.tscn"
 config/features=PackedStringArray("4.7", "Forward Plus")
 config/icon="res://icon.svg"
 

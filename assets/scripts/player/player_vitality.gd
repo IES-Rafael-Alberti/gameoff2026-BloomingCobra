@@ -75,6 +75,14 @@ func heal_from_cat() -> float:
 	return heal(cat_heal_amount)
 
 
+## Raises the vitality cap and restores the same amount (pink drop).
+func increase_max(amount: float) -> float:
+	if _dead or amount <= 0.0:
+		return 0.0
+	max_vitality += amount
+	return heal(amount)
+
+
 func get_ratio() -> float:
 	if max_vitality <= 0.0:
 		return 0.0

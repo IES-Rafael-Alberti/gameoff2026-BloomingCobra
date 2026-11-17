@@ -3,6 +3,8 @@ extends CharacterBody2D
 
 signal caught
 
+@export var catch_heal_drop_scene: PackedScene = preload("res://assets/scenes/props/pickups/pickup_cat_heal.tscn")
+
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var switchable: Node2D = $Switchable
 @onready var sfx: Node = get_node_or_null("SfxPlayer")
@@ -69,18 +71,22 @@ func play_gather() -> void:
 		animated_sprite.play("gather")
 		await animated_sprite.animation_finished
 	caught.emit()
-	_grant_catch_heal()
+	_spawn_catch_heal_drop()
 	queue_free()
 
 
-func _grant_catch_heal() -> void:
-	var player := get_player()
-	if player == null:
+func _spawn_catch_heal_drop() -> void:
+	if catch_heal_drop_scene == null:
 		return
-	if player.has_method("heal_vitality_from_cat"):
-		player.call("heal_vitality_from_cat")
-	elif player.has_method("heal_vitality"):
-		player.call("heal_vitality", 40.0)
+	var drop := catch_heal_drop_scene.instantiate()
+	var parent := get_parent()
+	if parent == null:
+		parent = get_tree().current_scene
+	if parent == null:
+		return
+	parent.add_child(drop)
+	if drop is Node2D:
+		(drop as Node2D).global_position = global_position
 
 
 func get_player() -> Node2D:

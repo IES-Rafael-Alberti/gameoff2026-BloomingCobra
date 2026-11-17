@@ -25,6 +25,12 @@
 [ext_resource type="AudioStream" uid="uid://crbieoj4wi1fq" path="res://assets/audio/general/Shift.wav" id="19_shift"]
 [ext_resource type="Script" uid="uid://c1h4s6dj62gua" path="res://assets/scripts/game/room_manager.gd" id="20_room_mgr"]
 [ext_resource type="PackedScene" uid="uid://csq6yrw4oejoa" path="res://assets/scenes/rooms/boss/bossRoom.tscn" id="25_jdjof"]
+[ext_resource type="PackedScene" path="res://assets/scenes/props/pickups/pickup_attack_boost.tscn" id="26_h5j7u"]
+[ext_resource type="PackedScene" path="res://assets/scenes/props/pickups/pickup_cat_heal.tscn" id="27_4hayi"]
+[ext_resource type="PackedScene" path="res://assets/scenes/props/pickups/pickup_heal.tscn" id="28_tcehl"]
+[ext_resource type="PackedScene" path="res://assets/scenes/props/pickups/pickup_max_health.tscn" id="29_c7jqk"]
+[ext_resource type="PackedScene" path="res://assets/scenes/props/pickups/pickup_projectile_boost.tscn" id="30_3sk60"]
+[ext_resource type="PackedScene" path="res://assets/scenes/props/pickups/pickup_shield.tscn" id="31_lx1sk"]
 
 [node name="Game" type="Node2D" unique_id=139143478]
 position = Vector2(-130, -76)
@@ -40,6 +46,7 @@ switch_sfx = ExtResource("19_shift")
 script = ExtResource("20_room_mgr")
 
 [node name="HealthBar" parent="." unique_id=121366271 instance=ExtResource("17_hp")]
+bar_scale = 0.42
 
 [node name="MapOverlay" parent="." unique_id=939454518 instance=ExtResource("16_map")]
 
@@ -96,12 +103,14 @@ position = Vector2(150, 394)
 light_mask = 3
 visibility_layer = 3
 z_index = 2
-position = Vector2(98, -223)
+position = Vector2(111, 66)
 
 [node name="Camera2D" type="Camera2D" parent="Player" unique_id=2003611831]
 zoom = Vector2(4, 4)
 limit_smoothed = true
 script = ExtResource("1_cam")
+follow_smoothing = 10.0
+dead_zone_half_extents = Vector2(28, 28)
 
 [node name="Runner" type="Node2D" parent="." unique_id=973671502]
 
@@ -145,3 +154,21 @@ position = Vector2(31, -698)
 
 [node name="Divider_3" parent="Enemy/Divider" unique_id=2066769326 instance=ExtResource("15_fc420")]
 position = Vector2(194, -703)
+
+[node name="PickupAttackBoost" parent="." unique_id=975963451 instance=ExtResource("26_h5j7u")]
+position = Vector2(215, 122)
+
+[node name="PickupShield" parent="." unique_id=1396938780 instance=ExtResource("31_lx1sk")]
+position = Vector2(237, 65)
+
+[node name="PickupCatHeal" parent="." unique_id=1173408185 instance=ExtResource("27_4hayi")]
+position = Vector2(200, 164)
+
+[node name="PickupProjectileBoost" parent="." unique_id=227373639 instance=ExtResource("30_3sk60")]
+position = Vector2(302, 82)
+
+[node name="PickupHeal" parent="." unique_id=914494015 instance=ExtResource("28_tcehl")]
+position = Vector2(275, 188)
+
+[node name="PickupMaxHealth" parent="." unique_id=381937692 instance=ExtResource("29_c7jqk")]
+position = Vector2(288, 139)

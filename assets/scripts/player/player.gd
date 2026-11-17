@@ -22,6 +22,7 @@ const IDLE_CONTENT_RECT := Rect2(245, 153, 509, 720)
 @onready var damageable: Node2D = $Damageable
 @onready var attack: Node2D = $Attack
 @onready var vitality: Node = get_node_or_null("Vitality")
+@onready var buffs: Node = get_node_or_null("Buffs")
 @onready var sfx: Node = get_node_or_null("SfxPlayer")
 @onready var _audio_listener: AudioListener2D = get_node_or_null("AudioListener2D")
 
@@ -183,12 +184,24 @@ func heal_vitality(amount: float) -> float:
 	return float(vitality.call("heal", amount))
 
 
+func increase_max_vitality(amount: float) -> float:
+	if _dead or vitality == null:
+		return 0.0
+	if vitality.has_method("increase_max"):
+		return float(vitality.call("increase_max", amount))
+	return heal_vitality(amount)
+
+
 func heal_vitality_from_cat() -> float:
 	if _dead:
 		return 0.0
 	if vitality != null and vitality.has_method("heal_from_cat"):
 		return float(vitality.call("heal_from_cat"))
 	return heal_vitality(40.0)
+
+
+func get_buffs() -> Node:
+	return buffs
 
 
 func _on_vitality_depleted() -> void:
@@ -210,7 +223,10 @@ func _on_vitality_depleted() -> void:
 func _on_damaged(amount: int, _current_health: int) -> void:
 	if _dead or _void_falling:
 		return
-	if vitality != null and vitality.has_method("apply_hit_damage"):
+	var absorbed := false
+	if buffs != null and buffs.has_method("try_absorb_hit"):
+		absorbed = bool(buffs.call("try_absorb_hit"))
+	if not absorbed and vitality != null and vitality.has_method("apply_hit_damage"):
 		vitality.call("apply_hit_damage", amount)
 	if _dead:
 		return

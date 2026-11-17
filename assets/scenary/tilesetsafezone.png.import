@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://wvkhpoeno64y"
-path="res://.godot/imported/tilesetPesadilla.png-c6bfd630e02a9ca7a7e48572cc3a7fde.ctex"
+uid="uid://bkbk3ji02etq0"
+path="res://.godot/imported/tilesetsafezone.png-e012586a777727eb3f297b22c9678375.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/scenary/tilesetPesadilla.png"
-dest_files=["res://.godot/imported/tilesetPesadilla.png-c6bfd630e02a9ca7a7e48572cc3a7fde.ctex"]
+source_file="res://assets/scenary/tilesetsafezone.png"
+dest_files=["res://.godot/imported/tilesetsafezone.png-e012586a777727eb3f297b22c9678375.ctex"]
 
 [params]
 

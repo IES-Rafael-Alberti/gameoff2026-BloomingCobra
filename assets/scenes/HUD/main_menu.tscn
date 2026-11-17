@@ -1,0 +1,88 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/hud/main_menu.gd" id="1_menu"]
+[ext_resource type="Texture2D" uid="uid://b535nujlqekvs" path="res://assets/sprittesheets/HUD/definitivo/inicio_titulo_background.png" id="2_bg"]
+[ext_resource type="Texture2D" uid="uid://cbd6oij8vo0su" path="res://assets/sprittesheets/HUD/definitivo/logo_inicio.png" id="3_logo"]
+[ext_resource type="Texture2D" uid="uid://byg8tgcia5q00" path="res://assets/sprittesheets/HUD/definitivo/colgantes_inicio.png" id="4_colgantes"]
+[ext_resource type="Texture2D" uid="uid://jc3hfx67tbte" path="res://assets/sprittesheets/HUD/definitivo/Seleccionador.png" id="5_selector"]
+[ext_resource type="Texture2D" uid="uid://dnjtl6coiv6sm" path="res://assets/sprittesheets/HUD/definitivo/inicio_bloomingcobra.png" id="6_brand"]
+
+[node name="MainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_menu")
+
+[node name="Background" type="Control" parent="."]
+clip_contents = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="ScrollBackground" type="TextureRect" parent="Background"]
+layout_mode = 0
+mouse_filter = 2
+texture = ExtResource("2_bg")
+expand_mode = 1
+stretch_mode = 0
+
+[node name="UI" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Colgantes" type="TextureRect" parent="UI"]
+layout_mode = 0
+mouse_filter = 2
+texture = ExtResource("4_colgantes")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Logo" type="TextureRect" parent="UI"]
+layout_mode = 0
+mouse_filter = 2
+texture = ExtResource("3_logo")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="MenuRow" type="HBoxContainer" parent="UI"]
+layout_mode = 0
+theme_override_constants/separation = 72
+alignment = 1
+
+[node name="SelectorLeft" type="TextureRect" parent="UI"]
+visible = false
+z_index = 2
+layout_mode = 0
+mouse_filter = 2
+texture = ExtResource("5_selector")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SelectorRight" type="TextureRect" parent="UI"]
+visible = false
+z_index = 2
+layout_mode = 0
+mouse_filter = 2
+texture = ExtResource("5_selector")
+expand_mode = 1
+stretch_mode = 5
+flip_h = true
+
+[node name="BloomingCobra" type="TextureRect" parent="UI"]
+layout_mode = 0
+mouse_filter = 2
+texture = ExtResource("6_brand")
+expand_mode = 1
+stretch_mode = 5

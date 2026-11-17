@@ -1,14 +1,22 @@
 class_name PickupProp
 extends Area2D
 
-## Collectible prop. Heal pickups restore vigil vitality.
+## Collectible prop. Heal / buff / shield / max-health pickups.
 
 @export var definition: PropPickupDef
+## Vertical float amplitude in pixels.
+@export var float_amplitude: float = 2.5
+## Full up-down cycles per second.
+@export var float_speed: float = 1.35
+## Fade-out duration when collected.
+@export var collect_fade_time: float = 0.22
 
 @onready var sprite: Sprite2D = $Sprite2D
 @onready var collision_shape: CollisionShape2D = $CollisionShape2D
 
 var _collected: bool = false
+var _float_phase: float = 0.0
+var _sprite_base_pos: Vector2 = Vector2.ZERO
 
 
 func _ready() -> void:
@@ -18,8 +26,29 @@ func _ready() -> void:
 	monitoring = true
 	monitorable = false
 	apply_definition()
+	_sprite_base_pos = sprite.position
+	_float_phase = randf() * TAU
 	if not body_entered.is_connected(_on_body_entered):
 		body_entered.connect(_on_body_entered)
+	# Drops that spawn on top of the player (cat catch) still collect.
+	call_deferred("_collect_if_already_overlapping")
+
+
+func _process(delta: float) -> void:
+	if _collected or sprite == null or float_amplitude <= 0.0:
+		return
+	_float_phase += delta * float_speed * TAU
+	sprite.position = _sprite_base_pos + Vector2(0.0, sin(_float_phase) * float_amplitude)
+
+
+func _collect_if_already_overlapping() -> void:
+	if _collected or not monitoring:
+		return
+	for body in get_overlapping_bodies():
+		if body is Node2D:
+			_on_body_entered(body as Node2D)
+			if _collected:
+				return
 
 
 func apply_definition() -> void:
@@ -43,27 +72,98 @@ func get_pickup_amount() -> int:
 	return 1
 
 
+func get_pickup_duration() -> float:
+	if definition != null:
+		return definition.duration
+	return 0.0
+
+
 func _on_body_entered(body: Node2D) -> void:
 	if _collected or body == null:
 		return
 	if not body.is_in_group("player"):
 		return
 	_collected = true
+	monitoring = false
+	if collision_shape != null:
+		collision_shape.set_deferred("disabled", true)
 	_apply_pickup(body)
 	play_collect_sfx()
-	queue_free()
+	_play_collect_fade()
+
+
+func _play_collect_fade() -> void:
+	if sprite == null:
+		queue_free()
+		return
+	var tween := create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(sprite, "modulate:a", 0.0, collect_fade_time).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+	tween.tween_property(sprite, "position:y", sprite.position.y - 6.0, collect_fade_time).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	tween.tween_property(sprite, "scale", sprite.scale * 1.15, collect_fade_time).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	tween.set_parallel(false)
+	tween.tween_callback(queue_free)
 
 
 func _apply_pickup(player: Node) -> void:
 	var kind := get_pickup_type()
-	var amount := float(get_pickup_amount())
-	if kind == &"heal" or kind == &"max_health" or kind == &"maxhealth":
-		if player.has_method("heal_vitality"):
-			player.call("heal_vitality", amount)
-		elif player.has_node("Vitality"):
-			var vit: Node = player.get_node("Vitality")
-			if vit.has_method("heal"):
-				vit.call("heal", amount)
+	var amount := get_pickup_amount()
+	var duration := get_pickup_duration()
+	match kind:
+		&"heal", &"cat_heal":
+			_apply_heal(player, float(amount))
+		&"max_health", &"maxhealth":
+			_apply_max_health(player, float(amount))
+		&"attack_boost", &"attack":
+			_apply_attack_boost(player, amount, duration)
+		&"projectile_boost", &"projectile":
+			_apply_projectile_boost(player, amount, duration)
+		&"shield":
+			_apply_shield(player, amount)
+		_:
+			_apply_heal(player, float(amount))
+
+
+func _apply_heal(player: Node, amount: float) -> void:
+	if player.has_method("heal_vitality"):
+		player.call("heal_vitality", amount)
+		return
+	var vit: Node = player.get_node_or_null("Vitality")
+	if vit != null and vit.has_method("heal"):
+		vit.call("heal", amount)
+
+
+func _apply_max_health(player: Node, amount: float) -> void:
+	if player.has_method("increase_max_vitality"):
+		player.call("increase_max_vitality", amount)
+		return
+	var vit: Node = player.get_node_or_null("Vitality")
+	if vit != null and vit.has_method("increase_max"):
+		vit.call("increase_max", amount)
+
+
+func _apply_attack_boost(player: Node, bonus: int, duration: float) -> void:
+	var buffs := _get_buffs(player)
+	if buffs != null and buffs.has_method("apply_attack_boost"):
+		buffs.call("apply_attack_boost", duration, bonus)
+
+
+func _apply_projectile_boost(player: Node, bonus: int, duration: float) -> void:
+	var buffs := _get_buffs(player)
+	if buffs != null and buffs.has_method("apply_projectile_boost"):
+		buffs.call("apply_projectile_boost", duration, bonus)
+
+
+func _apply_shield(player: Node, hits: int) -> void:
+	var buffs := _get_buffs(player)
+	if buffs != null and buffs.has_method("apply_shield"):
+		buffs.call("apply_shield", hits)
+
+
+func _get_buffs(player: Node) -> Node:
+	if player == null:
+		return null
+	return player.get_node_or_null("Buffs")
 
 
 ## Call from collect logic when the player picks this up.

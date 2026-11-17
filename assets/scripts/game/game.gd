@@ -64,6 +64,12 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("debug_boss_room") and not event.is_echo():
 		_debug_teleport_to_boss()
 		get_viewport().set_input_as_handled()
+		return
+
+	if event.is_action_pressed("debug_camera_mode") and not event.is_echo():
+		_debug_cycle_camera_mode()
+		get_viewport().set_input_as_handled()
+		return
 
 
 func _setup_debug_boss_button() -> void:
@@ -80,6 +86,20 @@ func _setup_debug_boss_button() -> void:
 	button.focus_mode = Control.FOCUS_NONE
 	button.pressed.connect(_debug_teleport_to_boss)
 	layer.add_child(button)
+
+
+func _debug_cycle_camera_mode() -> void:
+	var player := get_tree().get_first_node_in_group("player") as Node2D
+	if player == null:
+		return
+	var cam := player.get_node_or_null("Camera2D")
+	if cam == null or not cam.has_method("cycle_mode"):
+		return
+	var next_mode: Variant = cam.call("cycle_mode")
+	var labels: PackedStringArray = ["FIXED", "FOLLOW", "DEAD_ZONE"]
+	var idx := int(next_mode)
+	var label: String = labels[idx] if idx >= 0 and idx < labels.size() else str(next_mode)
+	print("[Debug] Camera mode: ", label)
 
 
 func _debug_teleport_to_boss() -> void:

@@ -1,8 +1,7 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://assets/scripts/props/pickups/pickup_prop.gd" id="1_pickup"]
-[ext_resource type="Texture2D" uid="uid://ch38tmeognbeb" path="res://assets/sprittesheets/props/placeholders/pickups/health.png" id="2_tex"]
-[ext_resource type="Resource" path="res://assets/resources/props/pickup_heal.tres" id="3_def"]
+[ext_resource type="Resource" path="res://assets/resources/props/pickup_heal.tres" id="2_def"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_heal"]
 size = Vector2(14, 14)
@@ -14,11 +13,10 @@ collision_mask = 2
 monitoring = true
 monitorable = false
 script = ExtResource("1_pickup")
-definition = ExtResource("3_def")
+definition = ExtResource("2_def")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture_filter = 1
-texture = ExtResource("2_tex")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_heal")
