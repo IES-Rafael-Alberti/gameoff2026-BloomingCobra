@@ -47,6 +47,8 @@ const MODE_COUNT := 3
 		queue_redraw()
 
 var _current_room: Room = null
+## Playable room rect (before viewport padding). Used to keep look-at inside the room.
+var _playable_bounds: Rect2 = Rect2()
 ## Desired world-space view center for DEAD_ZONE (and while easing into FOLLOW).
 var _look_at: Vector2 = Vector2.ZERO
 var _has_look_at: bool = false
@@ -138,13 +140,24 @@ func _apply_bounds(room: Room) -> void:
 	)
 	if bounds.size == Vector2.ZERO:
 		# Never keep the previous room's limits — that traps the camera in a smaller box.
+		_playable_bounds = Rect2()
 		limit_enabled = false
 		return
+	_playable_bounds = bounds
+	# Camera2D keeps the *visible* rect inside limit_*. Grow by half the view so the
+	# camera can stay centered on the player anywhere inside the playable room
+	# (otherwise it "hits the map edge" and stops while the player keeps walking).
+	var half_view := _half_view_extents()
+	var cam_limits := bounds.grow_individual(half_view.x, half_view.y, half_view.x, half_view.y)
 	limit_enabled = true
-	limit_left = int(floor(bounds.position.x))
-	limit_top = int(floor(bounds.position.y))
-	limit_right = int(ceil(bounds.end.x))
-	limit_bottom = int(ceil(bounds.end.y))
+	limit_left = int(floor(cam_limits.position.x))
+	limit_top = int(floor(cam_limits.position.y))
+	limit_right = int(ceil(cam_limits.end.x))
+	limit_bottom = int(ceil(cam_limits.end.y))
+
+
+func _half_view_extents() -> Vector2:
+	return get_viewport_rect().size * 0.5 / zoom.abs()
 
 
 ## Call after a forced player teleport so limits + scroll match the new room now.
@@ -232,17 +245,17 @@ func _set_look_at(world_center: Vector2, player: Node2D) -> void:
 
 
 func _clamp_look_at(center: Vector2) -> Vector2:
-	if not limit_enabled:
+	if _playable_bounds.size == Vector2.ZERO:
 		return center
-	var half_view := get_viewport_rect().size * 0.5 / zoom
-	var min_c := Vector2(float(limit_left), float(limit_top)) + half_view
-	var max_c := Vector2(float(limit_right), float(limit_bottom)) - half_view
+	# Keep the focus inside the playable room; limit_* already include view padding.
+	var min_c := _playable_bounds.position
+	var max_c := _playable_bounds.end
 	if min_c.x > max_c.x:
-		center.x = (float(limit_left) + float(limit_right)) * 0.5
+		center.x = _playable_bounds.get_center().x
 	else:
 		center.x = clampf(center.x, min_c.x, max_c.x)
 	if min_c.y > max_c.y:
-		center.y = (float(limit_top) + float(limit_bottom)) * 0.5
+		center.y = _playable_bounds.get_center().y
 	else:
 		center.y = clampf(center.y, min_c.y, max_c.y)
 	return center
