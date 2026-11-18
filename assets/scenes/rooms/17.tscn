@@ -1,0 +1,70 @@
+[gd_scene format=4 uid="uid://bwkaa8ycbdfuy"]
+
+[ext_resource type="Script" uid="uid://dv7i76b04aw1s" path="res://assets/scripts/rooms/trap.gd" id="1_lb8lx"]
+[ext_resource type="Script" uid="uid://bkoec71xnejuk" path="res://assets/scripts/common/switchable.gd" id="1_pd5op"]
+[ext_resource type="TileSet" uid="uid://c1fyb264g8tdl" path="res://assets/resources/tilesets/tileset_pesadilla.tres" id="2_lb8lx"]
+[ext_resource type="TileSet" uid="uid://ceqj8bpfcscjg" path="res://assets/resources/tilesets/tileset_vigiliadef.tres" id="3_l0d6y"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_rihe3"]
+size = Vector2(208, 16)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_p81wj"]
+size = Vector2(12.5, 157)
+
+[node name="17" type="Node2D" unique_id=1556955998]
+script = ExtResource("1_lb8lx")
+
+[node name="Switchable" type="Node2D" parent="." unique_id=884800511]
+script = ExtResource("1_pd5op")
+
+[node name="Pesadilla" type="Node2D" parent="Switchable" unique_id=966715375]
+visible = false
+
+[node name="Tiles" type="TileMapLayer" parent="Switchable/Pesadilla" unique_id=1555169988]
+texture_filter = 2
+scale = Vector2(0.05, 0.05)
+tile_map_data = PackedByteArray("AAD4//z/AAAAAAAAAAD4//7/AAAAAAEAAAD4/wAAAAAAAAEAAAD4/wIAAAAAAAEAAAD4/wQAAAAAAAIAAAD6/wQAAAABAAIAAAD8/wQAAAABAAIAAAD+/wQAAAABAAIAAAAAAAQAAAABAAIAAAACAAQAAAABAAIAAAAEAAQAAAABAAIAAAAGAAQAAAACAAIAAAAGAAIAAAACAAEAAAAGAAAAAAACAAEAAAAGAP7/AAACAAEAAAAGAPz/AAACAAAAAAAEAPz/AAABAAAAAAACAPz/AAABAAAAAAAAAPz/AAABAAAAAAD+//z/AAABAAAAAAD8//z/AAABAAAAAAD6//z/AAABAAAAAAD6//7/AAABAAEAAAD6/wAAAAABAAEAAAD6/wIAAAABAAEAAAD8/wIAAAABAAEAAAD+/wIAAAABAAEAAAAAAAIAAAABAAEAAAACAAIAAAABAAEAAAAEAAIAAAABAAEAAAAEAAAAAAABAAEAAAAEAP7/AAABAAEAAAACAP7/AAABAAEAAAAAAP7/AAABAAEAAAD+//7/AAABAAEAAAD8//7/AAABAAEAAAD8/wAAAAABAAEAAAD+/wAAAAABAAEAAAAAAAAAAAABAAEAAAACAAAAAAABAAEAAAA=")
+tile_set = ExtResource("2_lb8lx")
+
+[node name="Sueño" type="Node2D" parent="Switchable" unique_id=1018947006]
+
+[node name="Tiles" type="TileMapLayer" parent="Switchable/Sueño" unique_id=1121267889]
+texture_filter = 2
+position = Vector2(35.6, 6)
+scale = Vector2(0.05, 0.05)
+tile_map_data = PackedByteArray("AAADAP7/AAABAAEAAAD5//7/AAABAAEAAAD5/wAAAAABAAEAAAD5/wIAAAABAAEAAAADAAAAAAABAAEAAAADAAIAAAABAAEAAAADAPz/AAABAAEAAAACAPz/AAABAAEAAAABAPz/AAABAAEAAAAAAPz/AAABAAEAAAD///z/AAABAAEAAAD+//z/AAABAAEAAAD5/wQAAAABAAEAAAD9/wQAAAABAAEAAAD//wQAAAABAAEAAAABAAQAAAABAAEAAAADAAQAAAABAAEAAAD5//z/AAABAAEAAAD3//r/AAAAAAAAAAD3//z/AAAAAAEAAAD3//7/AAAAAAEAAAD3/wAAAAAAAAEAAAD3/wIAAAAAAAEAAAD3/wQAAAAAAAEAAAD3/wYAAAAAAAIAAAD5/wYAAAABAAIAAAD9/wYAAAABAAIAAAD//wYAAAABAAIAAAABAAYAAAABAAIAAAADAAYAAAABAAIAAAAFAAYAAAACAAIAAAAFAAQAAAACAAEAAAAFAAIAAAACAAEAAAAFAAAAAAACAAEAAAAFAP7/AAACAAEAAAAFAPz/AAACAAEAAAD5//r/AAABAAAAAAD///r/AAABAAAAAAABAPr/AAABAAAAAAADAPr/AAABAAAAAAAFAPr/AAACAAAAAAD//wAAAAABAAUAAAD///7/AAABAAQAAAD9/wAAAAAAAAUAAAD9/wIAAAAAAAYAAAD//wIAAAABAAYAAAABAAIAAAACAAYAAAABAAAAAAACAAUAAAABAP7/AAACAAQAAAD9//r/AAABAAAAAAD9//z/AAABAAEAAAD9//7/AAAAAAQAAAD7/wIAAAABAAEAAAD7/wQAAAABAAEAAAD7/wYAAAABAAIAAAD7/wAAAAABAAEAAAD7//7/AAABAAEAAAD8//z/AAABAAEAAAD7//r/AAABAAAAAAD7//z/AAABAAEAAAA=")
+tile_set = ExtResource("3_l0d6y")
+
+[node name="Walls" type="StaticBody2D" parent="." unique_id=1872382948]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls" unique_id=1275960346]
+position = Vector2(-97, -147)
+shape = SubResource("RectangleShape2D_rihe3")
+
+[node name="CollisionShape2D2" type="CollisionShape2D" parent="Walls" unique_id=1454824898]
+position = Vector2(-122, 182)
+shape = SubResource("RectangleShape2D_rihe3")
+
+[node name="CollisionShape2D3" type="CollisionShape2D" parent="Walls" unique_id=1253905346]
+position = Vector2(86, 183)
+shape = SubResource("RectangleShape2D_rihe3")
+
+[node name="CollisionShape2D4" type="CollisionShape2D" parent="Walls" unique_id=1157865004]
+position = Vector2(112, -148)
+shape = SubResource("RectangleShape2D_rihe3")
+
+[node name="CollisionShape2D5" type="CollisionShape2D" parent="Walls" unique_id=160418552]
+position = Vector2(-195, -62)
+shape = SubResource("RectangleShape2D_p81wj")
+
+[node name="CollisionShape2D6" type="CollisionShape2D" parent="Walls" unique_id=319886355]
+position = Vector2(-195, 93)
+shape = SubResource("RectangleShape2D_p81wj")
+
+[node name="CollisionShape2D8" type="CollisionShape2D" parent="Walls" unique_id=711331064]
+position = Vector2(189, 98)
+shape = SubResource("RectangleShape2D_p81wj")
+
+[node name="CollisionShape2D9" type="CollisionShape2D" parent="Walls" unique_id=773689057]
+position = Vector2(190, -60)
+shape = SubResource("RectangleShape2D_p81wj")

@@ -29,7 +29,7 @@ camera_limit_expand = 64.0
 [node name="Switchable" type="Node2D" parent="." unique_id=1028693094]
 script = ExtResource("2_nkxtl")
 
-[node name="Pesadilla" type="Node2D" parent="Switchable"]
+[node name="Pesadilla" type="Node2D" parent="Switchable" unique_id=2068127146]
 
 [node name="Tiles" type="TileMapLayer" parent="Switchable/Pesadilla" unique_id=681118894]
 texture_filter = 2
@@ -37,7 +37,7 @@ scale = Vector2(0.05, 0.05)
 tile_map_data = PackedByteArray("AAD4//z/AAAAAAAAAAD4//7/AAAAAAEAAAD4/wAAAAAAAAEAAAD4/wIAAAAAAAEAAAD4/wQAAAAAAAIAAAD6/wQAAAABAAIAAAD8/wQAAAABAAIAAAD+/wQAAAABAAIAAAAAAAQAAAABAAIAAAACAAQAAAABAAIAAAAEAAQAAAABAAIAAAAGAAQAAAACAAIAAAAGAAIAAAACAAEAAAAGAAAAAAACAAEAAAAGAP7/AAACAAEAAAAGAPz/AAACAAAAAAAEAPz/AAABAAAAAAACAPz/AAABAAAAAAAAAPz/AAABAAAAAAD+//z/AAABAAAAAAD8//z/AAABAAAAAAD6//z/AAABAAAAAAD6//7/AAABAAEAAAD6/wAAAAABAAEAAAD6/wIAAAABAAEAAAD8/wIAAAABAAEAAAD+/wIAAAABAAEAAAAAAAIAAAABAAEAAAACAAIAAAABAAEAAAAEAAIAAAABAAEAAAAEAAAAAAABAAEAAAAEAP7/AAABAAEAAAACAP7/AAABAAEAAAAAAP7/AAABAAEAAAD+//7/AAABAAEAAAD8//7/AAABAAEAAAD8/wAAAAABAAEAAAD+/wAAAAABAAEAAAAAAAAAAAABAAEAAAACAAAAAAABAAEAAAA=")
 tile_set = ExtResource("5_pesadilla")
 
-[node name="Sueño" type="Node2D" parent="Switchable"]
+[node name="Sueño" type="Node2D" parent="Switchable" unique_id=1741359392]
 
 [node name="Tiles" type="TileMapLayer" parent="Switchable/Sueño" unique_id=621681694]
 texture_filter = 2
