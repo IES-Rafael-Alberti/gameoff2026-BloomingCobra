@@ -4,7 +4,7 @@
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_vigiliadef"]
 texture = ExtResource("1_atlas")
-texture_region_size = Vector2i(1010, 1009)
+texture_region_size = Vector2i(1010, 1010)
 0:0/0 = 0
 1:0/0 = 0
 2:0/0 = 0
