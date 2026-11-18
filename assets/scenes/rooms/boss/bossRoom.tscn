@@ -22,18 +22,24 @@ size = Vector2(12, 40)
 
 [node name="BossRoom" type="Node2D" unique_id=1712451473]
 script = ExtResource("1_room")
+room_id = &"boss_room"
+map_cell = Vector2i(1, 4)
 
 [node name="Switchable" type="Node2D" parent="." unique_id=34621633]
 script = ExtResource("5_sw")
 
-[node name="Pesadilla" type="TileMap" parent="Switchable" unique_id=1227923592]
+[node name="Pesadilla" type="Node2D" parent="Switchable"]
+
+[node name="Tiles" type="TileMap" parent="Switchable/Pesadilla" unique_id=1227923592]
 visible = false
 texture_filter = 2
 scale = Vector2(0.05, 0.05)
 tile_set = ExtResource("4_pesadilla")
 format = 2
 
-[node name="Sueño" type="TileMap" parent="Switchable" unique_id=190515569]
+[node name="Sueño" type="Node2D" parent="Switchable"]
+
+[node name="Tiles" type="TileMap" parent="Switchable/Sueño" unique_id=190515569]
 texture_filter = 2
 position = Vector2(0, 0.9999697)
 scale = Vector2(0.05, 0.05)
@@ -67,44 +73,39 @@ shape = SubResource("RectangleShape2D_wall_v")
 [node name="Door" type="StaticBody2D" parent="." unique_id=1812403172]
 position = Vector2(-230, 3)
 script = ExtResource("6_door")
+door_id = &"west"
+target_room = "res://assets/scenes/rooms/habitacion_start.tscn"
+target_door_id = &"south"
 starts_open = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Door" unique_id=707785605]
 shape = SubResource("RectangleShape2D_door")
 
-[node name="VigiliaSpikes" type="Node2D" parent="." unique_id=1208378169]
+[node name="VigiliaSpikes" type="Node2D" parent="Switchable/Sueño" unique_id=1208378169]
 
-[node name="Spikes1" parent="VigiliaSpikes" unique_id=309930034 instance=ExtResource("7_spikes")]
+[node name="Spikes1" parent="Switchable/Sueño/VigiliaSpikes" unique_id=309930034 instance=ExtResource("7_spikes")]
 position = Vector2(-100, 50)
-only_in_mode = 1
 
-[node name="Spikes2" parent="VigiliaSpikes" unique_id=1185553460 instance=ExtResource("7_spikes")]
+[node name="Spikes2" parent="Switchable/Sueño/VigiliaSpikes" unique_id=1185553460 instance=ExtResource("7_spikes")]
 position = Vector2(-60, 70)
-only_in_mode = 1
 
-[node name="Spikes3" parent="VigiliaSpikes" unique_id=480658844 instance=ExtResource("7_spikes")]
+[node name="Spikes3" parent="Switchable/Sueño/VigiliaSpikes" unique_id=480658844 instance=ExtResource("7_spikes")]
 position = Vector2(-20, 50)
-only_in_mode = 1
 
-[node name="Spikes4" parent="VigiliaSpikes" unique_id=43929304 instance=ExtResource("7_spikes")]
+[node name="Spikes4" parent="Switchable/Sueño/VigiliaSpikes" unique_id=43929304 instance=ExtResource("7_spikes")]
 position = Vector2(20, 70)
-only_in_mode = 1
 
-[node name="Spikes5" parent="VigiliaSpikes" unique_id=1438988502 instance=ExtResource("7_spikes")]
+[node name="Spikes5" parent="Switchable/Sueño/VigiliaSpikes" unique_id=1438988502 instance=ExtResource("7_spikes")]
 position = Vector2(60, 50)
-only_in_mode = 1
 
-[node name="Spikes6" parent="VigiliaSpikes" unique_id=1969652676 instance=ExtResource("7_spikes")]
+[node name="Spikes6" parent="Switchable/Sueño/VigiliaSpikes" unique_id=1969652676 instance=ExtResource("7_spikes")]
 position = Vector2(-80, -40)
-only_in_mode = 1
 
-[node name="Spikes7" parent="VigiliaSpikes" unique_id=1734449893 instance=ExtResource("7_spikes")]
+[node name="Spikes7" parent="Switchable/Sueño/VigiliaSpikes" unique_id=1734449893 instance=ExtResource("7_spikes")]
 position = Vector2(40, -50)
-only_in_mode = 1
 
-[node name="Spikes8" parent="VigiliaSpikes" unique_id=1740931696 instance=ExtResource("7_spikes")]
+[node name="Spikes8" parent="Switchable/Sueño/VigiliaSpikes" unique_id=1740931696 instance=ExtResource("7_spikes")]
 position = Vector2(-10, 10)
-only_in_mode = 1
 
 [node name="ButtonSlots" type="Node2D" parent="." unique_id=232522831]
 

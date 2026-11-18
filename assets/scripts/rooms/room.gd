@@ -2,28 +2,28 @@ class_name Room
 extends Node2D
 
 ## Base room: camera bounds, activation, doors, and enemy spawns.
+## Designed to be loaded one-at-a-time under RoomManager / RoomContainer.
 
 signal player_entered(player: Node2D)
 signal player_exited(player: Node2D)
 signal discovered()
 
+const GAME_SCENE := "res://assets/scenes/game.tscn"
+
+## Unique id for RunState. Empty = basename of scene_file_path.
+@export var room_id: StringName = &""
+## Isaac-style map grid cell for this room.
+@export var map_cell: Vector2i = Vector2i.ZERO
+
 ## Optional: drag Door StaticBodies here. If empty, auto-detects Door children.
 @export var doors: Array[Door] = []
-## Snap the player past the doorway when this room becomes active.
-@export var teleport_on_enter: bool = true
-## How far inside (from the entry door toward the room center) to place the player.
-@export var enter_teleport_inset: float = 40.0
-## Grace time after enter before sealing doors (player is already teleported inside).
+## Grace time after enter before sealing doors.
 @export var door_close_delay: float = 0.15
 
 @export_group("Enemy Spawns")
 ## One entry per EnemySpawnPoint (tree order). Editable on room instances in the Inspector.
 ## Leave an element empty to keep that marker's default enemy.
 @export var spawn_enemy_scenes: Array[PackedScene] = []
-
-@export_group("Navigation")
-## Destination room per door, same order as get_doors(). Empty = geometric fallback.
-@export var door_targets: Array[Room] = []
 
 @export_group("Button Unlock")
 ## When enabled, assigned buttons can open this room's doors / clear its lock.
@@ -48,19 +48,85 @@ var _button_unlock_committed: bool = false
 var _buttons_wired: bool = false
 var _bounds_cached: bool = false
 var _cached_bounds: Rect2 = Rect2()
+var _state_cleared: bool = false
 
 
 func _ready() -> void:
 	add_to_group("rooms")
+	if room_id == &"":
+		room_id = _default_room_id()
+	_register_meta_with_run_state()
+
+	# F6 / Run Current Scene: room is the scene root → boot game.tscn into this room.
+	# Prefer parent==root: current_scene can still be null during _ready.
+	if _is_running_as_main_scene():
+		_queue_debug_boot()
+		return
+
 	_active = false
-	# Inactive rooms pause scripts/enemies, but walls/doors must keep colliding
-	# (default DISABLE_MODE_REMOVE would let the player walk out of the map).
-	_keep_world_collision_when_disabled()
 	process_mode = Node.PROCESS_MODE_DISABLED
-	# PROCESS_MODE_DISABLED does not skip rendering — hide for HTML5 perf.
-	visible = false
+	_keep_world_collision_when_disabled()
+	_register_preplaced_residents()
 	call_deferred("_setup_button_unlock")
 	call_deferred("_seal_unlinked_doors")
+	call_deferred("_register_links_with_run_state")
+
+
+func _is_running_as_main_scene() -> bool:
+	var tree := get_tree()
+	if tree == null:
+		return false
+	if get_parent() == tree.root:
+		return true
+	return tree.current_scene == self
+
+
+func _queue_debug_boot() -> void:
+	var path := scene_file_path
+	if path.is_empty():
+		push_error("Room F6 boot: scene_file_path is empty (save the scene first)")
+		return
+	RunState.debug_start = {
+		"scene": path,
+		"door": &"",
+	}
+	call_deferred("_boot_via_game_scene")
+
+
+func _boot_via_game_scene() -> void:
+	# Re-assert in case something cleared it between ready and deferred.
+	if RunState.debug_start.is_empty() and not scene_file_path.is_empty():
+		RunState.debug_start = {
+			"scene": scene_file_path,
+			"door": &"",
+		}
+	var err := get_tree().change_scene_to_file(GAME_SCENE)
+	if err != OK:
+		push_error("Room F6 boot: failed to change to %s (error %s)" % [GAME_SCENE, err])
+
+
+func _default_room_id() -> StringName:
+	var path := scene_file_path
+	if path.is_empty():
+		return StringName(name)
+	return StringName(path.get_file().get_basename())
+
+
+func _register_meta_with_run_state() -> void:
+	RunState.register_room_meta(room_id, scene_file_path, map_cell)
+
+
+func _register_links_with_run_state() -> void:
+	var links: Array = []
+	for door in get_doors():
+		if door == null or not door.is_linked():
+			continue
+		links.append({
+			"door_id": door.door_id,
+			"target_room": door.target_room,
+			"target_door_id": door.target_door_id,
+		})
+	RunState.register_room_links(room_id, links)
 
 
 func is_active() -> bool:
@@ -75,6 +141,7 @@ func mark_discovered() -> void:
 	if _discovered:
 		return
 	_discovered = true
+	RunState.mark_discovered(room_id)
 	discovered.emit()
 
 
@@ -86,8 +153,6 @@ func set_active(active: bool, player: Node2D = null) -> void:
 		visible = true
 		process_mode = Node.PROCESS_MODE_INHERIT
 		sync_mode()
-		if player != null:
-			teleport_player_inside_from_entry(player)
 		_enable_spawned_enemies()
 		_enable_resident_enemies()
 		mark_discovered()
@@ -98,8 +163,6 @@ func set_active(active: bool, player: Node2D = null) -> void:
 		player_exited.emit(player)
 		_disable_spawned_enemies()
 		_disable_resident_enemies()
-		process_mode = Node.PROCESS_MODE_DISABLED
-		visible = false
 
 
 ## Apply WorldMode to this room's tilemaps and enemies (lazy sync on enter / active switch).
@@ -116,7 +179,7 @@ func _sync_all_enemies_mode() -> void:
 	_sync_resident_enemies_mode()
 
 
-## Pre-placed enemies that live in this room (assigned by RoomManager).
+## Pre-placed enemies that live in this room.
 func register_resident(enemy: Node) -> void:
 	if enemy == null or not is_instance_valid(enemy):
 		return
@@ -132,48 +195,75 @@ func register_resident(enemy: Node) -> void:
 		enemy.process_mode = Node.PROCESS_MODE_DISABLED
 
 
-## Places the player just inside the nearest doorway so they never stand in the seal zone.
-func teleport_player_inside_from_entry(player: Node2D) -> void:
-	if not teleport_on_enter or player == null:
+func _register_preplaced_residents() -> void:
+	for node in get_children():
+		_collect_preplaced_enemies(node)
+
+
+func _collect_preplaced_enemies(node: Node) -> void:
+	if node.is_in_group("enemy") or node.is_in_group("cat"):
+		if node.is_in_group("cat") and not node.is_in_group("enemy"):
+			node.add_to_group("enemy")
+		register_resident(node)
 		return
+	for child in node.get_children():
+		if child.name == "Enemies":
+			continue
+		_collect_preplaced_enemies(child)
+
+
+func get_door_by_id(id: StringName) -> Door:
+	if id == &"":
+		return null
+	for door in get_doors():
+		if door != null and door.door_id == id:
+			return door
+	# Fallback: match node name case-insensitively.
+	var needle := String(id).to_lower()
+	for door in get_doors():
+		if door != null and String(door.name).to_lower() == needle:
+			return door
+	return null
+
+
+func get_default_spawn() -> Vector2:
+	var marker := get_node_or_null("DefaultSpawn") as Marker2D
+	if marker != null:
+		return marker.global_position
 	var bounds := get_camera_bounds()
-	if bounds.size == Vector2.ZERO:
-		return
-	# Already deep inside (e.g. run start) — don't yank.
-	var deep := bounds.grow(-enter_teleport_inset)
-	if deep.size.x > 0.0 and deep.size.y > 0.0 and deep.has_point(player.global_position):
-		return
-
-	var target := get_entry_teleport_position(player.global_position)
-	if player is CharacterBody2D:
-		var body := player as CharacterBody2D
-		body.velocity = Vector2.ZERO
-		body.global_position = target
-	else:
-		player.global_position = target
+	if bounds.size != Vector2.ZERO:
+		return bounds.get_center()
+	return global_position
 
 
-func get_entry_teleport_position(from_world: Vector2) -> Vector2:
-	var bounds := get_camera_bounds()
-	var center := bounds.get_center()
-	var origin := from_world
-	var door := _nearest_door_to(from_world)
-	if door != null:
-		origin = _door_world_center(door)
+func save_state(_run_state: Node = null) -> void:
+	var state := RunState.ensure_room(room_id)
+	state["discovered"] = _discovered or bool(state.get("discovered", false))
+	state["cleared"] = _state_cleared or bool(state.get("cleared", false))
+	state["buttons_committed"] = _button_unlock_committed or bool(state.get("buttons_committed", false))
+	_register_links_with_run_state()
+	RunState.register_room_meta(room_id, scene_file_path, map_cell)
 
-	var inward := center - origin
-	if inward.length_squared() < 0.01:
-		inward = center - from_world
-	if inward.length_squared() < 0.01:
-		return center
-	inward = inward.normalized()
 
-	var target := origin + inward * enter_teleport_inset
-	var safe := bounds.grow(-maxf(enter_teleport_inset * 0.5, 16.0))
-	if safe.size.x > 0.0 and safe.size.y > 0.0:
-		target.x = clampf(target.x, safe.position.x, safe.end.x)
-		target.y = clampf(target.y, safe.position.y, safe.end.y)
-	return target
+func load_state(_run_state: Node = null) -> void:
+	var state := RunState.ensure_room(room_id)
+	_discovered = bool(state.get("discovered", false))
+	_state_cleared = bool(state.get("cleared", false))
+	_button_unlock_committed = bool(state.get("buttons_committed", false))
+	if _button_unlock_committed:
+		_button_unlock_done = true
+		for button in unlock_buttons:
+			if button != null and button.has_method("commit"):
+				button.call("commit")
+
+
+func mark_room_cleared() -> void:
+	_state_cleared = true
+	RunState.mark_cleared(room_id, true)
+
+
+func is_room_cleared() -> bool:
+	return _state_cleared
 
 
 func nearest_door_to(point: Vector2) -> Door:
@@ -187,48 +277,13 @@ func nearest_door_to(point: Vector2) -> Door:
 	return best
 
 
-func _nearest_door_to(point: Vector2) -> Door:
-	return nearest_door_to(point)
-
-
-## Room linked to `door` via door_targets (same order as get_doors()). Null if unset.
-func get_door_target(door: Door) -> Room:
-	if door == null:
-		return null
-	var index := _door_index(door)
-	if index < 0:
-		return null
-	return _door_target_at(index)
-
-
-## True when this door has an authored destination room.
-func is_door_linked(door: Door) -> bool:
-	return get_door_target(door) != null
-
-
-## Doors with no door_targets entry stay closed as a permanent barrier.
+## Doors with no target_room stay closed as a permanent barrier.
 func _seal_unlinked_doors() -> void:
-	var doors := get_doors()
-	for i in doors.size():
-		if _door_target_at(i) != null:
+	for door in get_doors():
+		if door == null or door.is_linked():
 			continue
-		var door := doors[i]
 		door.starts_open = false
 		door.set_open(false)
-
-
-func _door_index(door: Door) -> int:
-	var doors := get_doors()
-	for i in doors.size():
-		if doors[i] == door:
-			return i
-	return -1
-
-
-func _door_target_at(index: int) -> Room:
-	if index < 0 or index >= door_targets.size():
-		return null
-	return door_targets[index]
 
 
 func _door_world_center(door: Door) -> Vector2:
@@ -255,6 +310,8 @@ func _keep_world_collision_recursive(node: Node) -> void:
 func on_player_entered(_player: Node2D) -> void:
 	# Base rooms with EnemySpawnPoint children spawn on enter.
 	# Typed rooms (Safe, Parkour, …) override and skip this if needed.
+	if _state_cleared:
+		return
 	if not get_spawn_points().is_empty():
 		spawn_enemies()
 
@@ -267,28 +324,83 @@ func get_camera_bounds() -> Rect2:
 	if _bounds_cached:
 		return _cached_bounds
 
-	var layer := get_node_or_null("Switchable/Pesadilla")
-	if layer == null or not layer.has_method("get_used_rect"):
+	var layers := _find_bounds_tile_layers()
+	if layers.is_empty():
 		return Rect2()
 
+	var combined := Rect2()
+	var has_any := false
+	for layer in layers:
+		var rect := _tile_node_global_bounds(layer)
+		if rect.size == Vector2.ZERO:
+			continue
+		if not has_any:
+			combined = rect
+			has_any = true
+		else:
+			combined = combined.merge(rect)
+
+	if not has_any:
+		return Rect2()
+	_cached_bounds = combined
+	_bounds_cached = true
+	return _cached_bounds
+
+
+## TileMapLayer nodes under Switchable/Pesadilla (union for bounds). Debug TileMap as fallback.
+func _find_bounds_tile_layers() -> Array[Node2D]:
+	var result: Array[Node2D] = []
+	var sw := get_node_or_null("Switchable")
+	if sw == null:
+		return result
+
+	var mode_root: Node = null
+	for mode_name in ["Pesadilla", "Sueño", "Sueno"]:
+		mode_root = sw.get_node_or_null(mode_name)
+		if mode_root != null:
+			break
+	if mode_root == null:
+		return result
+
+	_collect_tile_map_layers(mode_root, result)
+	if not result.is_empty():
+		return result
+
+	# Debug rooms still using a monolithic TileMap.
+	if mode_root is TileMap:
+		result.append(mode_root as Node2D)
+		return result
+	for child in mode_root.get_children():
+		if child is TileMap:
+			result.append(child as Node2D)
+			break
+	return result
+
+
+func _collect_tile_map_layers(node: Node, out: Array[Node2D]) -> void:
+	if node is TileMapLayer:
+		out.append(node as Node2D)
+	for child in node.get_children():
+		_collect_tile_map_layers(child, out)
+
+
+func _tile_node_global_bounds(layer: Node2D) -> Rect2:
+	if layer == null or not layer.has_method("get_used_rect"):
+		return Rect2()
 	var tileset: TileSet = layer.get("tile_set") as TileSet
 	if tileset == null:
 		return Rect2()
-
 	var used: Rect2i = layer.call("get_used_rect") as Rect2i
 	if used.size.x <= 0 or used.size.y <= 0:
 		return Rect2()
-
 	var tile_size := Vector2(tileset.tile_size)
 	var top_left_local: Vector2 = layer.call("map_to_local", used.position) as Vector2 - tile_size * 0.5
 	var bottom_right_local: Vector2 = (
 		layer.call("map_to_local", used.position + used.size - Vector2i.ONE) as Vector2 + tile_size * 0.5
 	)
-	var top_left: Vector2 = layer.to_global(top_left_local)
-	var bottom_right: Vector2 = layer.to_global(bottom_right_local)
-	_cached_bounds = Rect2(top_left, bottom_right - top_left)
-	_bounds_cached = true
-	return _cached_bounds
+	var top_left := layer.to_global(top_left_local)
+	var bottom_right := layer.to_global(bottom_right_local)
+	return Rect2(top_left, bottom_right - top_left)
 
 
 ## Bounds used by Camera2D limits. May be larger than playable `get_camera_bounds()`.
@@ -328,6 +440,8 @@ func get_spawn_points() -> Array[EnemySpawnPoint]:
 
 
 func spawn_enemies() -> Array[Node]:
+	if _state_cleared:
+		return []
 	var container := _get_or_create_enemies_container()
 	_prune_spawned_enemies()
 	_apply_spawn_type_overrides()
@@ -381,12 +495,11 @@ func register_enemy(enemy: Node) -> void:
 
 
 func set_all_doors_open(open: bool) -> void:
-	var doors := get_doors()
-	for i in doors.size():
+	for door in get_doors():
 		# Unlinked doors are permanent barriers — never open them via bulk unlock.
-		if open and _door_target_at(i) == null:
+		if open and not door.is_linked():
 			continue
-		doors[i].set_open(open)
+		door.set_open(open)
 
 
 func _setup_button_unlock() -> void:

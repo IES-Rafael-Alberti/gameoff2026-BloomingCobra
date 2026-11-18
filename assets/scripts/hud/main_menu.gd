@@ -176,6 +176,8 @@ func _activate_selection() -> void:
 
 func _start_game() -> void:
 	_input_enabled = false
+	if RunState != null and RunState.has_method("reset"):
+		RunState.reset()
 	get_tree().change_scene_to_file(GAME_SCENE)
 
 

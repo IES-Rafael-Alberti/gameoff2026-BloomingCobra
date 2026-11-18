@@ -1,0 +1,30 @@
+[gd_scene format=3 uid="uid://lxc282ahtelx"]
+
+[ext_resource type="PackedScene" uid="uid://bd24eu5qqqv2d" path="res://assets/scenes/rooms/habitacion_enemy_test.tscn" id="1_base"]
+[ext_resource type="PackedScene" uid="uid://d0bcr6ctny2xs" path="res://assets/scenes/enemies/elite.tscn" id="2_elite"]
+
+[node name="HabitacionTest3" unique_id=1303516640 instance=ExtResource("1_base")]
+room_id = &"habitacion_test3"
+map_cell = Vector2i(1, 1)
+
+[node name="Tiles" parent="Switchable/Pesadilla" index="0" unique_id=327332008]
+visible = true
+
+[node name="Door" parent="." index="2" unique_id=879425557]
+target_room = "res://assets/scenes/rooms/habitacion_test5.tscn"
+target_door_id = &"south"
+
+[node name="Door2" parent="." index="3" unique_id=1627573497]
+target_room = "res://assets/scenes/rooms/habitacion_descanso.tscn"
+target_door_id = &"north"
+
+[node name="Door3" parent="." index="4" unique_id=1900700370]
+target_room = "res://assets/scenes/rooms/habitacion_test4.tscn"
+target_door_id = &"west"
+
+[node name="Door4" parent="." index="5" unique_id=1315555281]
+target_room = "res://assets/scenes/rooms/habitacion_variada.tscn"
+target_door_id = &"east"
+
+[node name="Elite" parent="." index="7" unique_id=678839222 instance=ExtResource("2_elite")]
+position = Vector2(-73, 23)

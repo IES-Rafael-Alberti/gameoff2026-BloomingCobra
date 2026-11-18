@@ -3,12 +3,17 @@ extends Node2D
 ## 1 = fondo pegado a la cámara (sin parallax). Valores más bajos = se mueve más lento.
 @export_range(0.0, 1.0, 0.01) var background_parallax: float = 0.85
 
+const BOSS_ROOM_SCENE := "res://assets/scenes/rooms/boss/bossRoom.tscn"
+const ROOMS_DIR := "res://assets/scenes/rooms/"
+
 var _hitbox_debug: Node2D
 var _bg_pesadilla: Sprite2D
 var _bg_sueno: Sprite2D
 var _player: Node2D
 var _bg_anchor: Vector2 = Vector2.ZERO
 var _bg_anchor_ready: bool = false
+var _debug_room_panel: VBoxContainer = null
+var _debug_room_menu_open: bool = false
 
 @onready var sfx_general: Node = get_node_or_null("SfxGeneral")
 @onready var room_manager: Node = get_node_or_null("RoomManager")
@@ -19,7 +24,7 @@ func _ready() -> void:
 	_hitbox_debug.name = "HitboxDebug"
 	_hitbox_debug.set_script(load("res://assets/scripts/game/hitbox_debug.gd"))
 	add_child(_hitbox_debug)
-	_setup_debug_boss_button()
+	_setup_debug_room_ui()
 	_setup_world_backgrounds()
 	if room_manager != null and room_manager.has_signal("room_changed"):
 		if not room_manager.room_changed.is_connected(_on_room_changed_backgrounds):
@@ -76,21 +81,101 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		return
 
+	if event is InputEventKey and event.pressed and not event.echo:
+		var key := event as InputEventKey
+		if key.keycode == KEY_F4:
+			_toggle_debug_room_menu()
+			get_viewport().set_input_as_handled()
+			return
 
-func _setup_debug_boss_button() -> void:
+
+func _setup_debug_room_ui() -> void:
 	var layer := CanvasLayer.new()
 	layer.name = "DebugUI"
 	layer.layer = 100
 	add_child(layer)
 
-	var button := Button.new()
-	button.name = "DebugBossTeleport"
-	button.text = "Boss Room (F3)"
-	button.position = Vector2(12, 12)
-	button.custom_minimum_size = Vector2(140, 28)
-	button.focus_mode = Control.FOCUS_NONE
-	button.pressed.connect(_debug_teleport_to_boss)
-	layer.add_child(button)
+	var boss_button := Button.new()
+	boss_button.name = "DebugBossTeleport"
+	boss_button.text = "Boss Room (F3)"
+	boss_button.position = Vector2(12, 12)
+	boss_button.custom_minimum_size = Vector2(140, 28)
+	boss_button.focus_mode = Control.FOCUS_NONE
+	boss_button.pressed.connect(_debug_teleport_to_boss)
+	layer.add_child(boss_button)
+
+	var rooms_button := Button.new()
+	rooms_button.name = "DebugRoomsMenu"
+	rooms_button.text = "Rooms (F4)"
+	rooms_button.position = Vector2(160, 12)
+	rooms_button.custom_minimum_size = Vector2(120, 28)
+	rooms_button.focus_mode = Control.FOCUS_NONE
+	rooms_button.pressed.connect(_toggle_debug_room_menu)
+	layer.add_child(rooms_button)
+
+	_debug_room_panel = VBoxContainer.new()
+	_debug_room_panel.name = "DebugRoomList"
+	_debug_room_panel.position = Vector2(12, 48)
+	_debug_room_panel.visible = false
+	_debug_room_panel.add_theme_constant_override("separation", 2)
+	layer.add_child(_debug_room_panel)
+	_rebuild_debug_room_list()
+
+
+func _toggle_debug_room_menu() -> void:
+	_debug_room_menu_open = not _debug_room_menu_open
+	if _debug_room_panel != null:
+		if _debug_room_menu_open:
+			_rebuild_debug_room_list()
+		_debug_room_panel.visible = _debug_room_menu_open
+
+
+func _rebuild_debug_room_list() -> void:
+	if _debug_room_panel == null:
+		return
+	for child in _debug_room_panel.get_children():
+		child.queue_free()
+	var rooms := _list_room_scenes()
+	for path in rooms:
+		var button := Button.new()
+		button.text = path.get_file().get_basename()
+		button.focus_mode = Control.FOCUS_NONE
+		button.custom_minimum_size = Vector2(220, 24)
+		button.pressed.connect(_debug_go_to_room.bind(path))
+		_debug_room_panel.add_child(button)
+
+
+func _list_room_scenes() -> PackedStringArray:
+	var result: PackedStringArray = []
+	_collect_room_scenes(ROOMS_DIR, result)
+	result.sort()
+	return result
+
+
+func _collect_room_scenes(path: String, out: PackedStringArray) -> void:
+	var dir := DirAccess.open(path)
+	if dir == null:
+		return
+	dir.list_dir_begin()
+	var file_name := dir.get_next()
+	while file_name != "":
+		if dir.current_is_dir():
+			if file_name != "." and file_name != ".." and not file_name.begins_with("."):
+				_collect_room_scenes(path.path_join(file_name), out)
+		elif file_name.ends_with(".tscn") and not file_name.ends_with(".tscn.tscn"):
+			if file_name != "habitacion_enemy_test.tscn":
+				out.append(path.path_join(file_name))
+		file_name = dir.get_next()
+	dir.list_dir_end()
+
+
+func _debug_go_to_room(scene_path: String) -> void:
+	if room_manager != null and room_manager.has_method("go_to"):
+		room_manager.call("go_to", scene_path, &"")
+		print("[Debug] go_to ", scene_path)
+	_debug_room_menu_open = false
+	if _debug_room_panel != null:
+		_debug_room_panel.visible = false
 
 
 func _debug_cycle_camera_mode() -> void:
@@ -108,57 +193,7 @@ func _debug_cycle_camera_mode() -> void:
 
 
 func _debug_teleport_to_boss() -> void:
-	var player := get_tree().get_first_node_in_group("player") as Node2D
-	if player == null:
-		print("[Debug] Boss teleport failed: no player")
-		return
-
-	var boss_room: Room = null
-	for node in get_tree().get_nodes_in_group("rooms"):
-		if node is Room and String(node.name).begins_with("BossRoom"):
-			boss_room = node as Room
-			break
-	if boss_room == null:
-		boss_room = get_node_or_null("Habitaciones/BossRoom") as Room
-	if boss_room == null:
-		print("[Debug] Boss teleport failed: BossRoom not found")
-		return
-
-	# Activate the room first so camera limits update, then place the player.
-	if room_manager != null and room_manager.has_method("enter_room"):
-		room_manager.call("enter_room", boss_room, player)
-	else:
-		boss_room.set_active(true, player)
-
-	var bounds := boss_room.get_camera_bounds()
-	var target := bounds.get_center() if bounds.size != Vector2.ZERO else boss_room.global_position
-	if player is CharacterBody2D:
-		(player as CharacterBody2D).velocity = Vector2.ZERO
-	player.global_position = target
-
-	var cam := player.get_node_or_null("Camera2D")
-	if cam != null and cam.has_method("snap_to_room"):
-		cam.call("snap_to_room", boss_room)
-	elif cam is Camera2D:
-		var camera := cam as Camera2D
-		camera.make_current()
-		camera.reset_smoothing()
-		camera.force_update_scroll()
-
-	_recenter_backgrounds(target)
-
-	# Keep debug teleport snappy even if room_changed fired with stale/empty bounds.
-	call_deferred("_debug_resnap_camera", boss_room)
-
-
-func _debug_resnap_camera(boss_room: Room) -> void:
-	var player := get_tree().get_first_node_in_group("player") as Node2D
-	if player == null or boss_room == null:
-		return
-	var cam := player.get_node_or_null("Camera2D")
-	if cam != null and cam.has_method("snap_to_room"):
-		cam.call("snap_to_room", boss_room)
-	print("[Debug] Teleported to BossRoom bounds=", boss_room.get_camera_bounds())
+	_debug_go_to_room(BOSS_ROOM_SCENE)
 
 
 func _toggle_fullscreen() -> void:

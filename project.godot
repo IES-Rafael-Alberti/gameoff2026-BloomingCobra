@@ -19,6 +19,7 @@ config/icon="res://icon.svg"
 
 ErrorHandler="*res://assets/scripts/common/error_handler.gd"
 WorldMode="*res://assets/scripts/game/world_mode.gd"
+RunState="*res://assets/scripts/game/run_state.gd"
 
 [display]
 

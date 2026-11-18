@@ -15,13 +15,17 @@ extends CanvasLayer
 @export var undiscovered_texture: Texture2D
 @export var current_texture: Texture2D
 
+const ROOMS_DIR := "res://assets/scenes/rooms/"
+
 var _root: Control
 var _dim: ColorRect
 var _rooms_layer: Control
 var _open: bool = false
 var _wired: bool = false
-var _grid: Dictionary = {} # Room -> Vector2i
-var _icons: Dictionary = {} # Room -> TextureRect
+var _grid: Dictionary = {} # room_id(String) -> Vector2i
+var _scene_by_id: Dictionary = {} # room_id -> scene path
+var _links_by_id: Dictionary = {} # room_id -> Array of link dicts
+var _icons: Dictionary = {} # room_id -> TextureRect
 
 
 func _ready() -> void:
@@ -88,23 +92,150 @@ func _build_ui() -> void:
 
 
 func _setup_rooms() -> void:
+	_scan_room_catalog()
+	_merge_run_state()
 	_wire_room_signals()
-	_assign_grid()
 	_wired = true
 	if _open:
 		_rebuild_icons()
 
 
-func _wire_room_signals() -> void:
-	for node in get_tree().get_nodes_in_group("rooms"):
-		if not (node is Room):
+func _scan_room_catalog() -> void:
+	_grid.clear()
+	_scene_by_id.clear()
+	_links_by_id.clear()
+	_scan_dir(ROOMS_DIR)
+
+
+func _scan_dir(path: String) -> void:
+	var dir := DirAccess.open(path)
+	if dir == null:
+		return
+	dir.list_dir_begin()
+	var file_name := dir.get_next()
+	while file_name != "":
+		if dir.current_is_dir():
+			if file_name != "." and file_name != ".." and not file_name.begins_with("."):
+				_scan_dir(path.path_join(file_name))
+		elif file_name.ends_with(".tscn") and not file_name.ends_with(".tscn.tscn"):
+			# Skip the shared enemy-test base; use its inherited instances instead.
+			if file_name == "habitacion_enemy_test.tscn":
+				file_name = dir.get_next()
+				continue
+			_ingest_room_scene(path.path_join(file_name))
+		file_name = dir.get_next()
+	dir.list_dir_end()
+
+
+func _ingest_room_scene(scene_path: String) -> void:
+	var packed := load(scene_path) as PackedScene
+	if packed == null:
+		return
+	var state := packed.get_state()
+	if state == null or state.get_node_count() <= 0:
+		return
+	# Root props live on node 0.
+	var room_id := StringName(scene_path.get_file().get_basename())
+	var map_cell := Vector2i.ZERO
+	var has_cell := false
+	for i in state.get_node_property_count(0):
+		var prop_name := String(state.get_node_property_name(0, i))
+		var value: Variant = state.get_node_property_value(0, i)
+		if prop_name == "room_id" and value is StringName and value != &"":
+			room_id = value
+		elif prop_name == "room_id" and value is String and not String(value).is_empty():
+			room_id = StringName(value)
+		elif prop_name == "map_cell" and value is Vector2i:
+			map_cell = value
+			has_cell = true
+
+	var key := String(room_id)
+	_scene_by_id[key] = scene_path
+	if has_cell:
+		_grid[key] = map_cell
+	else:
+		_grid[key] = Vector2i.ZERO
+
+	var links: Array = []
+	for node_idx in state.get_node_count():
+		var node_name := String(state.get_node_name(node_idx))
+		var type_name := String(state.get_node_type(node_idx))
+		var is_door := type_name == "StaticBody2D" or node_name.begins_with("Door")
+		if not is_door:
 			continue
-		var room := node as Room
-		if not room.discovered.is_connected(_on_room_discovered):
-			room.discovered.connect(_on_room_discovered)
-		var entered_cb := _on_room_entered.bind(room)
-		if not room.player_entered.is_connected(entered_cb):
-			room.player_entered.connect(entered_cb)
+		var door_id := StringName(node_name.to_lower())
+		var target_room := ""
+		var target_door_id: StringName = &""
+		var looks_like_door := false
+		for p in state.get_node_property_count(node_idx):
+			var pname := String(state.get_node_property_name(node_idx, p))
+			var pval: Variant = state.get_node_property_value(node_idx, p)
+			if pname == "door_id":
+				looks_like_door = true
+				if pval is StringName:
+					door_id = pval
+				elif pval is String and not String(pval).is_empty():
+					door_id = StringName(pval)
+			elif pname == "target_room" and pval is String:
+				looks_like_door = true
+				target_room = pval
+			elif pname == "target_door_id":
+				looks_like_door = true
+				if pval is StringName:
+					target_door_id = pval
+				elif pval is String:
+					target_door_id = StringName(pval)
+			elif pname == "script" and pval is Script:
+				var script_path := String((pval as Script).resource_path)
+				if script_path.ends_with("door.gd"):
+					looks_like_door = true
+		if not looks_like_door:
+			continue
+		if target_room.is_empty():
+			continue
+		links.append({
+			"door_id": door_id,
+			"target_room": target_room,
+			"target_door_id": target_door_id,
+		})
+	_links_by_id[key] = links
+	RunState.register_room_meta(room_id, scene_path, _grid[key])
+	RunState.register_room_links(room_id, links)
+
+
+func _merge_run_state() -> void:
+	for key in RunState.room_cells.keys():
+		_grid[String(key)] = RunState.room_cells[key]
+	for key in RunState.room_scenes.keys():
+		_scene_by_id[String(key)] = RunState.room_scenes[key]
+	for key in RunState.room_links.keys():
+		_links_by_id[String(key)] = RunState.room_links[key]
+
+
+func _wire_room_signals() -> void:
+	var manager := get_tree().get_first_node_in_group("room_manager")
+	if manager != null and manager.has_signal("room_changed"):
+		if not manager.room_changed.is_connected(_on_room_changed):
+			manager.room_changed.connect(_on_room_changed)
+	for node in get_tree().get_nodes_in_group("rooms"):
+		if node is Room:
+			_wire_one_room(node as Room)
+
+
+func _wire_one_room(room: Room) -> void:
+	if not room.discovered.is_connected(_on_room_discovered):
+		room.discovered.connect(_on_room_discovered)
+	var entered_cb := _on_room_entered.bind(room)
+	if not room.player_entered.is_connected(entered_cb):
+		room.player_entered.connect(entered_cb)
+
+
+func _on_room_changed(_previous: Room, next: Room) -> void:
+	if next != null:
+		_wire_one_room(next)
+		_merge_run_state()
+	if _open:
+		_rebuild_icons()
 
 
 func _on_room_discovered() -> void:
@@ -117,103 +248,25 @@ func _on_room_entered(_player: Node2D, _room: Room) -> void:
 		_rebuild_icons()
 
 
-func _assign_grid() -> void:
-	_grid.clear()
-	var rooms: Array[Room] = []
-	var centers: Array[Vector2] = []
-	var sizes: Array[Vector2] = []
-
-	for node in get_tree().get_nodes_in_group("rooms"):
-		if not (node is Room):
-			continue
-		var room := node as Room
-		var bounds: Rect2 = room.get_camera_bounds()
-		if bounds.size == Vector2.ZERO:
-			continue
-		rooms.append(room)
-		centers.append(bounds.get_center())
-		sizes.append(bounds.size)
-
-	if rooms.is_empty():
-		return
-
-	var avg_size := Vector2.ZERO
-	for s in sizes:
-		avg_size += s
-	avg_size /= float(sizes.size())
-
-	# Tight clusters so side rooms of the start (parkour/trap) keep their own
-	# columns and do not stack under the rooms above them.
-	var merge_x := maxf(avg_size.x * 0.32, 1.0)
-	var merge_y := maxf(avg_size.y * 0.32, 1.0)
-
-	var xs: Array[float] = []
-	var ys: Array[float] = []
-	for c in centers:
-		_cluster_insert(xs, c.x, merge_x)
-		_cluster_insert(ys, c.y, merge_y)
-	xs.sort()
-	ys.sort()
-
-	var used_cells: Dictionary = {} # Vector2i -> Room
-	for i in rooms.size():
-		var cell := Vector2i(_nearest_index(xs, centers[i].x), _nearest_index(ys, centers[i].y))
-		if used_cells.has(cell):
-			cell = _find_free_cell(cell, used_cells)
-		used_cells[cell] = rooms[i]
-		_grid[rooms[i]] = cell
-
-
-func _cluster_insert(values: Array[float], value: float, threshold: float) -> void:
-	for i in values.size():
-		if absf(values[i] - value) <= threshold:
-			# Pull cluster center toward the new sample.
-			values[i] = (values[i] + value) * 0.5
-			return
-	values.append(value)
-
-
-func _nearest_index(values: Array[float], value: float) -> int:
-	var best_i := 0
-	var best_d := INF
-	for i in values.size():
-		var d := absf(values[i] - value)
-		if d < best_d:
-			best_d = d
-			best_i = i
-	return best_i
-
-
-func _find_free_cell(start: Vector2i, used: Dictionary) -> Vector2i:
-	if not used.has(start):
-		return start
-	for radius in range(1, 8):
-		for y in range(-radius, radius + 1):
-			for x in range(-radius, radius + 1):
-				var candidate := start + Vector2i(x, y)
-				if not used.has(candidate):
-					return candidate
-	return start + Vector2i(used.size(), 0)
-
-
 func _rebuild_icons() -> void:
 	if _rooms_layer == null:
 		return
+	_merge_run_state()
 	if _grid.is_empty():
-		_assign_grid()
+		_scan_room_catalog()
 
 	for child in _rooms_layer.get_children():
 		child.queue_free()
 	_icons.clear()
 
-	var visible_rooms: Array[Room] = _collect_visible_rooms()
-	if visible_rooms.is_empty():
+	var visible_ids: Array[String] = _collect_visible_room_ids()
+	if visible_ids.is_empty():
 		return
 
 	var min_g := Vector2i(999999, 999999)
 	var max_g := Vector2i(-999999, -999999)
-	for room in visible_rooms:
-		var g: Vector2i = _grid[room]
+	for id in visible_ids:
+		var g: Vector2i = _grid.get(id, Vector2i.ZERO)
 		min_g.x = mini(min_g.x, g.x)
 		min_g.y = mini(min_g.y, g.y)
 		max_g.x = maxi(max_g.x, g.x)
@@ -224,7 +277,6 @@ func _rebuild_icons() -> void:
 		base_tex_size = Vector2(discovered_texture.get_width(), discovered_texture.get_height())
 	var icon_size := base_tex_size * icon_scale
 	var start_size := icon_size * start_room_scale
-	# Pack the grid tightly around normal icons; start room can overhang a bit.
 	var step := icon_size + Vector2(cell_gap, cell_gap)
 
 	var grid_w := float(max_g.x - min_g.x) * step.x + icon_size.x
@@ -233,15 +285,15 @@ func _rebuild_icons() -> void:
 	var origin := (vp - Vector2(grid_w, grid_h)) * 0.5
 	origin = Vector2(roundf(origin.x), roundf(origin.y))
 
-	var current_room := _find_current_room()
+	var current_id := _find_current_room_id()
 
-	for room in visible_rooms:
-		var g: Vector2i = _grid[room]
+	for id in visible_ids:
+		var g: Vector2i = _grid.get(id, Vector2i.ZERO)
 		var cell_origin := origin + Vector2(
 			float(g.x - min_g.x) * step.x,
 			float(g.y - min_g.y) * step.y
 		)
-		var is_start := room is StartingRoom
+		var is_start := id == "habitacion_start"
 		var draw_size := start_size if is_start else icon_size
 		var icon_pos := cell_origin + (icon_size - draw_size) * 0.5
 		icon_pos = Vector2(roundf(icon_pos.x), roundf(icon_pos.y))
@@ -255,7 +307,7 @@ func _rebuild_icons() -> void:
 		icon.size = draw_size
 		icon.position = icon_pos
 
-		var is_current := room == current_room
+		var is_current := id == current_id
 		if is_start and current_texture != null:
 			icon.texture = current_texture
 			if is_current:
@@ -263,55 +315,60 @@ func _rebuild_icons() -> void:
 		elif is_current and current_texture != null:
 			icon.texture = current_texture
 			icon.modulate = current_modulate
-		elif room.is_discovered():
+		elif RunState.is_discovered(StringName(id)):
 			icon.texture = discovered_texture
 		else:
 			icon.texture = undiscovered_texture
 
 		_rooms_layer.add_child(icon)
-		_icons[room] = icon
+		_icons[id] = icon
 
 
-func _collect_visible_rooms() -> Array[Room]:
-	var result: Array[Room] = []
-	var discovered: Array[Room] = []
+func _collect_visible_room_ids() -> Array[String]:
+	var result: Array[String] = []
+	var discovered: Array[String] = []
 
-	for room in _grid.keys():
-		var r := room as Room
-		if r.is_discovered():
-			discovered.append(r)
-			result.append(r)
+	for id in _grid.keys():
+		var key := String(id)
+		if RunState.is_discovered(StringName(key)):
+			discovered.append(key)
+			result.append(key)
 
-	# Reveal undiscovered rooms that actually touch a discovered one in the world
-	# (door/corridor), not just grid neighbors — so parkour/trap don't look linked
-	# to the rooms stacked above them.
-	for room in _grid.keys():
-		var r := room as Room
-		if r.is_discovered():
+	# Reveal undiscovered rooms linked from a discovered room.
+	for id in _grid.keys():
+		var key := String(id)
+		if RunState.is_discovered(StringName(key)):
 			continue
 		for d in discovered:
-			if _rooms_touch(r, d):
-				result.append(r)
+			if _rooms_linked(d, key):
+				result.append(key)
 				break
 	return result
 
 
-## True when room bounds nearly touch (shared doorway / adjacent placement).
-func _rooms_touch(a: Room, b: Room) -> bool:
-	var ba := a.get_camera_bounds()
-	var bb := b.get_camera_bounds()
-	if ba.size == Vector2.ZERO or bb.size == Vector2.ZERO:
-		return false
-	const MARGIN := 24.0
-	return ba.grow(MARGIN).intersects(bb.grow(MARGIN))
+func _rooms_linked(a_id: String, b_id: String) -> bool:
+	var b_scene: String = String(_scene_by_id.get(b_id, ""))
+	var links: Array = _links_by_id.get(a_id, [])
+	for link in links:
+		if typeof(link) != TYPE_DICTIONARY:
+			continue
+		var target: String = String(link.get("target_room", ""))
+		if target.is_empty():
+			continue
+		if not b_scene.is_empty() and target == b_scene:
+			return true
+		var target_id := target.get_file().get_basename()
+		if target_id == b_id:
+			return true
+		for id in _scene_by_id.keys():
+			if String(_scene_by_id[id]) == target and String(id) == b_id:
+				return true
+	return false
 
 
-func _find_current_room() -> Room:
+func _find_current_room_id() -> String:
 	var manager := get_tree().get_first_node_in_group("room_manager")
 	if manager != null and "current_room" in manager and manager.current_room is Room:
-		return manager.current_room as Room
-	for room in _grid.keys():
-		var r := room as Room
-		if r.is_active():
-			return r
-	return null
+		var room := manager.current_room as Room
+		return String(room.room_id)
+	return ""

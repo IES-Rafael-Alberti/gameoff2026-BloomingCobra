@@ -1,0 +1,32 @@
+[gd_scene format=4 uid="uid://b7pp0mw5fcwte"]
+
+[ext_resource type="Script" uid="uid://bqy2qbyin3xr0" path="res://assets/scripts/rooms/varied.gd" id="1_h5h47"]
+[ext_resource type="Script" uid="uid://bkoec71xnejuk" path="res://assets/scripts/common/switchable.gd" id="2_epjtn"]
+[ext_resource type="TileSet" uid="uid://c1fyb264g8tdl" path="res://assets/resources/tilesets/tileset_pesadilla.tres" id="3_h8x5r"]
+[ext_resource type="TileSet" uid="uid://ceqj8bpfcscjg" path="res://assets/resources/tilesets/tileset_vigiliadef.tres" id="4_jjppp"]
+[ext_resource type="Script" uid="uid://cgr461snah57y" path="res://assets/scripts/rooms/enemy_spawn_point.gd" id="5_pnuf0"]
+[ext_resource type="PackedScene" uid="uid://cbt3w2furilt1" path="res://assets/scenes/enemies/hunter.tscn" id="6_hn5ju"]
+
+[node name="Sala1" type="Node2D" unique_id=1318050122]
+script = ExtResource("1_h5h47")
+
+[node name="Switchable" type="Node2D" parent="." unique_id=1221028821]
+script = ExtResource("2_epjtn")
+
+[node name="Pesadilla" type="TileMapLayer" parent="Switchable" unique_id=671808266]
+texture_filter = 2
+scale = Vector2(0.05, 0.05)
+tile_map_data = PackedByteArray("AAD4//z/AAAAAAAAAAD4//7/AAAAAAEAAAD4/wAAAAAAAAEAAAD4/wIAAAAAAAEAAAD4/wQAAAAAAAIAAAD6/wQAAAABAAIAAAD8/wQAAAABAAIAAAD+/wQAAAABAAIAAAAAAAQAAAABAAIAAAACAAQAAAABAAIAAAAEAAQAAAABAAIAAAAGAAQAAAACAAIAAAAGAAIAAAACAAEAAAAGAAAAAAACAAEAAAAGAP7/AAACAAEAAAAGAPz/AAACAAAAAAAEAPz/AAABAAAAAAACAPz/AAABAAAAAAAAAPz/AAABAAAAAAD+//z/AAABAAAAAAD8//z/AAABAAAAAAD6//z/AAABAAAAAAD6//7/AAABAAEAAAD6/wAAAAABAAEAAAD6/wIAAAABAAEAAAD8/wIAAAABAAEAAAD+/wIAAAABAAEAAAAAAAIAAAABAAEAAAACAAIAAAABAAEAAAAEAAIAAAABAAEAAAAEAAAAAAABAAEAAAAEAP7/AAABAAEAAAACAP7/AAABAAEAAAAAAP7/AAABAAEAAAD+//7/AAABAAEAAAD8//7/AAABAAEAAAD8/wAAAAABAAEAAAD+/wAAAAABAAEAAAAAAAAAAAABAAEAAAACAAAAAAABAAEAAAA=")
+tile_set = ExtResource("3_h8x5r")
+
+[node name="Sueño" type="TileMapLayer" parent="Switchable" unique_id=1273437766]
+texture_filter = 2
+position = Vector2(35.6, 6)
+scale = Vector2(0.05, 0.05)
+tile_map_data = PackedByteArray("AAD3//z/AAAAAAAAAAD3//7/AAAAAAEAAAD3/wAAAAAAAAEAAAD3/wIAAAAAAAEAAAD3/wQAAAAAAAIAAAD5/wQAAAABAAIAAAD7/wQAAAABAAIAAAD9/wQAAAABAAIAAAD//wQAAAABAAIAAAABAAQAAAABAAIAAAADAAQAAAABAAIAAAAFAAQAAAACAAIAAAAFAAIAAAACAAEAAAAFAAAAAAACAAEAAAAFAP7/AAACAAEAAAAFAPz/AAACAAAAAAD5//z/AAABAAAAAAD7//z/AAABAAAAAAD9//z/AAABAAAAAAD///z/AAABAAAAAAABAPz/AAABAAAAAAADAPz/AAABAAAAAAADAP7/AAABAAEAAAABAP7/AAABAAEAAAD///7/AAABAAEAAAD9//7/AAABAAEAAAD7//7/AAABAAEAAAD5//7/AAABAAEAAAADAAAAAAABAAEAAAABAAAAAAABAAEAAAD//wAAAAABAAEAAAD9/wAAAAABAAEAAAD7/wAAAAABAAEAAAD5/wAAAAABAAEAAAD5/wIAAAABAAEAAAD7/wIAAAABAAEAAAD9/wIAAAABAAEAAAD//wIAAAABAAEAAAABAAIAAAABAAEAAAADAAIAAAABAAEAAAA=")
+tile_set = ExtResource("4_jjppp")
+
+[node name="Marker2D" type="Marker2D" parent="." unique_id=775907272]
+script = ExtResource("5_pnuf0")
+enemy_scene = ExtResource("6_hn5ju")
+respawn_on_reenter = true

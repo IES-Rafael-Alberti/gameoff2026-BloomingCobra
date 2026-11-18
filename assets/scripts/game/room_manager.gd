@@ -1,41 +1,88 @@
 extends Node
 
-## Owns current_room, door transitions, and WorldMode sync for the active room only.
+## Loads one room scene at a time into RoomContainer and handles door transitions.
 
 signal room_changed(previous: Room, next: Room)
 
-@export var detect_margin: float = 8.0
+@export var fade_duration: float = 0.18
 
 var current_room: Room = null
 
 var _player: Node2D = null
 var _transitioning: bool = false
+var _enter_grace_until_msec: int = 0
+var _container: Node2D = null
+var _fade_layer: CanvasLayer = null
+var _fade_rect: ColorRect = null
+
+const ENTER_GRACE_MSEC := 350
 
 
 func _ready() -> void:
 	add_to_group("room_manager")
 	if not WorldMode.mode_changed.is_connected(_on_world_mode_changed):
 		WorldMode.mode_changed.connect(_on_world_mode_changed)
+	_ensure_fade_ui()
 	call_deferred("_bootstrap")
 
 
-func _physics_process(_delta: float) -> void:
+func is_enter_grace_active() -> bool:
+	return Time.get_ticks_msec() < _enter_grace_until_msec
+
+
+func is_transitioning() -> bool:
+	return _transitioning
+
+
+func go_to(scene_path: String, entry_door_id: StringName = &"") -> void:
 	if _transitioning:
 		return
+	if scene_path.is_empty():
+		push_warning("RoomManager.go_to: empty scene path")
+		return
+	_transitioning = true
+	await _fade_out()
+
 	_player = _get_player()
-	if _player == null:
+	if current_room != null:
+		current_room.save_state(RunState)
+		current_room.set_active(false, _player)
+		current_room.queue_free()
+		current_room = null
+		await get_tree().process_frame
+
+	var packed := await _load_scene(scene_path)
+	if packed == null:
+		push_error("RoomManager.go_to: failed to load %s" % scene_path)
+		_transitioning = false
+		await _fade_in()
 		return
-	# Don't room-hop while the player is mid void-fall animation.
-	if _player.has_method("is_void_falling") and bool(_player.call("is_void_falling")):
+
+	var room := packed.instantiate() as Room
+	if room == null:
+		push_error("RoomManager.go_to: root is not a Room: %s" % scene_path)
+		_transitioning = false
+		await _fade_in()
 		return
-	if current_room == null:
-		_bootstrap_current_room()
-		return
-	if current_room.contains_world_point(_player.global_position, detect_margin):
-		return
-	_try_transition_from_exit()
+
+	_get_container().add_child(room)
+	room.position = Vector2.ZERO
+	room.load_state(RunState)
+
+	_place_player(room, entry_door_id)
+	current_room = room
+	if not room.is_active():
+		room.set_active(true, _player)
+	# Previous room was queue_free'd — never pass a freed Object into typed Room args.
+	room_changed.emit(null, room)
+	_preload_neighbors(room)
+
+	await _fade_in()
+	_enter_grace_until_msec = Time.get_ticks_msec() + ENTER_GRACE_MSEC
+	_transitioning = false
 
 
+## Keep parkour void-respawn working without a scene change.
 func enter_room(room: Room, player: Node2D = null) -> void:
 	if room == null:
 		return
@@ -45,49 +92,22 @@ func enter_room(room: Room, player: Node2D = null) -> void:
 		if not room.is_active():
 			room.set_active(true, player)
 		return
-
-	_transitioning = true
-	var previous := current_room
-	if previous != null and previous != room:
-		previous.set_active(false, player)
+	# Cross-room enter is only valid while the target is already the loaded room.
 	current_room = room
 	if not room.is_active():
 		room.set_active(true, player)
-	room_changed.emit(previous, room)
-	_transitioning = false
-
-
-func get_room_at(point: Vector2, margin: float = -1.0) -> Room:
-	var use_margin := detect_margin if margin < 0.0 else margin
-	var best: Room = null
-	var best_area := INF
-	for node in get_tree().get_nodes_in_group("rooms"):
-		var room := node as Room
-		if room == null:
-			continue
-		if not room.contains_world_point(point, use_margin):
-			continue
-		var bounds := room.get_camera_bounds()
-		var area := bounds.get_area() if bounds.size != Vector2.ZERO else INF
-		if area < best_area:
-			best_area = area
-			best = room
-	return best
+	room_changed.emit(null, room)
 
 
 func _bootstrap() -> void:
-	_assign_resident_enemies()
-	_bootstrap_current_room()
-
-
-func _bootstrap_current_room() -> void:
 	_player = _get_player()
-	if _player == null:
-		return
-	var room := get_room_at(_player.global_position)
-	if room == null:
-		return
-	enter_room(room, _player)
+	var start := RunState.consume_debug_start()
+	var scene_path: String = String(start.get("scene", ""))
+	var door_id: StringName = start.get("door", &"") as StringName
+	if scene_path.is_empty():
+		scene_path = RunState.start_room
+		door_id = &""
+	await go_to(scene_path, door_id)
 
 
 func _on_world_mode_changed(_index: int) -> void:
@@ -95,63 +115,105 @@ func _on_world_mode_changed(_index: int) -> void:
 		current_room.sync_mode()
 
 
-func _try_transition_from_exit() -> void:
-	if current_room == null or _player == null:
+func _place_player(room: Room, entry_door_id: StringName) -> void:
+	_player = _get_player()
+	if _player == null or room == null:
 		return
-
-	# Must actually be inside another room (void / gaps do not force a transition).
-	var geometric := get_room_at(_player.global_position)
-	if geometric == null or geometric == current_room:
-		return
-
-	var next := geometric
-	var door := current_room.nearest_door_to(_player.global_position)
+	var target := room.get_default_spawn()
+	var door := room.get_door_by_id(entry_door_id)
 	if door != null:
-		var explicit := current_room.get_door_target(door)
-		# Prefer authored link when it matches where the player landed.
-		if explicit != null and (
-			explicit == geometric
-			or explicit.contains_world_point(_player.global_position, detect_margin)
-		):
-			next = explicit
-
-	if next == null or next == current_room:
-		return
-	enter_room(next, _player)
+		target = door.get_spawn_position()
+	if _player is CharacterBody2D:
+		(_player as CharacterBody2D).velocity = Vector2.ZERO
+	_player.global_position = target
 
 
-func _assign_resident_enemies() -> void:
-	var tree := get_tree()
-	if tree == null:
-		return
-	for node in tree.get_nodes_in_group("enemy"):
-		_try_register_orphan_enemy(node)
-	for node in tree.get_nodes_in_group("cat"):
-		if not node.is_in_group("enemy"):
-			node.add_to_group("enemy")
-		_try_register_orphan_enemy(node)
+func _get_container() -> Node2D:
+	if _container != null and is_instance_valid(_container):
+		return _container
+	var parent := get_parent()
+	if parent != null:
+		_container = parent.get_node_or_null("RoomContainer") as Node2D
+	if _container == null and parent != null:
+		_container = Node2D.new()
+		_container.name = "RoomContainer"
+		parent.add_child(_container)
+		parent.move_child(_container, 0)
+	return _container
 
 
-func _try_register_orphan_enemy(enemy: Node) -> void:
-	if enemy == null or not is_instance_valid(enemy):
-		return
-	if _owns_room_ancestor(enemy):
-		return
-	if enemy is not Node2D:
-		return
-	var room := get_room_at((enemy as Node2D).global_position, 48.0)
+func _load_scene(path: String) -> PackedScene:
+	var resolved := path
+	if ResourceLoader.has_cached(resolved):
+		return load(resolved) as PackedScene
+
+	var status := ResourceLoader.load_threaded_get_status(resolved)
+	if status == ResourceLoader.THREAD_LOAD_INVALID_RESOURCE:
+		var err := ResourceLoader.load_threaded_request(resolved)
+		if err != OK:
+			return load(resolved) as PackedScene
+
+	while true:
+		var progress: Array = []
+		status = ResourceLoader.load_threaded_get_status(resolved, progress)
+		match status:
+			ResourceLoader.THREAD_LOAD_LOADED:
+				return ResourceLoader.load_threaded_get(resolved) as PackedScene
+			ResourceLoader.THREAD_LOAD_FAILED, ResourceLoader.THREAD_LOAD_INVALID_RESOURCE:
+				return load(resolved) as PackedScene
+			_:
+				await get_tree().process_frame
+	return load(resolved) as PackedScene
+
+
+func _preload_neighbors(room: Room) -> void:
 	if room == null:
 		return
-	room.register_resident(enemy)
+	for door in room.get_doors():
+		if door == null or not door.is_linked():
+			continue
+		var path := door.target_room
+		if path.is_empty() or ResourceLoader.has_cached(path):
+			continue
+		var status := ResourceLoader.load_threaded_get_status(path)
+		if status == ResourceLoader.THREAD_LOAD_INVALID_RESOURCE:
+			ResourceLoader.load_threaded_request(path)
 
 
-func _owns_room_ancestor(node: Node) -> bool:
-	var cursor := node.get_parent()
-	while cursor != null:
-		if cursor is Room or cursor.is_in_group("rooms"):
-			return true
-		cursor = cursor.get_parent()
-	return false
+func _ensure_fade_ui() -> void:
+	if _fade_layer != null:
+		return
+	_fade_layer = CanvasLayer.new()
+	_fade_layer.name = "RoomFade"
+	_fade_layer.layer = 120
+	add_child(_fade_layer)
+
+	_fade_rect = ColorRect.new()
+	_fade_rect.name = "FadeRect"
+	_fade_rect.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_fade_rect.color = Color(0, 0, 0, 0)
+	_fade_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_fade_layer.add_child(_fade_rect)
+
+
+func _fade_out() -> void:
+	_ensure_fade_ui()
+	if fade_duration <= 0.0:
+		_fade_rect.color.a = 1.0
+		return
+	var tween := create_tween()
+	tween.tween_property(_fade_rect, "color:a", 1.0, fade_duration)
+	await tween.finished
+
+
+func _fade_in() -> void:
+	_ensure_fade_ui()
+	if fade_duration <= 0.0:
+		_fade_rect.color.a = 0.0
+		return
+	var tween := create_tween()
+	tween.tween_property(_fade_rect, "color:a", 0.0, fade_duration)
+	await tween.finished
 
 
 func _get_player() -> Node2D:

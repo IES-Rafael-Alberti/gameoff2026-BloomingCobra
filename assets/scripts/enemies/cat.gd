@@ -139,20 +139,14 @@ func _teleport_random_in_room() -> void:
 	velocity = Vector2.ZERO
 
 
-func _find_room_at(point: Vector2) -> Node2D:
+func _find_room_at(_point: Vector2) -> Node2D:
+	# Cat lives inside its room scene; prefer the active room.
 	var manager := get_tree().get_first_node_in_group("room_manager")
-	if manager != null and manager.has_method("get_room_at"):
-		return manager.call("get_room_at", point) as Node2D
-	var best: Node2D = null
-	var best_area := INF
-	for node in get_tree().get_nodes_in_group("rooms"):
-		if not node.has_method("contains_world_point"):
-			continue
-		if not node.contains_world_point(point, 8.0):
-			continue
-		var bounds: Rect2 = node.get_camera_bounds()
-		var area: float = bounds.get_area()
-		if area < best_area:
-			best_area = area
-			best = node
-	return best
+	if manager != null and "current_room" in manager and manager.current_room is Node2D:
+		return manager.current_room as Node2D
+	var parent_room := get_parent()
+	while parent_room != null:
+		if parent_room is Room or parent_room.is_in_group("rooms"):
+			return parent_room as Node2D
+		parent_room = parent_room.get_parent()
+	return null

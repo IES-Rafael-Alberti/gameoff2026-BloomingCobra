@@ -21,7 +21,7 @@ func _ready() -> void:
 		_boss.defeated.connect(_on_boss_defeated)
 
 
-## Prefer wall collision over TileMap used_rect (tileset tile_size may not match atlas 128).
+## Prefer wall collision over TileMapLayer used_rect (tileset tile_size may not match atlas 128).
 func get_camera_bounds() -> Rect2:
 	var from_walls := _bounds_from_walls()
 	if from_walls.size != Vector2.ZERO:
@@ -32,6 +32,8 @@ func get_camera_bounds() -> Rect2:
 
 
 func on_player_entered(player: Node2D) -> void:
+	if is_room_cleared():
+		_boss_defeated = true
 	if _boss_defeated:
 		set_all_doors_open(true)
 		return
@@ -59,6 +61,7 @@ func _start_boss_fight(_player: Node2D) -> void:
 func _on_boss_defeated() -> void:
 	_boss_defeated = true
 	_fight_started = false
+	mark_room_cleared()
 	cancel_pending_door_close()
 	set_all_doors_open(true)
 

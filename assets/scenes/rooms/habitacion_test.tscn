@@ -1,0 +1,28 @@
+[gd_scene format=3 uid="uid://v0b2kud7xh7s"]
+
+[ext_resource type="PackedScene" uid="uid://bd24eu5qqqv2d" path="res://assets/scenes/rooms/habitacion_enemy_test.tscn" id="1_base"]
+[ext_resource type="PackedScene" uid="uid://biqe6ous6m14k" path="res://assets/scenes/enemies/roamer.tscn" id="2_roamer"]
+
+[node name="HabitacionTest" unique_id=1506386588 instance=ExtResource("1_base")]
+room_id = &"habitacion_test"
+map_cell = Vector2i(0, 2)
+
+[node name="Tiles" parent="Switchable/Pesadilla" index="0" unique_id=327332008]
+visible = true
+
+[node name="Door" parent="." index="2" unique_id=879425557]
+target_room = "res://assets/scenes/rooms/habitacion_variada.tscn"
+target_door_id = &"south"
+
+[node name="Door3" parent="." index="4" unique_id=1900700370]
+target_room = "res://assets/scenes/rooms/habitacion_descanso.tscn"
+target_door_id = &"west"
+
+[node name="Roamer1" parent="." index="7" unique_id=1032048489 instance=ExtResource("2_roamer")]
+position = Vector2(-36, 23)
+
+[node name="Roamer2" parent="." index="8" unique_id=1345767857 instance=ExtResource("2_roamer")]
+position = Vector2(45, 52)
+
+[node name="Roamer3" parent="." index="9" unique_id=1622527776 instance=ExtResource("2_roamer")]
+position = Vector2(-3, -22)

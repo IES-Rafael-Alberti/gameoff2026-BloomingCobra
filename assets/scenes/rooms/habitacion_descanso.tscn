@@ -21,19 +21,25 @@ size = Vector2(16, 47)
 
 [node name="HabitacionDescanso" type="Node2D" unique_id=873851779 node_paths=PackedStringArray("doors")]
 script = ExtResource("1_qurve")
+room_id = &"habitacion_descanso"
+map_cell = Vector2i(1, 2)
 doors = [NodePath("Door"), NodePath("Door2"), NodePath("Door3"), NodePath("Door4")]
 camera_limit_expand = 64.0
 
 [node name="Switchable" type="Node2D" parent="." unique_id=1028693094]
 script = ExtResource("2_nkxtl")
 
-[node name="Pesadilla" type="TileMapLayer" parent="Switchable" unique_id=681118894]
+[node name="Pesadilla" type="Node2D" parent="Switchable"]
+
+[node name="Tiles" type="TileMapLayer" parent="Switchable/Pesadilla" unique_id=681118894]
 texture_filter = 2
 scale = Vector2(0.05, 0.05)
 tile_map_data = PackedByteArray("AAD4//z/AAAAAAAAAAD4//7/AAAAAAEAAAD4/wAAAAAAAAEAAAD4/wIAAAAAAAEAAAD4/wQAAAAAAAIAAAD6/wQAAAABAAIAAAD8/wQAAAABAAIAAAD+/wQAAAABAAIAAAAAAAQAAAABAAIAAAACAAQAAAABAAIAAAAEAAQAAAABAAIAAAAGAAQAAAACAAIAAAAGAAIAAAACAAEAAAAGAAAAAAACAAEAAAAGAP7/AAACAAEAAAAGAPz/AAACAAAAAAAEAPz/AAABAAAAAAACAPz/AAABAAAAAAAAAPz/AAABAAAAAAD+//z/AAABAAAAAAD8//z/AAABAAAAAAD6//z/AAABAAAAAAD6//7/AAABAAEAAAD6/wAAAAABAAEAAAD6/wIAAAABAAEAAAD8/wIAAAABAAEAAAD+/wIAAAABAAEAAAAAAAIAAAABAAEAAAACAAIAAAABAAEAAAAEAAIAAAABAAEAAAAEAAAAAAABAAEAAAAEAP7/AAABAAEAAAACAP7/AAABAAEAAAAAAP7/AAABAAEAAAD+//7/AAABAAEAAAD8//7/AAABAAEAAAD8/wAAAAABAAEAAAD+/wAAAAABAAEAAAAAAAAAAAABAAEAAAACAAAAAAABAAEAAAA=")
 tile_set = ExtResource("5_pesadilla")
 
-[node name="Sueño" type="TileMapLayer" parent="Switchable" unique_id=621681694]
+[node name="Sueño" type="Node2D" parent="Switchable"]
+
+[node name="Tiles" type="TileMapLayer" parent="Switchable/Sueño" unique_id=621681694]
 texture_filter = 2
 position = Vector2(35.6, 6)
 scale = Vector2(0.05, 0.05)
@@ -80,6 +86,9 @@ position = Vector2(-2, 0)
 [node name="Door" type="StaticBody2D" parent="." unique_id=879425557]
 position = Vector2(-34, -83)
 script = ExtResource("4_og2wd")
+door_id = &"north"
+target_room = "res://assets/scenes/rooms/habitacion_test3.tscn"
+target_door_id = &"south"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Door" unique_id=1541843155]
 position = Vector2(27, -20)
@@ -89,6 +98,9 @@ disabled = true
 [node name="Door2" type="StaticBody2D" parent="." unique_id=1627573497]
 position = Vector2(-34, -83)
 script = ExtResource("4_og2wd")
+door_id = &"south"
+target_room = "res://assets/scenes/rooms/habitacion_start.tscn"
+target_door_id = &"north"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Door2" unique_id=1988056655]
 position = Vector2(24, 203)
@@ -98,6 +110,9 @@ disabled = true
 [node name="Door3" type="StaticBody2D" parent="." unique_id=1900700370]
 position = Vector2(-34, -83)
 script = ExtResource("4_og2wd")
+door_id = &"east"
+target_room = "res://assets/scenes/rooms/habitacion_test2.tscn"
+target_door_id = &"west"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Door3" unique_id=1269703727]
 position = Vector2(215, 91)
@@ -107,6 +122,9 @@ disabled = true
 [node name="Door4" type="StaticBody2D" parent="." unique_id=1315555281]
 position = Vector2(-34, -83)
 script = ExtResource("4_og2wd")
+door_id = &"west"
+target_room = "res://assets/scenes/rooms/habitacion_test.tscn"
+target_door_id = &"east"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Door4" unique_id=985599619]
 position = Vector2(-163, 90)

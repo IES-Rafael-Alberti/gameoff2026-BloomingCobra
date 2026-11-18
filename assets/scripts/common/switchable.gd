@@ -5,7 +5,8 @@ signal mode_changed(index: int)
 const MODE_PESADILLA := 0
 const MODE_SUENO := 1
 
-## TileMap or TileMapLayer children used as mode variants.
+## Mode roots (Pesadilla / Sueño). Put TileMapLayer(s) + mode-only props under each.
+## If empty, auto-detects children named Pesadilla/Sueño (or direct tile layers).
 @export var variants: Array[Node2D] = []
 @export var start_index: int = 0
 @export var mode_count: int = 2
@@ -19,9 +20,7 @@ var _locked: bool = false
 func _ready() -> void:
 	add_to_group("switchable")
 	if variants.is_empty():
-		for child in get_children():
-			if _is_tile_variant(child):
-				variants.append(child)
+		_auto_detect_variants()
 
 	if follow_world:
 		_index = WorldMode.mode
@@ -33,6 +32,23 @@ func _ready() -> void:
 
 	_apply()
 	mode_changed.emit(_index)
+
+
+func _auto_detect_variants() -> void:
+	var pes := get_node_or_null("Pesadilla") as Node2D
+	var sue := get_node_or_null("Sueño") as Node2D
+	if sue == null:
+		sue = get_node_or_null("Sueno") as Node2D
+	if pes != null or sue != null:
+		if pes != null:
+			variants.append(pes)
+		if sue != null:
+			variants.append(sue)
+		return
+	# Fallback: mode roots that are themselves tile layers.
+	for child in get_children():
+		if child is TileMapLayer or child is TileMap:
+			variants.append(child as Node2D)
 
 
 func toggle() -> void:
@@ -84,6 +100,13 @@ func get_mode() -> int:
 	return _index
 
 
+func get_mode_root(index: int = -1) -> Node2D:
+	var i := _index if index < 0 else index
+	if i < 0 or i >= variants.size():
+		return null
+	return variants[i]
+
+
 func _on_world_mode_changed(index: int) -> void:
 	if index == _index:
 		_apply()
@@ -93,29 +116,46 @@ func _on_world_mode_changed(index: int) -> void:
 	mode_changed.emit(_index)
 
 
-func _is_tile_variant(node: Node) -> bool:
-	return node is TileMap or node is TileMapLayer
-
-
 func _apply() -> void:
 	if variants.is_empty():
 		return
-	# Enable the new map before disabling the old one so the canvas never goes empty.
-	var on_map: Node2D = null
-	var off_maps: Array[Node2D] = []
+	# Enable the active mode root before disabling others so the canvas never goes empty.
+	var on_root: Node2D = null
+	var off_roots: Array[Node2D] = []
 	for i in variants.size():
-		var tilemap := variants[i]
-		if tilemap == null or not _is_tile_variant(tilemap):
+		var root := variants[i]
+		if root == null:
 			continue
 		if i == _index:
-			on_map = tilemap
+			on_root = root
 		else:
-			off_maps.append(tilemap)
+			off_roots.append(root)
 
-	if on_map != null:
-		on_map.visible = true
-		on_map.process_mode = Node.PROCESS_MODE_INHERIT
+	if on_root != null:
+		on_root.visible = true
+		on_root.process_mode = Node.PROCESS_MODE_INHERIT
+		_set_subtree_collisions(on_root, true)
 
-	for tilemap in off_maps:
-		tilemap.visible = false
-		tilemap.process_mode = Node.PROCESS_MODE_DISABLED
+	for root in off_roots:
+		root.visible = false
+		root.process_mode = Node.PROCESS_MODE_DISABLED
+		# Rooms force DISABLE_MODE_KEEP_ACTIVE on props so walls stay solid while
+		# paused — process_mode alone is not enough; disable shapes explicitly.
+		_set_subtree_collisions(root, false)
+
+
+func _set_subtree_collisions(node: Node, enabled: bool) -> void:
+	if node is CollisionShape2D:
+		(node as CollisionShape2D).set_deferred("disabled", not enabled)
+	elif node is CollisionPolygon2D:
+		(node as CollisionPolygon2D).set_deferred("disabled", not enabled)
+	elif node is TileMapLayer:
+		(node as TileMapLayer).collision_enabled = enabled
+	elif node is TileMap:
+		# Debug rooms only — production rooms use TileMapLayer.
+		var tm := node as TileMap
+		for i in tm.get_layers_count():
+			tm.set_layer_enabled(i, enabled)
+
+	for child in node.get_children():
+		_set_subtree_collisions(child, enabled)
