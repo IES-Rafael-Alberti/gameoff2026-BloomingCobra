@@ -347,41 +347,40 @@ func get_camera_bounds() -> Rect2:
 	return _cached_bounds
 
 
-## TileMapLayer nodes under Switchable/Pesadilla (union for bounds). Debug TileMap as fallback.
+func invalidate_camera_bounds() -> void:
+	_bounds_cached = false
+	_cached_bounds = Rect2()
+
+
+## Tile geometry under Switchable/Pesadilla + Sueño (union). Covers rooms whose modes differ in size.
 func _find_bounds_tile_layers() -> Array[Node2D]:
 	var result: Array[Node2D] = []
 	var sw := get_node_or_null("Switchable")
 	if sw == null:
 		return result
 
-	var mode_root: Node = null
 	for mode_name in ["Pesadilla", "Sueño", "Sueno"]:
-		mode_root = sw.get_node_or_null(mode_name)
-		if mode_root != null:
-			break
-	if mode_root == null:
-		return result
-
-	_collect_tile_map_layers(mode_root, result)
-	if not result.is_empty():
-		return result
-
-	# Debug rooms still using a monolithic TileMap.
-	if mode_root is TileMap:
-		result.append(mode_root as Node2D)
-		return result
-	for child in mode_root.get_children():
-		if child is TileMap:
-			result.append(child as Node2D)
-			break
+		var mode_root := sw.get_node_or_null(mode_name)
+		if mode_root == null:
+			continue
+		var before := result.size()
+		_collect_tile_nodes(mode_root, result)
+		if result.size() == before:
+			# Mode root itself may be a tile node (legacy layout).
+			_collect_tile_nodes_self(mode_root, result)
 	return result
 
 
-func _collect_tile_map_layers(node: Node, out: Array[Node2D]) -> void:
-	if node is TileMapLayer:
-		out.append(node as Node2D)
+func _collect_tile_nodes(node: Node, out: Array[Node2D]) -> void:
+	_collect_tile_nodes_self(node, out)
 	for child in node.get_children():
-		_collect_tile_map_layers(child, out)
+		_collect_tile_nodes(child, out)
+
+
+func _collect_tile_nodes_self(node: Node, out: Array[Node2D]) -> void:
+	if node is TileMapLayer or node is TileMap:
+		if not out.has(node):
+			out.append(node as Node2D)
 
 
 func _tile_node_global_bounds(layer: Node2D) -> Rect2:
@@ -390,17 +389,31 @@ func _tile_node_global_bounds(layer: Node2D) -> Rect2:
 	var tileset: TileSet = layer.get("tile_set") as TileSet
 	if tileset == null:
 		return Rect2()
+
+	# Debug TileMap: Switchable disables layers on the inactive mode, and
+	# get_used_rect() then returns empty — re-enable briefly to measure.
+	var restored_layers: Array[bool] = []
+	var tm := layer as TileMap
+	if tm != null:
+		for i in tm.get_layers_count():
+			restored_layers.append(tm.is_layer_enabled(i))
+			tm.set_layer_enabled(i, true)
+
 	var used: Rect2i = layer.call("get_used_rect") as Rect2i
+	if tm != null:
+		for i in restored_layers.size():
+			tm.set_layer_enabled(i, restored_layers[i])
+
 	if used.size.x <= 0 or used.size.y <= 0:
 		return Rect2()
 	var tile_size := Vector2(tileset.tile_size)
-	var top_left_local: Vector2 = layer.call("map_to_local", used.position) as Vector2 - tile_size * 0.5
+	var top_left_local: Vector2 = (layer.call("map_to_local", used.position) as Vector2) - tile_size * 0.5
 	var bottom_right_local: Vector2 = (
-		layer.call("map_to_local", used.position + used.size - Vector2i.ONE) as Vector2 + tile_size * 0.5
+		(layer.call("map_to_local", used.position + used.size - Vector2i.ONE) as Vector2) + tile_size * 0.5
 	)
 	var top_left := layer.to_global(top_left_local)
 	var bottom_right := layer.to_global(bottom_right_local)
-	return Rect2(top_left, bottom_right - top_left)
+	return Rect2(top_left, bottom_right - top_left).abs()
 
 
 ## Bounds used by Camera2D limits. May be larger than playable `get_camera_bounds()`.

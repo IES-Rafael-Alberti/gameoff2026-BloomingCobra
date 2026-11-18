@@ -116,6 +116,6 @@ Sin `target_room`, la puerta es **barrera permanente**.
 3. **Enemigos / pickups** van en la escena de la sala; el estado (limpia, pickups cogidos, etc.) lo guarda `RunState` al salir.
 4. **Spawners**: `EnemySpawnPoint` + opcionalmente `spawn_enemy_scenes` en la raíz.
 5. **Botones que abren puertas**: `unlock_doors_with_buttons` + array de botones en la raíz.
-6. **Cámara**: bounds desde los `TileMapLayer` de Pesadilla; `camera_limit_expand` solo amplía el límite visual.
+6. **Cámara**: bounds = unión de los tiles de **Pesadilla y Sueño**; `camera_limit_expand` solo amplía el límite visual. Si una sala es más grande que otra, los límites se recalculan al entrar.
 7. **Props de un solo modo** deben ir bajo ese modo; si están fuera de `Switchable`, siguen activos en ambos mundos.
 8. Tipos de sala cambian reglas (safe, trap, parkour, boss…); elige el script adecuado desde el principio.

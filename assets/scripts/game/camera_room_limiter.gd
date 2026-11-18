@@ -113,8 +113,20 @@ func _on_room_changed(_previous: Room, next: Room) -> void:
 	_current_room = next
 	if next == null:
 		return
+	# Defer one frame so room transforms / tile used_rects are fully settled.
 	_apply_bounds(next)
 	_reset_look_at_for_room(next)
+	_snap_now()
+	call_deferred("_refresh_current_room_bounds")
+
+
+func _refresh_current_room_bounds() -> void:
+	if _current_room == null or not is_instance_valid(_current_room):
+		return
+	if _current_room.has_method("invalidate_camera_bounds"):
+		_current_room.invalidate_camera_bounds()
+	_apply_bounds(_current_room)
+	_reset_look_at_for_room(_current_room)
 	_snap_now()
 
 
@@ -125,7 +137,10 @@ func _apply_bounds(room: Room) -> void:
 		else room.get_camera_bounds()
 	)
 	if bounds.size == Vector2.ZERO:
+		# Never keep the previous room's limits — that traps the camera in a smaller box.
+		limit_enabled = false
 		return
+	limit_enabled = true
 	limit_left = int(floor(bounds.position.x))
 	limit_top = int(floor(bounds.position.y))
 	limit_right = int(ceil(bounds.end.x))
@@ -140,6 +155,7 @@ func snap_to_room(room: Room) -> void:
 	_apply_bounds(room)
 	_reset_look_at_for_room(room)
 	_snap_now()
+	call_deferred("_refresh_current_room_bounds")
 
 
 func set_mode(new_mode: Mode) -> void:

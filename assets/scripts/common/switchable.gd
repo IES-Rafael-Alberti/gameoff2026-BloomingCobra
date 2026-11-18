@@ -152,7 +152,7 @@ func _set_subtree_collisions(node: Node, enabled: bool) -> void:
 	elif node is TileMapLayer:
 		(node as TileMapLayer).collision_enabled = enabled
 	elif node is TileMap:
-		# Debug rooms only — production rooms use TileMapLayer.
+		# Debug only. Disabling layers drops collision; bounds code re-enables briefly to measure.
 		var tm := node as TileMap
 		for i in tm.get_layers_count():
 			tm.set_layer_enabled(i, enabled)
