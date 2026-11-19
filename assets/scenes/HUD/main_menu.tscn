@@ -28,6 +28,8 @@ mouse_filter = 2
 
 [node name="ScrollBackground" type="TextureRect" parent="Background"]
 layout_mode = 0
+offset_right = 1152.0
+offset_bottom = 1296.0
 mouse_filter = 2
 texture = ExtResource("2_bg")
 expand_mode = 1
@@ -44,6 +46,10 @@ mouse_filter = 2
 
 [node name="Colgantes" type="TextureRect" parent="UI"]
 layout_mode = 0
+offset_left = 46.0
+offset_top = -13.0
+offset_right = 1106.0
+offset_bottom = 2252.0
 mouse_filter = 2
 texture = ExtResource("4_colgantes")
 expand_mode = 1
@@ -51,6 +57,10 @@ stretch_mode = 5
 
 [node name="Logo" type="TextureRect" parent="UI"]
 layout_mode = 0
+offset_left = 300.0
+offset_top = 78.0
+offset_right = 853.0
+offset_bottom = 447.0
 mouse_filter = 2
 texture = ExtResource("3_logo")
 expand_mode = 1
@@ -58,22 +68,32 @@ stretch_mode = 5
 
 [node name="MenuRow" type="HBoxContainer" parent="UI"]
 layout_mode = 0
+offset_left = 276.0
+offset_top = 505.0
+offset_right = 876.0
+offset_bottom = 573.0
 theme_override_constants/separation = 72
 alignment = 1
 
 [node name="SelectorLeft" type="TextureRect" parent="UI"]
-visible = false
 z_index = 2
 layout_mode = 0
+offset_left = 220.0
+offset_top = 520.0
+offset_right = 256.0
+offset_bottom = 556.0
 mouse_filter = 2
 texture = ExtResource("5_selector")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="SelectorRight" type="TextureRect" parent="UI"]
-visible = false
 z_index = 2
 layout_mode = 0
+offset_left = 896.0
+offset_top = 520.0
+offset_right = 932.0
+offset_bottom = 556.0
 mouse_filter = 2
 texture = ExtResource("5_selector")
 expand_mode = 1
@@ -82,6 +102,10 @@ flip_h = true
 
 [node name="BloomingCobra" type="TextureRect" parent="UI"]
 layout_mode = 0
+offset_left = 964.0
+offset_top = 546.0
+offset_right = 1124.0
+offset_bottom = 626.0
 mouse_filter = 2
 texture = ExtResource("6_brand")
 expand_mode = 1
