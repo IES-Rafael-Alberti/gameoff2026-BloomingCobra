@@ -3,7 +3,7 @@ extends Room
 
 ## Closed exit until the challenge is done. Falling into the void resets to start.
 ## Forces dream mode and locks switching to nightmare while inside.
-## Enable Button Unlock + assign PropButtons (interactive/button.tscn) to open the exit.
+## Enable Button Unlock + assign PropButtons (buttonPesadilla / buttonVigilia / button.tscn).
 ## Falling resets uncommitted buttons; leaving the room with them pressed commits them.
 ## Void uses coyote time, then a shrink fall beat, then respawn.
 

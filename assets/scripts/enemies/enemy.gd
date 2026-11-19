@@ -162,22 +162,44 @@ func play_directional_animation(prefix: String, direction: Vector2) -> void:
 		sfx.call("play_walking")
 
 
-## Prefer *_sides / *_up / *_down; fall back to a single shared clip (e.g. walking).
+## Prefer dedicated left/right/up/down; then *_sides (flip); then a shared clip.
 func _resolve_directional_anim(prefix: String, direction: Vector2, frames: SpriteFrames) -> StringName:
+	var left := StringName("%s_left" % prefix)
+	var right := StringName("%s_right" % prefix)
 	var sides := StringName("%s_sides" % prefix)
 	var up := StringName("%s_up" % prefix)
 	var down := StringName("%s_down" % prefix)
 	var base := StringName(prefix)
+	var has_left := frames.has_animation(left)
+	var has_right := frames.has_animation(right)
 	var has_sides := frames.has_animation(sides)
 	var has_up := frames.has_animation(up)
 	var has_down := frames.has_animation(down)
 	var has_base := frames.has_animation(base)
 
 	if absf(direction.x) > absf(direction.y):
-		animated_sprite.flip_h = direction.x < 0.0
-		if has_sides:
-			return sides
+		if direction.x < 0.0:
+			if has_left:
+				animated_sprite.flip_h = false
+				return left
+			if has_sides:
+				animated_sprite.flip_h = true
+				return sides
+			if has_right:
+				animated_sprite.flip_h = true
+				return right
+		else:
+			if has_right:
+				animated_sprite.flip_h = false
+				return right
+			if has_sides:
+				animated_sprite.flip_h = false
+				return sides
+			if has_left:
+				animated_sprite.flip_h = true
+				return left
 		if has_base:
+			animated_sprite.flip_h = direction.x < 0.0
 			return base
 		return &""
 

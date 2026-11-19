@@ -1,8 +1,8 @@
 [gd_scene format=3 uid="uid://csq6yrw4oejoa"]
 
 [ext_resource type="Script" uid="uid://d061mxki715ii" path="res://assets/scripts/rooms/boss_room.gd" id="1_room"]
-[ext_resource type="TileSet" uid="uid://ceqj8bpf18e3s" path="res://assets/resources/tilesets/tileset_vigilia2.tres" id="4_tileset"]
-[ext_resource type="TileSet" uid="uid://f84717b46fa6594d" path="res://assets/resources/tilesets/tileset_pesadilla.tres" id="4_pesadilla"]
+[ext_resource type="TileSet" uid="uid://ceqj8bpfcscjg" path="res://assets/resources/tilesets/tileset_vigiliadef.tres" id="4_tileset"]
+[ext_resource type="TileSet" uid="uid://c1fyb264g8tdl" path="res://assets/resources/tilesets/tileset_pesadilla.tres" id="4_pesadilla"]
 [ext_resource type="Script" uid="uid://bkoec71xnejuk" path="res://assets/scripts/common/switchable.gd" id="5_sw"]
 [ext_resource type="Script" uid="uid://ctoj8a51fem1a" path="res://assets/scripts/rooms/door.gd" id="6_door"]
 [ext_resource type="PackedScene" path="res://assets/scenes/props/static/spikes.tscn" id="7_spikes"]

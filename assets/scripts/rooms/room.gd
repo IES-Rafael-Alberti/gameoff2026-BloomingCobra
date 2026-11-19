@@ -28,7 +28,7 @@ const GAME_SCENE := "res://assets/scenes/game.tscn"
 @export_group("Button Unlock")
 ## When enabled, assigned buttons can open this room's doors / clear its lock.
 @export var unlock_doors_with_buttons: bool = false
-## Drag PropButton nodes here (scene: res://assets/scenes/props/interactive/button.tscn).
+## Drag PropButton nodes here (buttonPesadilla / buttonVigilia / interactive/button.tscn).
 @export var unlock_buttons: Array[Area2D] = []
 ## If true, every assigned button must be pressed. If false, any one is enough.
 @export var require_all_buttons: bool = true

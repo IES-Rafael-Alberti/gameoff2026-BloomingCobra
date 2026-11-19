@@ -12,7 +12,7 @@ enum State { IDLE, FIGHTING, WEAKPOINT_EXPOSED, DEAD }
 @export var attack_cooldown: float = 1.6
 @export var phase_cooldown_multipliers: PackedFloat32Array = PackedFloat32Array([1.0, 0.8, 0.65])
 @export var heal_drop_scene: PackedScene = preload("res://assets/scenes/props/pickups/pickup_heal.tscn")
-@export var button_scene: PackedScene = preload("res://assets/scenes/props/interactive/button.tscn")
+@export var button_scene: PackedScene = preload("res://assets/scenes/props/vigilia/interactive/buttonVigilia.tscn")
 @export var button_only_in_vigilia: bool = true
 
 @onready var head: BossHead = get_node_or_null("BossCabeza") as BossHead
