@@ -9,7 +9,8 @@ const LAYER_SPIKES_ENEMY := 1 << 5 # physics layer 6
 @export var damage: int = 1
 ## Seconds between damage ticks while the player remains on the spikes.
 @export var damage_interval: float = 0.55
-@export var texture: Texture2D = preload("res://assets/sprittesheets/props/placeholders/static/spikes.png")
+## Optional override. Leave empty to keep the Sprite2D texture from the scene.
+@export var texture: Texture2D
 ## If >= 0, spikes only deal damage / show in that WorldMode (0 Pesadilla, 1 Sueño/Vigilia).
 @export var only_in_mode: int = -1
 
@@ -30,6 +31,7 @@ func _ready() -> void:
 	monitoring = true
 	monitorable = false
 	set_physics_process(true)
+	# Only override when explicitly set; mode scenes already have AtlasTextures.
 	if sprite != null and texture != null:
 		sprite.texture = texture
 	_ensure_enemy_blocker()

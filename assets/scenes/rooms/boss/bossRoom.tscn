@@ -5,7 +5,7 @@
 [ext_resource type="TileSet" uid="uid://c1fyb264g8tdl" path="res://assets/resources/tilesets/tileset_pesadilla.tres" id="4_pesadilla"]
 [ext_resource type="Script" uid="uid://bkoec71xnejuk" path="res://assets/scripts/common/switchable.gd" id="5_sw"]
 [ext_resource type="Script" uid="uid://ctoj8a51fem1a" path="res://assets/scripts/rooms/door.gd" id="6_door"]
-[ext_resource type="PackedScene" path="res://assets/scenes/props/static/spikes.tscn" id="7_spikes"]
+[ext_resource type="PackedScene" uid="uid://cy2b1k6dexwim" path="res://assets/scenes/props/vigilia/static/spikesVigilia.tscn" id="7_spikes"]
 [ext_resource type="PackedScene" path="res://assets/scenes/boss/boss.tscn" id="8_boss"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wall_h"]
