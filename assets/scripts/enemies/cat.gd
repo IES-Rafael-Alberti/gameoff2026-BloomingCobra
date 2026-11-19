@@ -12,6 +12,8 @@ signal caught
 var _movement: Node = null
 var _active: bool = true
 var _is_caught: bool = false
+## Last horizontal facing for idle flip (idle art faces left by default).
+var _idle_flip_h: bool = false
 
 
 func _ready() -> void:
@@ -47,18 +49,57 @@ func is_active() -> bool:
 
 
 func play_walk_animation(direction: Vector2) -> void:
+	if animated_sprite == null or animated_sprite.sprite_frames == null:
+		return
+	var frames := animated_sprite.sprite_frames
 	if direction == Vector2.ZERO:
+		_play_idle()
+		return
+
+	var anim := &""
+	animated_sprite.flip_h = false
+
+	if absf(direction.x) > absf(direction.y):
+		if direction.x < 0.0:
+			_idle_flip_h = false
+			if frames.has_animation(&"walking_left"):
+				anim = &"walking_left"
+			elif frames.has_animation(&"walking_sides"):
+				anim = &"walking_sides"
+				animated_sprite.flip_h = true
+			elif frames.has_animation(&"walking_right"):
+				anim = &"walking_right"
+				animated_sprite.flip_h = true
+		else:
+			_idle_flip_h = true
+			if frames.has_animation(&"walking_right"):
+				anim = &"walking_right"
+			elif frames.has_animation(&"walking_sides"):
+				anim = &"walking_sides"
+			elif frames.has_animation(&"walking_left"):
+				anim = &"walking_left"
+				animated_sprite.flip_h = true
+	elif direction.y < 0.0:
+		anim = &"walking_up" if frames.has_animation(&"walking_up") else &""
+	else:
+		anim = &"walking_down" if frames.has_animation(&"walking_down") else &""
+
+	if anim.is_empty():
+		return
+	if animated_sprite.animation != anim or not animated_sprite.is_playing():
+		animated_sprite.play(anim)
+
+
+func _play_idle() -> void:
+	if animated_sprite == null or animated_sprite.sprite_frames == null:
+		return
+	if not animated_sprite.sprite_frames.has_animation(&"idle"):
 		animated_sprite.stop()
 		return
-	if abs(direction.x) > abs(direction.y):
-		animated_sprite.play("walking_sides")
-		animated_sprite.flip_h = direction.x < 0
-	elif direction.y < 0:
-		animated_sprite.play("walking_up")
-		animated_sprite.flip_h = false
-	else:
-		animated_sprite.play("walking_down")
-		animated_sprite.flip_h = false
+	# Idle sheet faces left; flip when the cat last ran right.
+	animated_sprite.flip_h = _idle_flip_h
+	if animated_sprite.animation != &"idle" or not animated_sprite.is_playing():
+		animated_sprite.play(&"idle")
 
 
 func play_gather() -> void:
