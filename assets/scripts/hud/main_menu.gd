@@ -9,7 +9,7 @@ const INTRO_SLIDE_SECONDS := 2.8
 const UI_FADE_SECONDS := 0.85
 const MENU_LABELS: PackedStringArray = ["Play", "Options", "Exit"]
 
-@export var menu_font_size: int = 56
+@export var menu_font_size: int = 26
 @export var menu_color: Color = Color(0.96, 0.92, 0.86, 1.0)
 @export var logo_max_width_ratio: float = 0.48
 @export var colgantes_width_ratio: float = 0.92
@@ -17,7 +17,7 @@ const MENU_LABELS: PackedStringArray = ["Play", "Options", "Exit"]
 @onready var _scroll_bg: TextureRect = $Background/ScrollBackground
 @onready var _ui: Control = $UI
 @onready var _logo: TextureRect = $UI/Logo
-@onready var _colgantes: TextureRect = $UI/Colgantes
+@onready var _colgantes: Node = $UI/Colgantes
 @onready var _brand: TextureRect = $UI/BloomingCobra
 @onready var _menu_row: HBoxContainer = $UI/MenuRow
 @onready var _selector_left: TextureRect = $UI/SelectorLeft
@@ -219,7 +219,7 @@ func _place_selectors() -> void:
 func _on_resized() -> void:
 	_layout_scroll_background(_intro_done)
 	_fit_logo()
-	_fit_colgantes()
+	#_fit_colgantes()
 	_fit_brand()
 	_fit_menu_row()
 	_fit_selectors()
@@ -238,15 +238,15 @@ func _fit_logo() -> void:
 	_logo.position = Vector2((size.x - target_w) * 0.5, size.y * 0.12)
 
 
-func _fit_colgantes() -> void:
-	if _colgantes.texture == null:
-		return
-	var tex_size := _colgantes.texture.get_size()
-	var target_w := size.x * colgantes_width_ratio
-	var scale_factor := target_w / tex_size.x
-	var target_h := tex_size.y * scale_factor
-	_colgantes.size = Vector2(target_w, target_h)
-	_colgantes.position = Vector2((size.x - target_w) * 0.5, -size.y * 0.02)
+#func _fit_colgantes() -> void:
+	#if _colgantes.texture == null:
+		#return
+	#var tex_size := _colgantes.texture.get_size()
+	#var target_w := size.x * colgantes_width_ratio
+	#var scale_factor := target_w / tex_size.x
+	#var target_h := tex_size.y * scale_factor
+	#_colgantes.size = Vector2(target_w, target_h)
+	#_colgantes.position = Vector2((size.x - target_w) * 0.5, -size.y * 0.02)
 
 
 func _fit_brand() -> void:

@@ -1,13 +1,23 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene format=3 uid="uid://rnngxtbcdt2p"]
 
-[ext_resource type="Script" path="res://assets/scripts/hud/main_menu.gd" id="1_menu"]
+[ext_resource type="Script" uid="uid://clharysq5v6kj" path="res://assets/scripts/hud/main_menu.gd" id="1_menu"]
 [ext_resource type="Texture2D" uid="uid://b535nujlqekvs" path="res://assets/sprittesheets/HUD/definitivo/inicio_titulo_background.png" id="2_bg"]
 [ext_resource type="Texture2D" uid="uid://cbd6oij8vo0su" path="res://assets/sprittesheets/HUD/definitivo/logo_inicio.png" id="3_logo"]
+[ext_resource type="Texture2D" uid="uid://dm6g14oqbp258" path="res://assets/scenes/HUD/referencia_start_HK.jpg" id="3_rwffj"]
+[ext_resource type="Script" uid="uid://d1mkf8lsmg1g3" path="res://assets/scripts/hud/referencia_main_menu_hk.gd" id="4_07wup"]
 [ext_resource type="Texture2D" uid="uid://byg8tgcia5q00" path="res://assets/sprittesheets/HUD/definitivo/colgantes_inicio.png" id="4_colgantes"]
 [ext_resource type="Texture2D" uid="uid://jc3hfx67tbte" path="res://assets/sprittesheets/HUD/definitivo/Seleccionador.png" id="5_selector"]
 [ext_resource type="Texture2D" uid="uid://dnjtl6coiv6sm" path="res://assets/sprittesheets/HUD/definitivo/inicio_bloomingcobra.png" id="6_brand"]
 
-[node name="MainMenu" type="Control"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_rvyf8"]
+atlas = ExtResource("4_colgantes")
+region = Rect2(134, 0, 69, 327)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ujbc3"]
+atlas = ExtResource("4_colgantes")
+region = Rect2(0, 0, 112.346466, 804)
+
+[node name="MainMenu" type="Control" unique_id=1842389175]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -16,7 +26,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_menu")
 
-[node name="Background" type="Control" parent="."]
+[node name="Background" type="Control" parent="." unique_id=1328078852]
 clip_contents = true
 layout_mode = 1
 anchors_preset = 15
@@ -26,14 +36,20 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="ScrollBackground" type="TextureRect" parent="Background"]
+[node name="ScrollBackground" type="TextureRect" parent="Background" unique_id=1902604688]
 layout_mode = 0
 mouse_filter = 2
 texture = ExtResource("2_bg")
 expand_mode = 1
-stretch_mode = 0
 
-[node name="UI" type="Control" parent="."]
+[node name="ReferenciaStartHk" type="Sprite2D" parent="." unique_id=1588310079]
+modulate = Color(1, 1, 1, 0.28235295)
+position = Vector2(575.6667, 324)
+scale = Vector2(0.6, 0.6)
+texture = ExtResource("3_rwffj")
+script = ExtResource("4_07wup")
+
+[node name="UI" type="Control" parent="." unique_id=1641608196]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -42,27 +58,57 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
+<<<<<<< Updated upstream
 [node name="Colgantes" type="TextureRect" parent="UI"]
 layout_mode = 0
 mouse_filter = 2
 texture = ExtResource("4_colgantes")
 expand_mode = 1
 stretch_mode = 5
+=======
+[node name="Colgantes" type="Node" parent="UI" unique_id=88806568]
+>>>>>>> Stashed changes
 
-[node name="Logo" type="TextureRect" parent="UI"]
+[node name="estrella2" type="Sprite2D" parent="UI/Colgantes" unique_id=1799677395]
+position = Vector2(196, 162)
+texture = SubResource("AtlasTexture_rvyf8")
+
+[node name="estrella1" type="Sprite2D" parent="UI/Colgantes" unique_id=1058029992]
+position = Vector2(101, 400)
+texture = SubResource("AtlasTexture_ujbc3")
+
+[node name="Logo" type="TextureRect" parent="UI" unique_id=1984630384]
 layout_mode = 0
+<<<<<<< Updated upstream
+=======
+offset_left = 293.0
+offset_top = 53.0
+offset_right = 886.4634
+offset_bottom = 449.0
+>>>>>>> Stashed changes
 mouse_filter = 2
 texture = ExtResource("3_logo")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="MenuRow" type="HBoxContainer" parent="UI"]
+[node name="MenuRow" type="HBoxContainer" parent="UI" unique_id=2030265834]
 layout_mode = 0
+<<<<<<< Updated upstream
 theme_override_constants/separation = 72
 alignment = 1
 
 [node name="SelectorLeft" type="TextureRect" parent="UI"]
 visible = false
+=======
+offset_left = 326.0
+offset_top = 487.0
+offset_right = 820.1177
+offset_bottom = 531.0
+theme_override_constants/separation = 72
+alignment = 1
+
+[node name="SelectorLeft" type="TextureRect" parent="UI" unique_id=1299778380]
+>>>>>>> Stashed changes
 z_index = 2
 layout_mode = 0
 mouse_filter = 2
@@ -70,8 +116,12 @@ texture = ExtResource("5_selector")
 expand_mode = 1
 stretch_mode = 5
 
+<<<<<<< Updated upstream
 [node name="SelectorRight" type="TextureRect" parent="UI"]
 visible = false
+=======
+[node name="SelectorRight" type="TextureRect" parent="UI" unique_id=1501891190]
+>>>>>>> Stashed changes
 z_index = 2
 layout_mode = 0
 mouse_filter = 2
@@ -80,8 +130,24 @@ expand_mode = 1
 stretch_mode = 5
 flip_h = true
 
+<<<<<<< Updated upstream
 [node name="BloomingCobra" type="TextureRect" parent="UI"]
 layout_mode = 0
+=======
+[node name="BloomingCobra" type="TextureRect" parent="UI" unique_id=1746192526]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -298.0
+offset_top = -181.0
+offset_right = -162.0
+offset_bottom = -125.0
+grow_horizontal = 0
+grow_vertical = 0
+>>>>>>> Stashed changes
 mouse_filter = 2
 texture = ExtResource("6_brand")
 expand_mode = 1
