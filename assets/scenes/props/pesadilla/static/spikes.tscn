@@ -1,16 +1,12 @@
-[gd_scene load_steps=5 format=3 uid="uid://vkvkp328imyq"]
+[gd_scene load_steps=4 format=3]
 
-[ext_resource type="Script" uid="uid://bnfjiqrlbkdtf" path="res://assets/scripts/props/static/spikes.gd" id="1_spikes"]
-[ext_resource type="Texture2D" uid="uid://c0x0c5ptiyqno" path="res://assets/sprittesheets/props/definitivo/Nightmare Props.png" id="2_sheet"]
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_spikes"]
-atlas = ExtResource("2_sheet")
-region = Rect2(2063, 12, 636, 663)
+[ext_resource type="Script" path="res://assets/scripts/props/static/spikes.gd" id="1_spikes"]
+[ext_resource uid="uid://bfmcufim7vn4s" type="Texture2D" path="res://assets/sprittesheets/props/placeholders/static/spikes.png" id="2_tex"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_spikes"]
 size = Vector2(14, 14)
 
-[node name="SpikesPesadilla" type="Area2D"]
+[node name="Spikes" type="Area2D"]
 z_index = 1
 collision_layer = 0
 collision_mask = 2
@@ -19,9 +15,8 @@ monitorable = false
 script = ExtResource("1_spikes")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_tex")
 texture_filter = 1
-scale = Vector2(0.02, 0.02)
-texture = SubResource("AtlasTexture_spikes")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_spikes")

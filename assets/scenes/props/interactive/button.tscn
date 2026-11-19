@@ -1,0 +1,80 @@
+[gd_scene load_steps=12 format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/props/interactive/button.gd" id="1_btn"]
+[ext_resource type="Texture2D" uid="uid://nadfbq72pvc1" path="res://assets/sprittesheets/props/definitivo/boton_pesadilla.png" id="2_pes"]
+[ext_resource type="Texture2D" uid="uid://dn2m23cf4yxla" path="res://assets/sprittesheets/props/definitivo/boton_vigilia.png" id="3_vig"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_pes_up"]
+atlas = ExtResource("2_pes")
+region = Rect2(0, 0, 58, 58)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_pes_down"]
+atlas = ExtResource("2_pes")
+region = Rect2(58, 0, 58, 58)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_pesadilla"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_pes_up")
+}],
+"loop": true,
+"name": &"unpressed",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_pes_down")
+}],
+"loop": true,
+"name": &"pressed",
+"speed": 5.0
+}]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vig_up"]
+atlas = ExtResource("3_vig")
+region = Rect2(0, 0, 59, 59)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vig_down"]
+atlas = ExtResource("3_vig")
+region = Rect2(59, 0, 59, 59)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_vigilia"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vig_up")
+}],
+"loop": true,
+"name": &"unpressed",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vig_down")
+}],
+"loop": true,
+"name": &"pressed",
+"speed": 5.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_btn"]
+size = Vector2(28, 28)
+
+[node name="Button" type="Area2D"]
+collision_layer = 0
+collision_mask = 2
+monitoring = true
+monitorable = false
+script = ExtResource("1_btn")
+pesadilla_frames = SubResource("SpriteFrames_pesadilla")
+vigilia_frames = SubResource("SpriteFrames_vigilia")
+stay_pressed = true
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_pesadilla")
+animation = &"unpressed"
+autoplay = "unpressed"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_btn")
