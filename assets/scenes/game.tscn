@@ -7,6 +7,7 @@
 [ext_resource type="AudioStream" uid="uid://dviqet6e1useg" path="res://assets/audio/music/NightmareMusic.ogg" id="4_fx2rd"]
 [ext_resource type="PackedScene" path="res://assets/scenes/HUD/map_overlay.tscn" id="16_map"]
 [ext_resource type="PackedScene" path="res://assets/scenes/HUD/health_bar.tscn" id="17_hp"]
+[ext_resource type="PackedScene" path="res://assets/scenes/HUD/pause_menu.tscn" id="21_pause"]
 [ext_resource type="Script" uid="uid://cubeh2wh4qdcc" path="res://assets/scripts/sfx/general_sfx.gd" id="18_sfx"]
 [ext_resource type="AudioStream" uid="uid://crbieoj4wi1fq" path="res://assets/audio/general/Shift.wav" id="19_shift"]
 [ext_resource type="Script" uid="uid://c1h4s6dj62gua" path="res://assets/scripts/game/room_manager.gd" id="20_room_mgr"]
@@ -29,6 +30,8 @@ script = ExtResource("20_room_mgr")
 bar_scale = 0.42
 
 [node name="MapOverlay" parent="." instance=ExtResource("16_map")]
+
+[node name="PauseMenu" parent="." instance=ExtResource("21_pause")]
 
 [node name="Player" parent="." instance=ExtResource("1_cb66b")]
 light_mask = 3

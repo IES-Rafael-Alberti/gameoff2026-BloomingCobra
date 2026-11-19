@@ -28,12 +28,14 @@ var _selected_index: int = 0
 var _input_enabled: bool = false
 var _intro_done: bool = false
 var _menu_font: Font
+var _options: Control
 
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_menu_font = load(FONT_PATH) as Font
 	_setup_menu_labels()
+	_setup_options()
 	_ui.modulate.a = 0.0
 	_selector_left.visible = false
 	_selector_right.visible = false
@@ -46,6 +48,11 @@ func _ready() -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not _input_enabled or not is_inside_tree():
+		return
+
+	if _options != null and _options.has_method("is_open") and bool(_options.call("is_open")):
+		if _options.has_method("handle_input") and bool(_options.call("handle_input", event)):
+			_mark_input_handled()
 		return
 
 	if event.is_action_pressed("ui_left") or event.is_action_pressed("move_left"):
@@ -137,7 +144,7 @@ func _setup_menu_labels() -> void:
 			_on_menu_item_gui_input(index, event)
 		)
 		label.mouse_entered.connect(func() -> void:
-			if _input_enabled:
+			if _input_enabled and not _is_options_open():
 				_selected_index = index
 				_update_selection_visuals()
 		)
@@ -145,8 +152,22 @@ func _setup_menu_labels() -> void:
 		_menu_items.append(label)
 
 
+func _setup_options() -> void:
+	var options_script := load("res://assets/scripts/hud/options_overlay.gd") as Script
+	_options = Control.new()
+	_options.set_script(options_script)
+	_options.name = "OptionsOverlay"
+	add_child(_options)
+	if _options.has_signal("closed"):
+		_options.closed.connect(_on_options_closed)
+
+
+func _is_options_open() -> bool:
+	return _options != null and _options.has_method("is_open") and bool(_options.call("is_open"))
+
+
 func _on_menu_item_gui_input(index: int, event: InputEvent) -> void:
-	if not _input_enabled:
+	if not _input_enabled or _is_options_open():
 		return
 	if event is InputEventMouseButton:
 		var mouse := event as InputEventMouseButton
@@ -182,10 +203,22 @@ func _start_game() -> void:
 
 
 func _open_options() -> void:
-	pass
+	if _options != null and _options.has_method("open"):
+		_options.call("open")
+	_selector_left.visible = false
+	_selector_right.visible = false
+
+
+func _on_options_closed() -> void:
+	_update_selection_visuals()
 
 
 func _update_selection_visuals() -> void:
+	if _is_options_open():
+		_selector_left.visible = false
+		_selector_right.visible = false
+		return
+
 	if _menu_items.is_empty():
 		_selector_left.visible = false
 		_selector_right.visible = false
@@ -198,7 +231,7 @@ func _update_selection_visuals() -> void:
 
 
 func _place_selectors() -> void:
-	if _menu_items.is_empty() or _selected_index < 0 or _selected_index >= _menu_items.size():
+	if _is_options_open() or _menu_items.is_empty() or _selected_index < 0 or _selected_index >= _menu_items.size():
 		return
 
 	var selected := _menu_items[_selected_index]
@@ -225,7 +258,7 @@ func _on_resized() -> void:
 	_fit_brand()
 	_fit_menu_row()
 	_fit_selectors()
-	if _input_enabled:
+	if _input_enabled and not _is_options_open():
 		_update_selection_visuals()
 
 

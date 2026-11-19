@@ -31,6 +31,7 @@ var _icons: Dictionary = {} # room_id -> TextureRect
 func _ready() -> void:
 	layer = 80
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	add_to_group("map_overlay")
 	_ensure_textures()
 	_build_ui()
 	visible = false
@@ -41,6 +42,9 @@ func _ready() -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if not event.is_action_pressed("toggle_map") or event.is_echo():
 		return
+	# Don't open the map while the game is paused.
+	if get_tree().paused and not _open:
+		return
 	_set_open(not _open)
 	get_viewport().set_input_as_handled()
 
@@ -49,6 +53,14 @@ func refresh() -> void:
 	if not _wired:
 		_setup_rooms()
 	_rebuild_icons()
+
+
+func close_overlay() -> void:
+	_set_open(false)
+
+
+func is_open() -> bool:
+	return _open
 
 
 func _set_open(open: bool) -> void:

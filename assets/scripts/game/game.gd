@@ -197,6 +197,9 @@ func _debug_teleport_to_boss() -> void:
 
 
 func _toggle_fullscreen() -> void:
+	if GameSettings != null and GameSettings.has_method("toggle_fullscreen_shortcut"):
+		GameSettings.toggle_fullscreen_shortcut()
+		return
 	var mode := DisplayServer.window_get_mode()
 	if mode == DisplayServer.WINDOW_MODE_FULLSCREEN or mode == DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN:
 		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
