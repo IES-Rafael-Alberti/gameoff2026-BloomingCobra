@@ -1,0 +1,33 @@
+[gd_scene format=3 uid="uid://cgaraabnaw6lh"]
+
+[ext_resource type="Script" uid="uid://bnfjiqrlbkdtf" path="res://assets/scripts/props/static/spikes.gd" id="1_spikes"]
+[ext_resource type="Texture2D" uid="uid://chy5pa84snsoq" path="res://assets/sprittesheets/props/definitivo/Vigil props.png" id="2_sheet"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_spikes"]
+atlas = ExtResource("2_sheet")
+region = Rect2(2061, 0, 639, 671)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_spikes"]
+size = Vector2(14, 14)
+
+[node name="SpikesVigilia" type="Area2D" unique_id=1891323913]
+z_index = 1
+collision_layer = 0
+collision_mask = 2
+monitorable = false
+script = ExtResource("1_spikes")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=83415847]
+texture_filter = 1
+scale = Vector2(0.02, 0.02)
+texture = SubResource("AtlasTexture_spikes")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=452770780]
+shape = SubResource("RectangleShape2D_spikes")
+
+[node name="EnemyBlocker" type="StaticBody2D" parent="." unique_id=1520588893]
+collision_layer = 32
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EnemyBlocker" unique_id=1846193719]
+shape = SubResource("RectangleShape2D_spikes")
