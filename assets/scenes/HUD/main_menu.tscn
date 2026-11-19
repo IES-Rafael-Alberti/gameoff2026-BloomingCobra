@@ -58,16 +58,7 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-<<<<<<< Updated upstream
-[node name="Colgantes" type="TextureRect" parent="UI"]
-layout_mode = 0
-mouse_filter = 2
-texture = ExtResource("4_colgantes")
-expand_mode = 1
-stretch_mode = 5
-=======
 [node name="Colgantes" type="Node" parent="UI" unique_id=88806568]
->>>>>>> Stashed changes
 
 [node name="estrella2" type="Sprite2D" parent="UI/Colgantes" unique_id=1799677395]
 position = Vector2(196, 162)
@@ -79,13 +70,10 @@ texture = SubResource("AtlasTexture_ujbc3")
 
 [node name="Logo" type="TextureRect" parent="UI" unique_id=1984630384]
 layout_mode = 0
-<<<<<<< Updated upstream
-=======
 offset_left = 293.0
 offset_top = 53.0
 offset_right = 886.4634
 offset_bottom = 449.0
->>>>>>> Stashed changes
 mouse_filter = 2
 texture = ExtResource("3_logo")
 expand_mode = 1
@@ -93,13 +81,6 @@ stretch_mode = 5
 
 [node name="MenuRow" type="HBoxContainer" parent="UI" unique_id=2030265834]
 layout_mode = 0
-<<<<<<< Updated upstream
-theme_override_constants/separation = 72
-alignment = 1
-
-[node name="SelectorLeft" type="TextureRect" parent="UI"]
-visible = false
-=======
 offset_left = 326.0
 offset_top = 487.0
 offset_right = 820.1177
@@ -108,7 +89,6 @@ theme_override_constants/separation = 72
 alignment = 1
 
 [node name="SelectorLeft" type="TextureRect" parent="UI" unique_id=1299778380]
->>>>>>> Stashed changes
 z_index = 2
 layout_mode = 0
 mouse_filter = 2
@@ -116,12 +96,7 @@ texture = ExtResource("5_selector")
 expand_mode = 1
 stretch_mode = 5
 
-<<<<<<< Updated upstream
-[node name="SelectorRight" type="TextureRect" parent="UI"]
-visible = false
-=======
 [node name="SelectorRight" type="TextureRect" parent="UI" unique_id=1501891190]
->>>>>>> Stashed changes
 z_index = 2
 layout_mode = 0
 mouse_filter = 2
@@ -130,10 +105,6 @@ expand_mode = 1
 stretch_mode = 5
 flip_h = true
 
-<<<<<<< Updated upstream
-[node name="BloomingCobra" type="TextureRect" parent="UI"]
-layout_mode = 0
-=======
 [node name="BloomingCobra" type="TextureRect" parent="UI" unique_id=1746192526]
 layout_mode = 1
 anchors_preset = 3
@@ -147,7 +118,6 @@ offset_right = -162.0
 offset_bottom = -125.0
 grow_horizontal = 0
 grow_vertical = 0
->>>>>>> Stashed changes
 mouse_filter = 2
 texture = ExtResource("6_brand")
 expand_mode = 1
