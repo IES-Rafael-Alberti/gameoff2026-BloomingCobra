@@ -1,6 +1,7 @@
 [gd_resource type="TileSet" format=3 uid="uid://mo5sa42ii37l"]
 
 [ext_resource type="Texture2D" uid="uid://c2vbbfffpavma" path="res://assets/scenary/tilesetPesadillaDefRed.png" id="1_r0x46"]
+[ext_resource type="Texture2D" uid="uid://b7ryas6e5dlkr" path="res://assets/scenary/tilesetpuertas.png" id="2_v2sa1"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_v2sa1"]
 texture = ExtResource("1_r0x46")
@@ -70,6 +71,20 @@ texture_region_size = Vector2i(128, 128)
 4:1/0 = 0
 5:1/0 = 0
 
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_25t3p"]
+texture = ExtResource("2_v2sa1")
+texture_region_size = Vector2i(128, 128)
+4:0/0 = 0
+4:1/0 = 0
+4:2/0 = 0
+5:2/0 = 0
+6:2/0 = 0
+6:1/0 = 0
+6:0/0 = 0
+5:0/0 = 0
+5:1/0 = 0
+
 [resource]
 tile_size = Vector2i(128, 128)
 sources/0 = SubResource("TileSetAtlasSource_v2sa1")
+sources/1 = SubResource("TileSetAtlasSource_25t3p")
