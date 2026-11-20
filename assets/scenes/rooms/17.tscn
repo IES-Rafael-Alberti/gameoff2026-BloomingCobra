@@ -19,6 +19,7 @@ tile_map_data = PackedByteArray("AAD+//v/AAAAAAAAAAD///v/AAABAAAAAAAAAPv/AAABAAA
 tile_set = ExtResource("4_l0d6y")
 
 [node name="Sueño" type="Node2D" parent="Switchable" unique_id=1018947006]
+visible = false
 
 [node name="Tiles" type="TileMapLayer" parent="Switchable/Sueño" unique_id=1715976387]
 position = Vector2(35.6, 6)
