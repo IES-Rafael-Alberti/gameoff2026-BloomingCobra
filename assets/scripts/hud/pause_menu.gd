@@ -5,6 +5,7 @@ extends CanvasLayer
 
 const MAIN_MENU_SCENE := "res://assets/scenes/HUD/main_menu.tscn"
 const FONT_PATH := "res://assets/fonts/MagicalNeverlandRegular-JpRZ7.ttf"
+const MenuNavGate := preload("res://assets/scripts/hud/menu_nav_gate.gd")
 const MENU_LABELS: PackedStringArray = ["Resume", "Options", "Main Menu"]
 
 @export var menu_font_size: int = 48
@@ -19,6 +20,7 @@ var _dim: ColorRect
 var _menu_column: VBoxContainer
 var _menu_items: Array[Label] = []
 var _options: Control
+var _nav := MenuNavGate.new()
 
 
 func _ready() -> void:
@@ -34,10 +36,21 @@ func is_open() -> bool:
 	return _open
 
 
+func _process(delta: float) -> void:
+	if not _open:
+		return
+	if _options != null and _options.has_method("is_open") and bool(_options.call("is_open")):
+		return
+	_nav.update(delta)
+	var step := _nav.poll_step()
+	if step.y != 0:
+		_move_selection(step.y)
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("toggle_pause") and not event.is_echo():
 		if _options != null and _options.has_method("is_open") and bool(_options.call("is_open")):
-			# While options are open, E does nothing (Back only).
+			# While options are open, E / Start do nothing (Back only).
 			_mark_input_handled()
 			return
 		_set_open(not _open)
@@ -52,12 +65,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			_mark_input_handled()
 		return
 
-	if event.is_action_pressed("ui_up") or event.is_action_pressed("move_up"):
-		_move_selection(-1)
-		_mark_input_handled()
-		return
-	if event.is_action_pressed("ui_down") or event.is_action_pressed("move_down"):
-		_move_selection(1)
+	if event.is_action_pressed("ui_cancel") and event is InputEventJoypadButton:
+		_set_open(false)
 		_mark_input_handled()
 		return
 	if event.is_action_pressed("ui_accept") or event.is_action_pressed("ui_select"):
@@ -146,6 +155,7 @@ func _set_open(open: bool) -> void:
 		return
 	_open = open
 	visible = open
+	_nav.reset()
 
 	if open:
 		_close_map_if_open()

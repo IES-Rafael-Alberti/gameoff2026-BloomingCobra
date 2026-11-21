@@ -1,11 +1,13 @@
 extends Control
 
-## Shared Volume / Display options. Close only via Back (no Esc — web-safe).
+## Shared Volume / Display / Camera / Controls. Close only via Back (no Esc — web-safe).
 
 signal closed
 
 const FONT_PATH := "res://assets/fonts/MagicalNeverlandRegular-JpRZ7.ttf"
-const OPTIONS_ROWS: PackedStringArray = ["Volume", "Display", "Back"]
+const MenuNavGate := preload("res://assets/scripts/hud/menu_nav_gate.gd")
+const ControlsOverlay := preload("res://assets/scripts/hud/controls_overlay.gd")
+const OPTIONS_ROWS: PackedStringArray = ["Volume", "Display", "Camera", "Controls", "Back"]
 const VOLUME_STEP := 0.05
 
 @export var font_size: int = 42
@@ -21,7 +23,10 @@ var _panel: PanelContainer
 var _row_labels: Array[Label] = []
 var _value_labels: Array[Label] = []
 var _volume_slider: HSlider
+var _desc_label: Label
 var _built: bool = false
+var _nav := MenuNavGate.new()
+var _controls: Control
 
 
 func _ready() -> void:
@@ -46,6 +51,7 @@ func open() -> void:
 	_index = 0
 	visible = true
 	mouse_filter = Control.MOUSE_FILTER_STOP
+	_nav.reset()
 	_refresh_values()
 	_update_visuals()
 	_fit_panel()
@@ -54,33 +60,61 @@ func open() -> void:
 func close() -> void:
 	if not _open:
 		return
+	if _controls != null and _controls.has_method("is_open") and bool(_controls.call("is_open")):
+		_controls.call("close")
 	_open = false
 	visible = false
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_nav.reset()
 	closed.emit()
+
+
+func _process(delta: float) -> void:
+	if not _open:
+		return
+	if _is_controls_open():
+		return
+	_nav.update(delta)
+	var step := _nav.poll_step()
+	if step.y != 0:
+		_move_selection(step.y)
+	elif step.x != 0:
+		_adjust_value(step.x)
 
 
 func handle_input(event: InputEvent) -> bool:
 	if not _open:
 		return false
 
-	# Web-safe: never close with Esc / ui_cancel. Use Back only.
-	if event.is_action_pressed("ui_up") or event.is_action_pressed("move_up"):
-		_move_selection(-1)
+	if _is_controls_open():
+		if _controls.has_method("handle_input"):
+			return bool(_controls.call("handle_input", event))
 		return true
-	if event.is_action_pressed("ui_down") or event.is_action_pressed("move_down"):
-		_move_selection(1)
-		return true
-	if event.is_action_pressed("ui_left") or event.is_action_pressed("move_left"):
-		_adjust_value(-1)
-		return true
-	if event.is_action_pressed("ui_right") or event.is_action_pressed("move_right"):
-		_adjust_value(1)
+
+	# Esc stays unbound for web; gamepad B (ui_cancel) acts as Back.
+	if event.is_action_pressed("ui_cancel") and event is InputEventJoypadButton:
+		close()
 		return true
 	if event.is_action_pressed("ui_accept") or event.is_action_pressed("ui_select"):
 		_activate_selection()
 		return true
+	# Directional nav is polled in _process (stick repeat gate).
+	if (
+		event.is_action_pressed("ui_up")
+		or event.is_action_pressed("ui_down")
+		or event.is_action_pressed("ui_left")
+		or event.is_action_pressed("ui_right")
+		or event.is_action_pressed("move_up")
+		or event.is_action_pressed("move_down")
+		or event.is_action_pressed("move_left")
+		or event.is_action_pressed("move_right")
+	):
+		return true
 	return false
+
+
+func _is_controls_open() -> bool:
+	return _controls != null and _controls.has_method("is_open") and bool(_controls.call("is_open"))
 
 
 func _build_ui() -> void:
@@ -110,7 +144,7 @@ func _build_ui() -> void:
 	add_child(_panel)
 
 	var vbox := VBoxContainer.new()
-	vbox.add_theme_constant_override("separation", 18)
+	vbox.add_theme_constant_override("separation", 16)
 	_panel.add_child(vbox)
 
 	var title := Label.new()
@@ -132,7 +166,7 @@ func _build_ui() -> void:
 			_on_row_gui_input(row_index, event)
 		)
 		row.mouse_entered.connect(func() -> void:
-			if _open:
+			if _open and not _is_controls_open():
 				_index = row_index
 				_update_visuals()
 		)
@@ -151,7 +185,7 @@ func _build_ui() -> void:
 			_volume_slider.min_value = 0.0
 			_volume_slider.max_value = 1.0
 			_volume_slider.step = VOLUME_STEP
-			_volume_slider.custom_minimum_size = Vector2(220.0, 28.0)
+			_volume_slider.custom_minimum_size = Vector2(200.0, 28.0)
 			_volume_slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			_volume_slider.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 			_volume_slider.focus_mode = Control.FOCUS_NONE
@@ -165,9 +199,9 @@ func _build_ui() -> void:
 			_apply_font(value_label, font_size)
 			row.add_child(value_label)
 			_value_labels.append(value_label)
-		elif row_name == "Display":
+		elif row_name == "Display" or row_name == "Camera":
 			var value_label := Label.new()
-			value_label.custom_minimum_size = Vector2(220.0, 0.0)
+			value_label.custom_minimum_size = Vector2(200.0, 0.0)
 			value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 			value_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			_apply_font(value_label, font_size)
@@ -178,6 +212,20 @@ func _build_ui() -> void:
 			spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			row.add_child(spacer)
 			_value_labels.append(null)
+
+	_desc_label = Label.new()
+	_desc_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_desc_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_desc_label.custom_minimum_size = Vector2(0.0, 48.0)
+	_apply_font(_desc_label, font_size - 12)
+	vbox.add_child(_desc_label)
+
+	_controls = Control.new()
+	_controls.set_script(ControlsOverlay)
+	_controls.name = "ControlsOverlay"
+	add_child(_controls)
+	if _controls.has_signal("closed"):
+		_controls.closed.connect(_on_controls_closed)
 
 
 func _apply_font(label: Label, size: int) -> void:
@@ -193,8 +241,11 @@ func _fit_panel() -> void:
 	var view := size
 	if view.x <= 1.0 or view.y <= 1.0:
 		view = get_viewport_rect().size
-	var panel_w := clampf(view.x * 0.52, 420.0, 640.0)
-	var panel_h := clampf(view.y * 0.42, 260.0, 360.0)
+	var margin := 24.0
+	var panel_w := minf(view.x - margin * 2.0, 560.0)
+	var panel_h := minf(view.y - margin * 2.0, 420.0)
+	panel_w = maxf(panel_w, 320.0)
+	panel_h = maxf(panel_h, 280.0)
 	_panel.size = Vector2(panel_w, panel_h)
 	_panel.position = Vector2((view.x - panel_w) * 0.5, (view.y - panel_h) * 0.5)
 
@@ -208,7 +259,7 @@ func _on_dim_gui_input(event: InputEvent) -> void:
 
 
 func _on_row_gui_input(index: int, event: InputEvent) -> void:
-	if not _open:
+	if not _open or _is_controls_open():
 		return
 	if event is InputEventMouseButton:
 		var mouse := event as InputEventMouseButton
@@ -226,12 +277,25 @@ func _move_selection(delta: int) -> void:
 
 func _activate_selection() -> void:
 	match OPTIONS_ROWS[_index]:
-		"Display":
+		"Display", "Camera":
 			_adjust_value(1)
+		"Controls":
+			_open_controls()
 		"Back":
 			close()
 		_:
 			pass
+
+
+func _open_controls() -> void:
+	if _controls != null and _controls.has_method("open"):
+		_controls.call("open")
+	_update_visuals()
+
+
+func _on_controls_closed() -> void:
+	_nav.reset()
+	_update_visuals()
 
 
 func _adjust_value(direction: int) -> void:
@@ -243,6 +307,10 @@ func _adjust_value(direction: int) -> void:
 		"Display":
 			if GameSettings != null:
 				GameSettings.cycle_display_mode(direction)
+			_refresh_values()
+		"Camera":
+			if GameSettings != null:
+				GameSettings.cycle_camera_mode(direction)
 			_refresh_values()
 		_:
 			pass
@@ -259,18 +327,44 @@ func _on_volume_slider_changed(value: float) -> void:
 func _refresh_values(sync_slider: bool = true) -> void:
 	if GameSettings == null:
 		return
+	# Volume is index 0, Display 1, Camera 2.
 	if _volume_slider != null and sync_slider:
 		_volume_slider.set_value_no_signal(GameSettings.master_volume)
-	if _value_labels.size() >= 1 and _value_labels[0] != null:
+	if _value_labels.size() > 0 and _value_labels[0] != null:
 		_value_labels[0].text = "%d%%" % int(round(GameSettings.master_volume * 100.0))
-	if _value_labels.size() >= 2 and _value_labels[1] != null:
+	if _value_labels.size() > 1 and _value_labels[1] != null:
 		_value_labels[1].text = GameSettings.display_mode_label()
+	if _value_labels.size() > 2 and _value_labels[2] != null:
+		_value_labels[2].text = GameSettings.camera_mode_label()
+	_update_description()
+
+
+func _update_description() -> void:
+	if _desc_label == null or GameSettings == null:
+		return
+	match OPTIONS_ROWS[_index]:
+		"Camera":
+			_desc_label.text = GameSettings.camera_mode_description()
+		"Controls":
+			_desc_label.text = "Remap keyboard or gamepad bindings."
+		"Display":
+			_desc_label.text = "Windowed, borderless, or exclusive fullscreen."
+		"Volume":
+			_desc_label.text = "Master volume."
+		_:
+			_desc_label.text = ""
 
 
 func _update_visuals() -> void:
+	var controls_open := _is_controls_open()
+	if _panel != null:
+		_panel.visible = not controls_open
+	if _dim != null:
+		_dim.visible = not controls_open
 	for i in _row_labels.size():
-		var selected := i == _index
+		var selected := (not controls_open) and i == _index
 		var color := text_color if selected else Color(text_color, 0.55)
 		_row_labels[i].add_theme_color_override("font_color", color)
 		if i < _value_labels.size() and _value_labels[i] != null:
 			_value_labels[i].add_theme_color_override("font_color", color)
+	_update_description()

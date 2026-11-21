@@ -20,12 +20,12 @@ func _ready() -> void:
 	body_exited.connect(_on_body_exited)
 
 
-func _unhandled_input(event: InputEvent) -> void:
+func _process(_delta: float) -> void:
 	if not _player_inside:
 		return
-	if event.is_action_pressed(interact_action) and not event.is_echo():
+	# Poll so joypad trigger axes work (same as WorldMode switch).
+	if Input.is_action_just_pressed(interact_action):
 		trigger()
-		get_viewport().set_input_as_handled()
 
 
 func trigger() -> void:

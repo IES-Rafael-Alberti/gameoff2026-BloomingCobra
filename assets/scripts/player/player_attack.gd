@@ -57,6 +57,8 @@ var _busy: bool = false
 var _enabled: bool = true
 var _hit_ids: Dictionary = {}
 var _charge_ready_flashed: bool = false
+## Previous frame: right stick past deadzone (edge-detect charge / release).
+var _aim_held: bool = false
 
 var _slash_hitbox: Area2D
 var _thrust_hitbox: Area2D
@@ -91,12 +93,19 @@ func _physics_process(delta: float) -> void:
 	if not _enabled:
 		if _charging:
 			_cancel_charge()
+		_aim_held = false
 		return
 
 	if _busy:
+		_aim_held = _is_aim_held()
 		return
 
-	if Input.is_action_just_pressed("attack"):
+	var attack_held := _is_attack_held()
+	var attack_just_pressed := _is_attack_just_pressed()
+	var attack_just_released := _is_attack_just_released()
+	_aim_held = _is_aim_held()
+
+	if attack_just_pressed and not _charging:
 		_charging = true
 		_charge = 0.0
 		_charge_ready_flashed = false
@@ -104,7 +113,7 @@ func _physics_process(delta: float) -> void:
 			_player.call("begin_attack_charge", _cardinal_facing())
 
 	if _charging:
-		if Input.is_action_pressed("attack"):
+		if attack_held:
 			var prev := _charge
 			_charge = minf(_charge + delta / maxf(charge_time, 0.01), 1.0)
 			if _player.has_method("update_attack_charge"):
@@ -113,7 +122,7 @@ func _physics_process(delta: float) -> void:
 				_charge_ready_flashed = true
 				if _player.has_method("on_attack_charge_ready"):
 					_player.call("on_attack_charge_ready")
-		if Input.is_action_just_released("attack"):
+		if attack_just_released:
 			_release_attack()
 
 
@@ -533,6 +542,32 @@ func _try_hit_target(target: Node2D, hitbox: Area2D) -> void:
 	var amount := int(hitbox.get_meta("damage", slash_damage))
 	_play_hit_sfx()
 	_apply_hit(target, amount)
+
+
+func _is_aim_held() -> bool:
+	if _player != null and _player.has_method("get_aim_vector"):
+		return (_player.call("get_aim_vector") as Vector2) != Vector2.ZERO
+	return Input.get_vector("aim_left", "aim_right", "aim_up", "aim_down").length() >= 0.35
+
+
+func _is_attack_held() -> bool:
+	return Input.is_action_pressed("attack") or _is_aim_held()
+
+
+func _is_attack_just_pressed() -> bool:
+	if Input.is_action_just_pressed("attack"):
+		return true
+	return _is_aim_held() and not _aim_held
+
+
+func _is_attack_just_released() -> bool:
+	# Mouse release always ends a mouse charge; stick returns to center too.
+	# Avoid releasing while the other input is still held.
+	var mouse_released := Input.is_action_just_released("attack")
+	var aim_released := _aim_held and not _is_aim_held()
+	if not mouse_released and not aim_released:
+		return false
+	return not _is_attack_held()
 
 
 func _cardinal_facing() -> Vector2:

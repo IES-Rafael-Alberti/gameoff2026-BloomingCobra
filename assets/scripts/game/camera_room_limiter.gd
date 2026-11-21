@@ -62,6 +62,8 @@ func _ready() -> void:
 	make_current()
 	limit_enabled = true
 	set_process(true)
+	if GameSettings != null:
+		mode = GameSettings.camera_mode as Mode
 	call_deferred("_bind_room_manager")
 	_apply_mode(true)
 

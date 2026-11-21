@@ -40,6 +40,12 @@ func _ready() -> void:
 
 
 func _process(_delta: float) -> void:
+	# Triggers are axes: poll just_pressed here (event.is_action_pressed is unreliable).
+	if Input.is_action_just_pressed("switch"):
+		if WorldMode.toggle():
+			if sfx_general != null and sfx_general.has_method("play_switch"):
+				sfx_general.call("play_switch")
+
 	if _player == null or not is_instance_valid(_player):
 		_player = get_tree().get_first_node_in_group("player") as Node2D
 	if _player == null:
@@ -50,13 +56,6 @@ func _process(_delta: float) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("toggle_fullscreen") and not event.is_echo():
 		_toggle_fullscreen()
-		get_viewport().set_input_as_handled()
-		return
-
-	if event.is_action_pressed("switch") and not event.is_echo():
-		if WorldMode.toggle():
-			if sfx_general != null and sfx_general.has_method("play_switch"):
-				sfx_general.call("play_switch")
 		get_viewport().set_input_as_handled()
 		return
 
@@ -80,11 +79,6 @@ func _unhandled_input(event: InputEvent) -> void:
 
 	if event.is_action_pressed("debug_boss_room") and not event.is_echo():
 		_debug_teleport_to_boss()
-		get_viewport().set_input_as_handled()
-		return
-
-	if event.is_action_pressed("debug_camera_mode") and not event.is_echo():
-		_debug_cycle_camera_mode()
 		get_viewport().set_input_as_handled()
 		return
 
@@ -184,19 +178,6 @@ func _debug_go_to_room(scene_path: String) -> void:
 	if _debug_room_panel != null:
 		_debug_room_panel.visible = false
 
-
-func _debug_cycle_camera_mode() -> void:
-	var player := get_tree().get_first_node_in_group("player") as Node2D
-	if player == null:
-		return
-	var cam := player.get_node_or_null("Camera2D")
-	if cam == null or not cam.has_method("cycle_mode"):
-		return
-	var next_mode: Variant = cam.call("cycle_mode")
-	var labels: PackedStringArray = ["FIXED", "FOLLOW", "DEAD_ZONE"]
-	var idx := int(next_mode)
-	var label: String = labels[idx] if idx >= 0 and idx < labels.size() else str(next_mode)
-	print("[Debug] Camera mode: ", label)
 
 
 func _debug_teleport_to_boss() -> void:

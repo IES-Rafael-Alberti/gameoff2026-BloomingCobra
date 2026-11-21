@@ -4,6 +4,7 @@ extends Control
 
 const GAME_SCENE := "res://assets/scenes/game.tscn"
 const FONT_PATH := "res://assets/fonts/MagicalNeverlandRegular-JpRZ7.ttf"
+const MenuNavGate := preload("res://assets/scripts/hud/menu_nav_gate.gd")
 
 const INTRO_SLIDE_SECONDS := 2.8
 const UI_FADE_SECONDS := 0.85
@@ -29,6 +30,7 @@ var _input_enabled: bool = false
 var _intro_done: bool = false
 var _menu_font: Font
 var _options: Control
+var _nav := MenuNavGate.new()
 
 
 func _ready() -> void:
@@ -46,6 +48,17 @@ func _ready() -> void:
 	_update_selection_visuals()
 
 
+func _process(delta: float) -> void:
+	if not _input_enabled or not is_inside_tree():
+		return
+	if _is_options_open():
+		return
+	_nav.update(delta)
+	var step := _nav.poll_step()
+	if step.x != 0:
+		_move_selection(step.x)
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if not _input_enabled or not is_inside_tree():
 		return
@@ -55,14 +68,6 @@ func _unhandled_input(event: InputEvent) -> void:
 			_mark_input_handled()
 		return
 
-	if event.is_action_pressed("ui_left") or event.is_action_pressed("move_left"):
-		_mark_input_handled()
-		_move_selection(-1)
-		return
-	if event.is_action_pressed("ui_right") or event.is_action_pressed("move_right"):
-		_mark_input_handled()
-		_move_selection(1)
-		return
 	if event.is_action_pressed("ui_accept") or event.is_action_pressed("ui_select"):
 		_mark_input_handled()
 		_activate_selection()

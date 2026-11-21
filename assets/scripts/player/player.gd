@@ -30,7 +30,10 @@ const IDLE_CONTENT_RECT := Rect2(245, 153, 509, 720)
 @export var charge_shake_amplitude: float = 1.2
 @export var charge_ready_flash_time: float = 0.28
 
-## Last non-zero move facing used by attacks.
+## Stick deflection that overrides move facing / starts a charged attack.
+const AIM_DEADZONE := 0.35
+
+## Last non-zero move/aim facing used by attacks.
 var facing: Vector2 = Vector2.DOWN
 var _in_dream: bool = false
 var _knockback: Vector2 = Vector2.ZERO
@@ -88,7 +91,11 @@ func _physics_process(delta: float) -> void:
 		return
 
 	var direction := Input.get_vector("move_left", "move_right", "move_up", "move_down")
-	if direction != Vector2.ZERO:
+	var aim := get_aim_vector()
+	# Right stick aims (and charges); otherwise facing follows movement.
+	if aim != Vector2.ZERO:
+		facing = _cardinal_from(aim)
+	elif direction != Vector2.ZERO:
 		facing = _cardinal_from(direction)
 
 	if _hurt_lock > 0.0:
@@ -542,6 +549,12 @@ func _sync_sprite_visual() -> void:
 		animated_sprite.scale = Vector2(PIXEL_SPRITE_SCALE, PIXEL_SPRITE_SCALE)
 		animated_sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 		animated_sprite.offset = Vector2.ZERO
+
+
+## Right-stick aim; Vector2.ZERO when under the deadzone.
+func get_aim_vector() -> Vector2:
+	var aim := Input.get_vector("aim_left", "aim_right", "aim_up", "aim_down")
+	return aim if aim.length() >= AIM_DEADZONE else Vector2.ZERO
 
 
 func _cardinal_from(direction: Vector2) -> Vector2:

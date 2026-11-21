@@ -22,12 +22,28 @@ func _ensure_input_actions() -> void:
 	_bind_key_action(&"move_right", [KEY_D, KEY_RIGHT])
 	_bind_key_action(&"move_up", [KEY_W, KEY_UP])
 	_bind_key_action(&"move_down", [KEY_S, KEY_DOWN])
+	_bind_joypad_axis_action(&"move_left", JOY_AXIS_LEFT_X, -1.0)
+	_bind_joypad_axis_action(&"move_right", JOY_AXIS_LEFT_X, 1.0)
+	_bind_joypad_axis_action(&"move_up", JOY_AXIS_LEFT_Y, -1.0)
+	_bind_joypad_axis_action(&"move_down", JOY_AXIS_LEFT_Y, 1.0)
+	_bind_joypad_axis_action(&"aim_left", JOY_AXIS_RIGHT_X, -1.0)
+	_bind_joypad_axis_action(&"aim_right", JOY_AXIS_RIGHT_X, 1.0)
+	_bind_joypad_axis_action(&"aim_up", JOY_AXIS_RIGHT_Y, -1.0)
+	_bind_joypad_axis_action(&"aim_down", JOY_AXIS_RIGHT_Y, 1.0)
+	# Keep Shift + RT; do not wipe joypad when forcing the keyboard bind.
 	_rebind_key_action(&"switch", [KEY_SHIFT])
+	_bind_joypad_axis_action(&"switch", JOY_AXIS_TRIGGER_RIGHT, 1.0)
 	_bind_key_action(&"toggle_map", [KEY_TAB])
+	_bind_key_action(&"toggle_pause", [KEY_E])
+	_bind_joypad_button_action(&"toggle_map", JOY_BUTTON_BACK)
+	_bind_joypad_button_action(&"toggle_pause", JOY_BUTTON_START)
+	# Menus: Xbox A confirm, B back (also covers PS Cross / Circle via SDL map).
+	_bind_joypad_button_action(&"ui_accept", JOY_BUTTON_A)
+	_bind_joypad_button_action(&"ui_select", JOY_BUTTON_A)
+	_bind_joypad_button_action(&"ui_cancel", JOY_BUTTON_B)
 	_bind_key_action(&"debug_hitboxes", [KEY_F1])
 	_bind_key_action(&"debug_god_mode", [KEY_F2])
 	_bind_key_action(&"debug_boss_room", [KEY_F3])
-	_bind_key_action(&"debug_camera_mode", [KEY_F4])
 	_bind_mouse_action(&"attack", MOUSE_BUTTON_LEFT)
 
 
@@ -42,20 +58,43 @@ func _bind_key_action(action: StringName, keycodes: Array) -> void:
 
 
 func _rebind_key_action(action: StringName, keycodes: Array) -> void:
-	if InputMap.has_action(action):
-		InputMap.action_erase_events(action)
-	else:
+	if not InputMap.has_action(action):
 		InputMap.add_action(action)
+	else:
+		# Only replace keyboard binds — preserve joypad / mouse events.
+		for existing in InputMap.action_get_events(action):
+			if existing is InputEventKey:
+				InputMap.action_erase_event(action, existing)
 	for keycode in keycodes:
 		var ev := InputEventKey.new()
 		ev.physical_keycode = keycode as Key
-		InputMap.action_add_event(action, ev)
+		if not InputMap.action_has_event(action, ev):
+			InputMap.action_add_event(action, ev)
 
 
 func _bind_mouse_action(action: StringName, button: MouseButton) -> void:
 	if not InputMap.has_action(action):
 		InputMap.add_action(action)
 	var ev := InputEventMouseButton.new()
+	ev.button_index = button
+	if not InputMap.action_has_event(action, ev):
+		InputMap.action_add_event(action, ev)
+
+
+func _bind_joypad_axis_action(action: StringName, axis: JoyAxis, axis_value: float) -> void:
+	if not InputMap.has_action(action):
+		InputMap.add_action(action, 0.25)
+	var ev := InputEventJoypadMotion.new()
+	ev.axis = axis
+	ev.axis_value = axis_value
+	if not InputMap.action_has_event(action, ev):
+		InputMap.action_add_event(action, ev)
+
+
+func _bind_joypad_button_action(action: StringName, button: JoyButton) -> void:
+	if not InputMap.has_action(action):
+		InputMap.add_action(action)
+	var ev := InputEventJoypadButton.new()
 	ev.button_index = button
 	if not InputMap.action_has_event(action, ev):
 		InputMap.action_add_event(action, ev)
