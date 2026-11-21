@@ -405,22 +405,25 @@ func invalidate_camera_bounds() -> void:
 	_cached_bounds = Rect2()
 
 
-## Tile geometry under Switchable/Pesadilla + Sueño (union). Covers rooms whose modes differ in size.
+## Tile geometry under Switchable modes or a root SafeRoom (non-switchable safe zones).
 func _find_bounds_tile_layers() -> Array[Node2D]:
 	var result: Array[Node2D] = []
 	var sw := get_node_or_null("Switchable")
-	if sw == null:
-		return result
+	if sw != null:
+		for mode_name in ["Pesadilla", "Sueño", "Sueno", "SafeRoom"]:
+			var mode_root := sw.get_node_or_null(mode_name)
+			if mode_root == null:
+				continue
+			var before := result.size()
+			_collect_tile_nodes(mode_root, result)
+			if result.size() == before:
+				# Mode root itself may be a tile node (legacy layout).
+				_collect_tile_nodes_self(mode_root, result)
 
-	for mode_name in ["Pesadilla", "Sueño", "Sueno"]:
-		var mode_root := sw.get_node_or_null(mode_name)
-		if mode_root == null:
-			continue
-		var before := result.size()
-		_collect_tile_nodes(mode_root, result)
-		if result.size() == before:
-			# Mode root itself may be a tile node (legacy layout).
-			_collect_tile_nodes_self(mode_root, result)
+	# Safe rooms without Switchable keep tiles under a root SafeRoom node.
+	var safe_root := get_node_or_null("SafeRoom")
+	if safe_root != null:
+		_collect_tile_nodes(safe_root, result)
 	return result
 
 

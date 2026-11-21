@@ -5,9 +5,8 @@
 [ext_resource type="Texture2D" uid="uid://clsh17dljxm24" path="res://assets/scenary/TilesetField.png" id="2_vv6ki"]
 [ext_resource type="Script" uid="uid://ctoj8a51fem1a" path="res://assets/scripts/rooms/door.gd" id="3_vv6ki"]
 [ext_resource type="Script" uid="uid://cgr461snah57y" path="res://assets/scripts/rooms/enemy_spawn_point.gd" id="6_cjr5n"]
-[ext_resource type="PackedScene" uid="uid://c7r4dqfupp84j" path="res://assets/scenes/props/static/barrier_prop.tscn" id="6_wdcrt"]
-[ext_resource type="PackedScene" uid="uid://dw3rcxopoegnt" path="res://assets/scenes/props/static/breakable_prop.tscn" id="7_r43y2"]
-[ext_resource type="PackedScene" uid="uid://qt0m0d8adih7" path="res://assets/scenes/props/static/decorative_prop.tscn" id="8_0ec8b"]
+[ext_resource type="PackedScene" uid="uid://dw3rcxopoegnt" path="res://assets/scenes/props/pesadilla/static/breakable/box2.tscn" id="7_r43y2"]
+[ext_resource type="PackedScene" uid="uid://qt0m0d8adih7" path="res://assets/scenes/props/pesadilla/static/decorative/cone.tscn" id="8_0ec8b"]
 [ext_resource type="PackedScene" uid="uid://cbt3w2furilt1" path="res://assets/scenes/enemies/hunter.tscn" id="9_hunter"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_0b2by"]
@@ -178,33 +177,6 @@ script = ExtResource("1_gf1o8")
 
 [node name="Barriers" type="Node2D" parent="Switchable/Pesadilla" unique_id=186337852]
 position = Vector2(-8, 8)
-
-[node name="BarrierProp" parent="Switchable/Pesadilla/Barriers" unique_id=1799256030 instance=ExtResource("6_wdcrt")]
-position = Vector2(-15, 0)
-
-[node name="BarrierProp2" parent="Switchable/Pesadilla/Barriers" unique_id=190305728 instance=ExtResource("6_wdcrt")]
-position = Vector2(-15, -16)
-
-[node name="BarrierProp3" parent="Switchable/Pesadilla/Barriers" unique_id=1348566931 instance=ExtResource("6_wdcrt")]
-position = Vector2(1, 0)
-
-[node name="BarrierProp4" parent="Switchable/Pesadilla/Barriers" unique_id=1984371162 instance=ExtResource("6_wdcrt")]
-position = Vector2(1, -16)
-
-[node name="BarrierProp5" parent="Switchable/Pesadilla/Barriers" unique_id=722904794 instance=ExtResource("6_wdcrt")]
-position = Vector2(17, 0)
-
-[node name="BarrierProp7" parent="Switchable/Pesadilla/Barriers" unique_id=627964286 instance=ExtResource("6_wdcrt")]
-position = Vector2(-15, 16)
-
-[node name="BarrierProp8" parent="Switchable/Pesadilla/Barriers" unique_id=324214425 instance=ExtResource("6_wdcrt")]
-position = Vector2(1, 16)
-
-[node name="BarrierProp9" parent="Switchable/Pesadilla/Barriers" unique_id=1515291504 instance=ExtResource("6_wdcrt")]
-position = Vector2(17, 16)
-
-[node name="BarrierProp6" parent="Switchable/Pesadilla/Barriers" unique_id=1305520594 instance=ExtResource("6_wdcrt")]
-position = Vector2(17, -16)
 
 [node name="Decoratives" type="Node2D" parent="Switchable/Pesadilla" unique_id=1040543879]
 

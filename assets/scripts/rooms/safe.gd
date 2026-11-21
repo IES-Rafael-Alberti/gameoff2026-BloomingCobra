@@ -1,7 +1,8 @@
 class_name SafeRoom
 extends Room
 
-## Rest zone: player can recover health while inside.
+## Rest zone: safezone tiles only (no switchable variants).
+## Forces nightmare movement and locks world switching while inside.
 
 @export var heal_on_enter: bool = true
 @export var heal_per_second: float = 1.0
@@ -13,6 +14,7 @@ var _player: Node2D = null
 func on_player_entered(player: Node2D) -> void:
 	_player = player
 	_heal_accumulator = 0.0
+	_force_pesadilla_and_lock()
 	if heal_on_enter:
 		_heal_player(true)
 
@@ -20,6 +22,23 @@ func on_player_entered(player: Node2D) -> void:
 func on_player_exited(_player: Node2D) -> void:
 	_player = null
 	_heal_accumulator = 0.0
+	_unlock_switch()
+
+
+func sync_mode() -> void:
+	# No Switchable tile variants — keep the player on nightmare movement.
+	if is_active():
+		_force_pesadilla_and_lock()
+	call_deferred("_sync_all_enemies_mode")
+
+
+func _force_pesadilla_and_lock() -> void:
+	WorldMode.set_mode(WorldMode.MODE_PESADILLA)
+	WorldMode.set_locked(true)
+
+
+func _unlock_switch() -> void:
+	WorldMode.set_locked(false)
 
 
 func _process(delta: float) -> void:

@@ -1,0 +1,27 @@
+[gd_scene format=3 uid="uid://coi0agnps2itj"]
+
+[ext_resource type="Script" uid="uid://dgvwro07yrgfh" path="res://assets/scripts/props/static/decorative_prop.gd" id="1_fex50"]
+[ext_resource type="Texture2D" uid="uid://dkoxsii0qwbwu" path="res://assets/sprittesheets/props/definitivo/props_vigilia_Y.png" id="2_qd5t6"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_bhbtl"]
+atlas = ExtResource("2_qd5t6")
+region = Rect2(0, 0, 109, 69)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_decor"]
+size = Vector2(16, 16)
+
+[node name="DecorativeProp" type="StaticBody2D" unique_id=145285363]
+z_index = 1
+collision_layer = 0
+collision_mask = 0
+script = ExtResource("1_fex50")
+float_amplitude = 2.0
+float_speed = 0.55
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=655021863]
+texture_filter = 1
+scale = Vector2(0.2, 0.2)
+texture = SubResource("AtlasTexture_bhbtl")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=888800844]
+shape = SubResource("RectangleShape2D_decor")

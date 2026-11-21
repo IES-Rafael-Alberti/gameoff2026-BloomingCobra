@@ -1,0 +1,43 @@
+[gd_scene format=3 uid="uid://cak7kwxdxkomd"]
+
+[ext_resource type="Script" uid="uid://c4lqggjndetxi" path="res://assets/scripts/props/static/breakable_prop.gd" id="1_w65iq"]
+[ext_resource type="Texture2D" uid="uid://chy5pa84snsoq" path="res://assets/sprittesheets/props/definitivo/Vigil props.png" id="2_4rsit"]
+[ext_resource type="Script" uid="uid://bgh2aslom8hdu" path="res://assets/scripts/common/damageable.gd" id="3_4cvd3"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_457kq"]
+atlas = ExtResource("2_4rsit")
+region = Rect2(669, 63, 682, 687)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_break"]
+size = Vector2(16, 16)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hurt"]
+size = Vector2(16, 16)
+
+[node name="BreakableProp" type="CharacterBody2D" unique_id=904867938]
+z_index = 1
+collision_layer = 69
+collision_mask = 0
+motion_mode = 1
+script = ExtResource("1_w65iq")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1569744862]
+texture_filter = 1
+scale = Vector2(0.02, 0.02)
+texture = SubResource("AtlasTexture_457kq")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1396157828]
+shape = SubResource("RectangleShape2D_break")
+
+[node name="Hurtbox" type="Area2D" parent="." unique_id=760797478]
+collision_layer = 64
+collision_mask = 0
+monitoring = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox" unique_id=1933311917]
+shape = SubResource("RectangleShape2D_hurt")
+
+[node name="Damageable" type="Node2D" parent="." unique_id=217361708]
+script = ExtResource("3_4cvd3")
+max_health = 1
+invulnerability_time = 0.05

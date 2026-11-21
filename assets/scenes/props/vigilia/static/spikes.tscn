@@ -1,29 +1,28 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene format=3 uid="uid://bbrieirl1noop"]
 
-[ext_resource type="Script" path="res://assets/scripts/props/static/spikes.gd" id="1_spikes"]
-[ext_resource uid="uid://bfmcufim7vn4s" type="Texture2D" path="res://assets/sprittesheets/props/placeholders/static/spikes.png" id="2_tex"]
+[ext_resource type="Script" uid="uid://bnfjiqrlbkdtf" path="res://assets/scripts/props/static/spikes.gd" id="1_spikes"]
+[ext_resource type="Texture2D" uid="uid://bfmcufim7vn4s" path="res://assets/sprittesheets/props/placeholders/static/spikes.png" id="2_tex"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_spikes"]
 size = Vector2(14, 14)
 
-[node name="Spikes" type="Area2D"]
+[node name="Spikes" type="Area2D" unique_id=1433094862]
 z_index = 1
 collision_layer = 0
 collision_mask = 2
-monitoring = true
 monitorable = false
 script = ExtResource("1_spikes")
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
-texture = ExtResource("2_tex")
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=439432659]
 texture_filter = 1
+texture = ExtResource("2_tex")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=715518170]
 shape = SubResource("RectangleShape2D_spikes")
 
-[node name="EnemyBlocker" type="StaticBody2D" parent="."]
+[node name="EnemyBlocker" type="StaticBody2D" parent="." unique_id=2040159485]
 collision_layer = 32
 collision_mask = 0
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="EnemyBlocker"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EnemyBlocker" unique_id=1006394457]
 shape = SubResource("RectangleShape2D_spikes")

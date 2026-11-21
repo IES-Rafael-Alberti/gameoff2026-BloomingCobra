@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://dtajvumsbmxxj"]
 
 [ext_resource type="Script" uid="uid://dv7i76b04aw1s" path="res://assets/scripts/rooms/trap.gd" id="1_qdxtd"]
-[ext_resource type="PackedScene" path="res://assets/scenes/props/static/spikes.tscn" id="2_8jrpr"]
+[ext_resource type="PackedScene" path="res://assets/scenes/props/pesadilla/static/spikesPesadillla.tscn" id="2_8jrpr"]
 [ext_resource type="Script" uid="uid://bkoec71xnejuk" path="res://assets/scripts/common/switchable.gd" id="2_n34pu"]
 [ext_resource type="Texture2D" uid="uid://clsh17dljxm24" path="res://assets/scenary/TilesetField.png" id="3_e04oj"]
 [ext_resource type="Script" uid="uid://ctoj8a51fem1a" path="res://assets/scripts/rooms/door.gd" id="4_wenam"]

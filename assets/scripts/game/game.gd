@@ -2,9 +2,16 @@ extends Node2D
 
 ## 1 = fondo pegado a la cámara (sin parallax). Valores más bajos = se mueve más lento.
 @export_range(0.0, 1.0, 0.01) var background_parallax: float = 0.85
+## Escala mínima del arte 3840x2160 (vista jugable con zoom 4).
+@export var background_base_scale: float = 0.12
+## Multiplicador sobre el viewport: deja margen para parallax antes de clampear.
+@export_range(1.0, 2.0, 0.01) var background_cover_margin: float = 1.2
 
 const BOSS_ROOM_SCENE := "res://assets/scenes/rooms/boss/bossRoom.tscn"
 const ROOMS_DIR := "res://assets/scenes/rooms/"
+## Colores de borde del arte, para no ver el clear gris de Godot si algo se escapa.
+const _BG_CLEAR_PESADILLA := Color(0.0, 0.04, 0.16)
+const _BG_CLEAR_SUENO := Color(0.02, 0.04, 0.45)
 
 var _hitbox_debug: Node2D
 var _bg_pesadilla: Sprite2D
@@ -243,8 +250,8 @@ func _make_bg_sprite(node_name: String, texture: Texture2D) -> Sprite2D:
 	sprite.texture = texture
 	sprite.z_index = -100
 	sprite.centered = true
-	# 3840x2160 art; cover zoomed gameplay view with margin.
-	sprite.scale = Vector2(0.12, 0.12)
+	# 3840x2160 art; scale real se ajusta en _fit_backgrounds_to_view.
+	sprite.scale = Vector2(background_base_scale, background_base_scale)
 	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	return sprite
 
@@ -254,7 +261,13 @@ func _on_world_mode_changed_backgrounds(mode: int) -> void:
 		_bg_pesadilla.visible = mode == WorldMode.MODE_PESADILLA
 	if _bg_sueno != null:
 		_bg_sueno.visible = mode == WorldMode.MODE_SUENO
+	_apply_background_clear_color(mode)
 	_recenter_backgrounds(_background_follow_target())
+
+
+func _apply_background_clear_color(mode: int) -> void:
+	var clear := _BG_CLEAR_PESADILLA if mode == WorldMode.MODE_PESADILLA else _BG_CLEAR_SUENO
+	RenderingServer.set_default_clear_color(clear)
 
 
 func _background_follow_target() -> Vector2:
@@ -268,12 +281,60 @@ func _background_follow_target() -> Vector2:
 	return _player.global_position
 
 
+func _active_camera() -> Camera2D:
+	if _player == null or not is_instance_valid(_player):
+		_player = get_tree().get_first_node_in_group("player") as Node2D
+	if _player == null:
+		return null
+	var cam := _player.get_node_or_null("Camera2D") as Camera2D
+	if cam != null and cam.is_current():
+		return cam
+	return null
+
+
+func _half_view_extents(cam: Camera2D) -> Vector2:
+	if cam == null:
+		return get_viewport_rect().size * 0.5
+	return cam.get_viewport_rect().size * 0.5 / cam.zoom.abs()
+
+
+func _fit_backgrounds_to_view(half_view: Vector2) -> void:
+	var needed := half_view * maxf(background_cover_margin, 1.0)
+	for sprite in [_bg_pesadilla, _bg_sueno]:
+		if sprite == null or sprite.texture == null:
+			continue
+		var tex_size: Vector2 = sprite.texture.get_size()
+		if tex_size.x <= 0.0 or tex_size.y <= 0.0:
+			continue
+		var cover: float = maxf(needed.x / (tex_size.x * 0.5), needed.y / (tex_size.y * 0.5))
+		var s: float = maxf(background_base_scale, cover)
+		sprite.scale = Vector2(s, s)
+
+
+func _bg_half_extents(sprite: Sprite2D) -> Vector2:
+	if sprite == null or sprite.texture == null:
+		return Vector2.ZERO
+	var tex_size: Vector2 = sprite.texture.get_size()
+	return tex_size * sprite.scale.abs() * 0.5
+
+
 func _parallax_background_position(camera_pos: Vector2) -> Vector2:
 	if not _bg_anchor_ready:
 		_bg_anchor = camera_pos
 		_bg_anchor_ready = true
 	# 1 = sigue a la cámara; <1 = se desplaza menos (parallax).
 	return _bg_anchor.lerp(camera_pos, clampf(background_parallax, 0.0, 1.0))
+
+
+## Evita que el borde del sprite entre en pantalla (salas anchas / viewport grande).
+func _clamp_background_to_view(bg_pos: Vector2, camera_pos: Vector2, half_view: Vector2, half_bg: Vector2) -> Vector2:
+	var slack := half_bg - half_view
+	if slack.x < 0.0 or slack.y < 0.0:
+		return camera_pos
+	return Vector2(
+		clampf(bg_pos.x, camera_pos.x - slack.x, camera_pos.x + slack.x),
+		clampf(bg_pos.y, camera_pos.y - slack.y, camera_pos.y + slack.y)
+	)
 
 
 func _place_backgrounds(pos: Vector2) -> void:
@@ -284,12 +345,20 @@ func _place_backgrounds(pos: Vector2) -> void:
 
 
 func _update_backgrounds(camera_pos: Vector2) -> void:
-	_place_backgrounds(_parallax_background_position(camera_pos))
+	var cam := _active_camera()
+	var half_view := _half_view_extents(cam)
+	_fit_backgrounds_to_view(half_view)
+	var desired := _parallax_background_position(camera_pos)
+	var half_bg := _bg_half_extents(_bg_pesadilla if _bg_pesadilla != null and _bg_pesadilla.visible else _bg_sueno)
+	_place_backgrounds(_clamp_background_to_view(desired, camera_pos, half_view, half_bg))
 
 
 func _recenter_backgrounds(pos: Vector2) -> void:
 	_bg_anchor = pos
 	_bg_anchor_ready = true
+	var cam := _active_camera()
+	var half_view := _half_view_extents(cam)
+	_fit_backgrounds_to_view(half_view)
 	_place_backgrounds(pos)
 
 

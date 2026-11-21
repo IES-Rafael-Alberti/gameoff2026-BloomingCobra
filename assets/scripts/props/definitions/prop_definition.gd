@@ -18,16 +18,18 @@ extends Resource
 func apply_visual(sprite: Sprite2D, body: Node2D = null) -> void:
 	if sprite == null:
 		return
-	if texture != null:
-		sprite.texture = texture
-	elif sprite.texture == null:
-		# Keep any texture already set on the scene; only invent a placeholder if empty.
-		sprite.texture = _make_placeholder_texture()
-	sprite.modulate = modulate
-	if sprite_scale > 0.0:
-		sprite.scale = Vector2(sprite_scale, sprite_scale)
+	# Scene-authored art (AtlasTexture / definitivo) wins over definition placeholders.
+	var keep_scene_visual := sprite.texture != null
+	if not keep_scene_visual:
+		if texture != null:
+			sprite.texture = texture
+		else:
+			sprite.texture = _make_placeholder_texture()
+		sprite.modulate = modulate
+		if sprite_scale > 0.0:
+			sprite.scale = Vector2(sprite_scale, sprite_scale)
 	if body != null:
-		body.z_index = z_index
+		body.z_index = maxi(body.z_index, z_index)
 
 
 func apply_collision_shape(shape_node: CollisionShape2D) -> void:

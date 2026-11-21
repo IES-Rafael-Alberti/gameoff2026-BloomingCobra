@@ -6,6 +6,8 @@
 [ext_resource type="Script" uid="uid://ctoj8a51fem1a" path="res://assets/scripts/rooms/door.gd" id="3_door"]
 [ext_resource type="PackedScene" uid="uid://tvq6u6rrx621" path="res://assets/scenes/props/pesadilla/interactive/buttonPesadilla.tscn" id="4_hnffb"]
 [ext_resource type="PackedScene" uid="uid://cm16eeyma7gae" path="res://assets/scenes/props/vigilia/interactive/buttonVigilia.tscn" id="5_p8uf0"]
+[ext_resource type="PackedScene" uid="uid://coi0agnps2itj" path="res://assets/scenes/props/vigilia/static/decorative/bubbles.tscn" id="7_rvxfw"]
+[ext_resource type="PackedScene" uid="uid://cqj1w0hug8op2" path="res://assets/scenes/props/vigilia/static/decorative/stars.tscn" id="8_myb6q"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ilxij"]
 texture = ExtResource("1_lf0li")
@@ -292,3 +294,9 @@ shape = SubResource("RectangleShape2D_2p1tb")
 
 [node name="DefaultSpawn" type="Marker2D" parent="." unique_id=1842107126]
 position = Vector2(-40, 0)
+
+[node name="DecorativeProp" parent="." unique_id=145285363 instance=ExtResource("7_rvxfw")]
+position = Vector2(-44, 20)
+
+[node name="DecorativeProp2" parent="." unique_id=2020958694 instance=ExtResource("8_myb6q")]
+position = Vector2(-16, 40)

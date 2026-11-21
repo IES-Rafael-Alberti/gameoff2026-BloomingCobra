@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://vkvkp328imyq"]
+[gd_scene format=3 uid="uid://ck7etjlladivy"]
 
 [ext_resource type="Script" uid="uid://bnfjiqrlbkdtf" path="res://assets/scripts/props/static/spikes.gd" id="1_spikes"]
 [ext_resource type="Texture2D" uid="uid://bfmcufim7vn4s" path="res://assets/sprittesheets/props/placeholders/static/spikes.png" id="2_tex"]
