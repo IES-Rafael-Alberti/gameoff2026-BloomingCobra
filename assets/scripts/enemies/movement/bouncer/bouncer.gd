@@ -2,6 +2,8 @@ extends Node
 
 @export var speed: float = 60.0
 @export var initial_direction: Vector2 = Vector2(1, 1)
+## Continuous spin while floating (degrees / sec). Sign follows horizontal travel.
+@export var spin_degrees_per_second: float = 90.0
 
 var _enemy: CharacterBody2D
 var _direction: Vector2 = Vector2.RIGHT
@@ -26,9 +28,11 @@ func set_active(active: bool) -> void:
 	_active = active
 	if active:
 		_play_float()
+	else:
+		_reset_spin()
 
 
-func physics_update(_delta: float) -> void:
+func physics_update(delta: float) -> void:
 	if not _active or _enemy == null:
 		return
 
@@ -47,6 +51,7 @@ func physics_update(_delta: float) -> void:
 			sfx.call("play_bounce")
 
 	_enemy.velocity = _direction * speed
+	_spin_while_floating(delta)
 	_play_float()
 
 
@@ -60,10 +65,31 @@ func _ignore_player_collision() -> void:
 
 
 func _play_float() -> void:
-	if _enemy == null:
-		return
-	var sprite := _enemy.get_node_or_null("AnimatedSprite2D") as AnimatedSprite2D
+	var sprite := _sprite()
 	if sprite == null:
 		return
-	sprite.play("floating")
-	sprite.flip_h = _direction.x < 0
+	if sprite.animation != &"floating":
+		sprite.play("floating")
+	sprite.flip_h = false
+
+
+func _spin_while_floating(delta: float) -> void:
+	var sprite := _sprite()
+	if sprite == null or spin_degrees_per_second == 0.0:
+		return
+	var dir_sign := -1.0 if _direction.x < 0.0 else 1.0
+	sprite.rotation_degrees += spin_degrees_per_second * dir_sign * delta
+
+
+func _reset_spin() -> void:
+	var sprite := _sprite()
+	if sprite == null:
+		return
+	sprite.rotation = 0.0
+	sprite.flip_h = false
+
+
+func _sprite() -> AnimatedSprite2D:
+	if _enemy == null:
+		return null
+	return _enemy.get_node_or_null("AnimatedSprite2D") as AnimatedSprite2D

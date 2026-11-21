@@ -1,9 +1,8 @@
 [gd_scene format=3 uid="uid://bxk5iodhcl1y1"]
 
 [ext_resource type="Script" uid="uid://c1fbuoperocxx" path="res://assets/scripts/enemies/enemy.gd" id="1_kpjfe"]
-[ext_resource type="Texture2D" uid="uid://dx634wwswaoia" path="res://assets/sprittesheets/enemy/placeholders/enemy4/Walk-Anim.png" id="2_h74ec"]
+[ext_resource type="Texture2D" uid="uid://bwfimlakh0e1v" path="res://assets/sprittesheets/enemy/definitivo/spriteenemigos2.png" id="2_78gwb"]
 [ext_resource type="Script" uid="uid://bgh2aslom8hdu" path="res://assets/scripts/common/damageable.gd" id="2_j5asl"]
-[ext_resource type="Texture2D" uid="uid://cseire07wg86u" path="res://assets/sprittesheets/enemy/placeholders/enemy4/Sleep-Anim.png" id="3_gqm0i"]
 [ext_resource type="Script" uid="uid://bkoec71xnejuk" path="res://assets/scripts/common/switchable.gd" id="3_h74ec"]
 [ext_resource type="Script" uid="uid://hyer0s0jqcmx" path="res://assets/scripts/enemies/movement/bouncer/bouncer.gd" id="4_gqm0i"]
 [ext_resource type="Script" uid="uid://crv20txmkr0pc" path="res://assets/scripts/sfx/bouncer_sfx.gd" id="5_sfx"]
@@ -11,72 +10,31 @@
 [ext_resource type="AudioStream" uid="uid://biu8i33dciac" path="res://assets/audio/enemies/BouncerBounce2.wav" id="8_eui82"]
 [ext_resource type="AudioStream" uid="uid://wdrth601lb6s" path="res://assets/audio/enemies/BouncerBounce3.wav" id="9_4uj5d"]
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_akui1"]
-atlas = ExtResource("2_h74ec")
-region = Rect2(0, 0, 32, 64)
+[sub_resource type="AtlasTexture" id="AtlasTexture_c1622"]
+atlas = ExtResource("2_78gwb")
+region = Rect2(992, 0, 496, 496)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_xwrwn"]
-atlas = ExtResource("2_h74ec")
-region = Rect2(32, 0, 32, 64)
+[sub_resource type="AtlasTexture" id="AtlasTexture_eui82"]
+atlas = ExtResource("2_78gwb")
+region = Rect2(496, 0, 496, 496)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_lws5t"]
-atlas = ExtResource("2_h74ec")
-region = Rect2(64, 0, 32, 64)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_5rro6"]
-atlas = ExtResource("2_h74ec")
-region = Rect2(96, 0, 32, 64)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_nhtvk"]
-atlas = ExtResource("2_h74ec")
-region = Rect2(128, 0, 32, 64)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_otbrx"]
-atlas = ExtResource("2_h74ec")
-region = Rect2(160, 0, 32, 64)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_o3lfu"]
-atlas = ExtResource("2_h74ec")
-region = Rect2(192, 0, 32, 64)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_5kh3m"]
-atlas = ExtResource("2_h74ec")
-region = Rect2(224, 0, 32, 64)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_c3m5a"]
-atlas = ExtResource("3_gqm0i")
-region = Rect2(0, 0, 32, 48)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_3avw0"]
-atlas = ExtResource("3_gqm0i")
-region = Rect2(32, 0, 32, 48)
+[sub_resource type="AtlasTexture" id="AtlasTexture_4uj5d"]
+atlas = ExtResource("2_78gwb")
+region = Rect2(0, 0, 496, 496)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_akui1"]
 animations = [{
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_akui1")
+"texture": SubResource("AtlasTexture_c1622")
+}],
+"loop": 1,
+"name": &"dead",
+"speed": 5.0
 }, {
+"frames": [{
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_xwrwn")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_lws5t")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_5rro6")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_nhtvk")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_otbrx")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_o3lfu")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_5kh3m")
+"texture": SubResource("AtlasTexture_eui82")
 }],
 "loop": 1,
 "name": &"floating",
@@ -84,10 +42,7 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_c3m5a")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_3avw0")
+"texture": SubResource("AtlasTexture_4uj5d")
 }],
 "loop": 1,
 "name": &"inactive",
@@ -104,9 +59,10 @@ script = ExtResource("1_kpjfe")
 move_speed = 60.0
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1304020782]
+position = Vector2(0, -9.999999)
+scale = Vector2(0.06, 0.06)
 sprite_frames = SubResource("SpriteFrames_akui1")
-animation = &"floating"
-frame_progress = 0.08328262
+animation = &"dead"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=2010100391]
 position = Vector2(0, -10)

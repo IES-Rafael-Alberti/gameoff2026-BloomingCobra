@@ -12,6 +12,10 @@ const CELL := Vector2i(395, 395)
 ## Visible bar art ends around here — layout height ignores empty cell padding below.
 const LAYOUT_HEIGHT := 210
 const BUFF_CELL := Vector2i(95, 95)
+## Sheet: left = vigilia / sueño, right = pesadilla.
+const MODE_SWITCH_CELL := Vector2i(321, 321)
+const MODE_SWITCH_FRAME_VIGILIA := 0
+const MODE_SWITCH_FRAME_PESADILLA := 1
 ## Right edge of the red fill per frame (measured from the sheet).
 const RED_RIGHT := [
 	[197, 155, 154, 94, 93, 81],
@@ -21,26 +25,32 @@ const RED_RIGHT := [
 
 @export var sheet: Texture2D
 @export var buff_sheet: Texture2D
+@export var mode_switch_sheet: Texture2D
 @export var bar_scale: float = 0.42
 @export var buff_icon_scale: float = 0.42
+@export var mode_switch_scale: float = 0.3
 @export var base_max_vitality: float = 100.0
 @export var vitality_per_size_tier: float = 20.0
 ## Visible bar eases down to real HP (ratio / sec).
 @export var visual_drain_per_second: float = 0.12
 @export var visual_rise_per_second: float = 0.55
 
-@onready var _root: Control = $Margin/Column/Root
-@onready var _under: TextureRect = $Margin/Column/Root/Under
-@onready var _fill: TextureRect = $Margin/Column/Root/Fill
-@onready var _buff_row: HBoxContainer = $Margin/Column/BuffRow
-@onready var _buff_attack: VBoxContainer = $Margin/Column/BuffRow/Attack
-@onready var _buff_projectile: VBoxContainer = $Margin/Column/BuffRow/Projectile
-@onready var _buff_shield: VBoxContainer = $Margin/Column/BuffRow/Shield
+@onready var _root: Control = $Margin/Column/TopRow/Root
+@onready var _under: TextureRect = $Margin/Column/TopRow/Root/Under
+@onready var _fill: TextureRect = $Margin/Column/TopRow/Root/Fill
+@onready var _buff_pad: MarginContainer = $Margin/Column/BuffPad
+@onready var _buff_row: HBoxContainer = $Margin/Column/BuffPad/BuffRow
+@onready var _buff_attack: VBoxContainer = $Margin/Column/BuffPad/BuffRow/Attack
+@onready var _buff_projectile: VBoxContainer = $Margin/Column/BuffPad/BuffRow/Projectile
+@onready var _buff_shield: VBoxContainer = $Margin/Column/BuffPad/BuffRow/Shield
+@onready var _mode_switch: TextureRect = $Margin/Column/TopRow/ModeSwitch
+@onready var _top_row: HBoxContainer = $Margin/Column/TopRow
 
 var _vitality: Node = null
 var _buffs: Node = null
 var _frames: Array[AtlasTexture] = []
 var _buff_icons: Array[AtlasTexture] = []
+var _mode_switch_frames: Array[AtlasTexture] = []
 var _fill_atlas: AtlasTexture = AtlasTexture.new()
 var _size_row: int = -1
 var _pair_index: int = -1
@@ -54,7 +64,9 @@ func _ready() -> void:
 	_fill_atlas.atlas = sheet
 	_build_frames()
 	_build_buff_icons()
+	_build_mode_switch_frames()
 	_configure_nodes()
+	_bind_world_mode()
 	call_deferred("_bind_player")
 
 
@@ -98,8 +110,45 @@ func _build_buff_icons() -> void:
 		_buff_icons.append(atlas)
 
 
+func _build_mode_switch_frames() -> void:
+	_mode_switch_frames.clear()
+	if mode_switch_sheet == null:
+		return
+	for i in 2:
+		var atlas := AtlasTexture.new()
+		atlas.atlas = mode_switch_sheet
+		atlas.region = Rect2(i * MODE_SWITCH_CELL.x, 0, MODE_SWITCH_CELL.x, MODE_SWITCH_CELL.y)
+		_mode_switch_frames.append(atlas)
+
+
 func _frame(row: int, col: int) -> AtlasTexture:
 	return _frames[row * COLS + col]
+
+
+func _bind_world_mode() -> void:
+	if WorldMode != null and WorldMode.has_signal("mode_changed"):
+		if not WorldMode.mode_changed.is_connected(_on_world_mode_changed):
+			WorldMode.mode_changed.connect(_on_world_mode_changed)
+		_on_world_mode_changed(WorldMode.get_mode())
+	else:
+		_apply_mode_switch_frame(MODE_SWITCH_FRAME_PESADILLA)
+
+
+func _on_world_mode_changed(mode: int) -> void:
+	# Sheet order: 1 vigilia / sueño, 2 pesadilla.
+	var frame := (
+		MODE_SWITCH_FRAME_PESADILLA
+		if mode == WorldMode.MODE_PESADILLA
+		else MODE_SWITCH_FRAME_VIGILIA
+	)
+	_apply_mode_switch_frame(frame)
+
+
+func _apply_mode_switch_frame(frame: int) -> void:
+	if _mode_switch == null or _mode_switch_frames.is_empty():
+		return
+	var idx := clampi(frame, 0, _mode_switch_frames.size() - 1)
+	_mode_switch.texture = _mode_switch_frames[idx]
 
 
 func _configure_nodes() -> void:
@@ -115,6 +164,27 @@ func _configure_nodes() -> void:
 		_fill.z_index = 1
 	if _under != null:
 		_under.z_index = 0
+	if _mode_switch != null:
+		_mode_switch.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_mode_switch.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		_mode_switch.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		_mode_switch.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+		_mode_switch.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		var switch_size := Vector2(MODE_SWITCH_CELL) * mode_switch_scale
+		_mode_switch.custom_minimum_size = switch_size
+		_mode_switch.size = switch_size
+		if _buff_pad != null:
+			var top_sep := -10
+			if _top_row != null:
+				top_sep = _top_row.get_theme_constant("separation")
+			_buff_pad.add_theme_constant_override(
+				"margin_left",
+				maxi(0, int(round(switch_size.x + float(top_sep))))
+			)
+	if _root != null:
+		_root.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	if _top_row != null:
+		_top_row.alignment = BoxContainer.ALIGNMENT_CENTER
 	_configure_buff_slot(_buff_attack, 0)
 	_configure_buff_slot(_buff_projectile, 1)
 	_configure_buff_slot(_buff_shield, 2)
@@ -179,9 +249,16 @@ func _apply_size_row(row: int, force: bool = false) -> void:
 		_root.custom_minimum_size = layout_size
 		_root.size = layout_size
 		_root.clip_contents = false
+		_root.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	if _under != null:
 		_under.position = Vector2.ZERO
 		_under.size = draw_size
+	# Keep switch and bar on the same vertical center axis.
+	if _mode_switch != null:
+		var switch_h := float(MODE_SWITCH_CELL.y) * mode_switch_scale
+		var row_h := maxf(layout_size.y, switch_h)
+		if _top_row != null:
+			_top_row.custom_minimum_size.y = row_h
 
 
 func _set_visual(ratio: float, max_vitality: float, force: bool = false) -> void:

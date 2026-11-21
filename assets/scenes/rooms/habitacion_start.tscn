@@ -191,6 +191,12 @@ position = Vector2(52, 39)
 
 [node name="Sueño" type="Node2D" parent="Switchable" unique_id=639321158]
 
+[node name="DecorativeProp" parent="Switchable/Sueño" unique_id=145285363 instance=ExtResource("7_rvxfw")]
+position = Vector2(-44, 20)
+
+[node name="DecorativeProp2" parent="Switchable/Sueño" unique_id=2020958694 instance=ExtResource("8_myb6q")]
+position = Vector2(-16, 40)
+
 [node name="Tiles" type="TileMap" parent="Switchable/Sueño" unique_id=1285842170]
 tile_set = SubResource("TileSet_ilxij")
 format = 2
@@ -294,9 +300,3 @@ shape = SubResource("RectangleShape2D_2p1tb")
 
 [node name="DefaultSpawn" type="Marker2D" parent="." unique_id=1842107126]
 position = Vector2(-40, 0)
-
-[node name="DecorativeProp" parent="." unique_id=145285363 instance=ExtResource("7_rvxfw")]
-position = Vector2(-44, 20)
-
-[node name="DecorativeProp2" parent="." unique_id=2020958694 instance=ExtResource("8_myb6q")]
-position = Vector2(-16, 40)

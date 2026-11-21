@@ -177,6 +177,12 @@ func _resolve_directional_anim(prefix: String, direction: Vector2, frames: Sprit
 	var has_down := frames.has_animation(down)
 	var has_base := frames.has_animation(base)
 
+	# Diagonal clips (divider snake, etc.). Includes legacy typo "dowRight".
+	if absf(direction.x) > 0.01 and absf(direction.y) > 0.01:
+		var diag := _resolve_diagonal_anim(prefix, direction, frames)
+		if not diag.is_empty():
+			return diag
+
 	if absf(direction.x) > absf(direction.y):
 		if direction.x < 0.0:
 			if has_left:
@@ -226,6 +232,32 @@ func _resolve_directional_anim(prefix: String, direction: Vector2, frames: Sprit
 	if has_sides:
 		animated_sprite.flip_h = direction.x < 0.0
 		return sides
+	return &""
+
+
+func _resolve_diagonal_anim(prefix: String, direction: Vector2, frames: SpriteFrames) -> StringName:
+	var x_right := direction.x > 0.0
+	var y_up := direction.y < 0.0
+	var candidates: PackedStringArray = []
+	if y_up and x_right:
+		candidates = PackedStringArray(["%s_upRight" % prefix, "%s_up_right" % prefix])
+	elif y_up and not x_right:
+		candidates = PackedStringArray(["%s_upLeft" % prefix, "%s_up_left" % prefix])
+	elif not y_up and x_right:
+		# Divider sheets currently ship "walking_dowRight" (missing 'n').
+		candidates = PackedStringArray([
+			"%s_downRight" % prefix,
+			"%s_dowRight" % prefix,
+			"%s_down_right" % prefix,
+		])
+	else:
+		candidates = PackedStringArray(["%s_downLeft" % prefix, "%s_down_left" % prefix])
+
+	for name in candidates:
+		var anim := StringName(name)
+		if frames.has_animation(anim):
+			animated_sprite.flip_h = false
+			return anim
 	return &""
 
 

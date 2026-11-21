@@ -1,16 +1,19 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://assets/scripts/hud/health_bar.gd" id="1_hb"]
 [ext_resource type="Texture2D" uid="uid://d4wkvntrj7dp" path="res://assets/sprittesheets/HUD/definitivo/ui_barra_vida.png" id="2_sheet"]
 [ext_resource type="Texture2D" uid="uid://c08nt63r46rs5" path="res://assets/sprittesheets/HUD/definitivo/ui_iconos_bufos.png" id="3_buffs"]
+[ext_resource type="Texture2D" uid="uid://hv3o43a07pdx" path="res://assets/sprittesheets/HUD/definitivo/ui_interruptor_1vig_2pes.png" id="4_switch"]
 
 [node name="HealthBar" type="CanvasLayer"]
 layer = 60
 script = ExtResource("1_hb")
 sheet = ExtResource("2_sheet")
 buff_sheet = ExtResource("3_buffs")
+mode_switch_sheet = ExtResource("4_switch")
 bar_scale = 0.42
 buff_icon_scale = 0.42
+mode_switch_scale = 0.3
 base_max_vitality = 100.0
 vitality_per_size_tier = 20.0
 visual_drain_per_second = 0.12
@@ -18,47 +21,65 @@ visual_rise_per_second = 0.55
 
 [node name="Margin" type="MarginContainer" parent="."]
 anchors_preset = 0
-offset_left = 10.0
+offset_left = 2.0
 offset_top = 8.0
-offset_right = 260.0
+offset_right = 360.0
 offset_bottom = 240.0
 
 [node name="Column" type="VBoxContainer" parent="Margin"]
 layout_mode = 2
 theme_override_constants/separation = -6
 
-[node name="Root" type="Control" parent="Margin/Column"]
+[node name="TopRow" type="HBoxContainer" parent="Margin/Column"]
+layout_mode = 2
+theme_override_constants/separation = -10
+alignment = 1
+
+[node name="ModeSwitch" type="TextureRect" parent="Margin/Column/TopRow"]
+custom_minimum_size = Vector2(96, 96)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Root" type="Control" parent="Margin/Column/TopRow"]
 clip_contents = false
 layout_mode = 2
+size_flags_vertical = 4
 custom_minimum_size = Vector2(166, 88)
 
-[node name="Under" type="TextureRect" parent="Margin/Column/Root"]
+[node name="Under" type="TextureRect" parent="Margin/Column/TopRow/Root"]
 z_index = 0
 layout_mode = 0
 mouse_filter = 2
 
-[node name="Fill" type="TextureRect" parent="Margin/Column/Root"]
+[node name="Fill" type="TextureRect" parent="Margin/Column/TopRow/Root"]
 z_index = 1
 layout_mode = 0
 mouse_filter = 2
 
-[node name="BuffRow" type="HBoxContainer" parent="Margin/Column"]
+[node name="BuffPad" type="MarginContainer" parent="Margin/Column"]
+layout_mode = 2
+theme_override_constants/margin_left = 98
+
+[node name="BuffRow" type="HBoxContainer" parent="Margin/Column/BuffPad"]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Attack" type="VBoxContainer" parent="Margin/Column/BuffRow"]
+[node name="Attack" type="VBoxContainer" parent="Margin/Column/BuffPad/BuffRow"]
 visible = false
 layout_mode = 2
 theme_override_constants/separation = -2
 
-[node name="Icon" type="TextureRect" parent="Margin/Column/BuffRow/Attack"]
+[node name="Icon" type="TextureRect" parent="Margin/Column/BuffPad/BuffRow/Attack"]
 custom_minimum_size = Vector2(40, 40)
 layout_mode = 2
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Count" type="Label" parent="Margin/Column/BuffRow/Attack"]
+[node name="Count" type="Label" parent="Margin/Column/BuffPad/BuffRow/Attack"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0.05, 0.05, 0.12, 1)
@@ -67,19 +88,19 @@ theme_override_font_sizes/font_size = 18
 text = "x0"
 horizontal_alignment = 1
 
-[node name="Projectile" type="VBoxContainer" parent="Margin/Column/BuffRow"]
+[node name="Projectile" type="VBoxContainer" parent="Margin/Column/BuffPad/BuffRow"]
 visible = false
 layout_mode = 2
 theme_override_constants/separation = -2
 
-[node name="Icon" type="TextureRect" parent="Margin/Column/BuffRow/Projectile"]
+[node name="Icon" type="TextureRect" parent="Margin/Column/BuffPad/BuffRow/Projectile"]
 custom_minimum_size = Vector2(40, 40)
 layout_mode = 2
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Count" type="Label" parent="Margin/Column/BuffRow/Projectile"]
+[node name="Count" type="Label" parent="Margin/Column/BuffPad/BuffRow/Projectile"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0.05, 0.05, 0.12, 1)
@@ -88,19 +109,19 @@ theme_override_font_sizes/font_size = 18
 text = "x0"
 horizontal_alignment = 1
 
-[node name="Shield" type="VBoxContainer" parent="Margin/Column/BuffRow"]
+[node name="Shield" type="VBoxContainer" parent="Margin/Column/BuffPad/BuffRow"]
 visible = false
 layout_mode = 2
 theme_override_constants/separation = -2
 
-[node name="Icon" type="TextureRect" parent="Margin/Column/BuffRow/Shield"]
+[node name="Icon" type="TextureRect" parent="Margin/Column/BuffPad/BuffRow/Shield"]
 custom_minimum_size = Vector2(40, 40)
 layout_mode = 2
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Count" type="Label" parent="Margin/Column/BuffRow/Shield"]
+[node name="Count" type="Label" parent="Margin/Column/BuffPad/BuffRow/Shield"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0.05, 0.05, 0.12, 1)
