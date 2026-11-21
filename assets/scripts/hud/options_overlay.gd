@@ -4,22 +4,24 @@ extends Control
 
 signal closed
 
-const FONT_PATH := "res://assets/fonts/MagicalNeverlandRegular-JpRZ7.ttf"
+const FONT_PATH := "res://assets/fonts/Poppins-SemiBold.ttf"
 const MenuNavGate := preload("res://assets/scripts/hud/menu_nav_gate.gd")
 const ControlsOverlay := preload("res://assets/scripts/hud/controls_overlay.gd")
 const OPTIONS_ROWS: PackedStringArray = ["Volume", "Display", "Camera", "Controls", "Back"]
 const VOLUME_STEP := 0.05
 
-@export var font_size: int = 42
+@export var font_size: int = 28
 @export var text_color: Color = Color(0.96, 0.92, 0.86, 1.0)
-@export var dim_color: Color = Color(0.05, 0.04, 0.06, 0.45)
-@export var panel_color: Color = Color(0.12, 0.1, 0.14, 0.78)
+@export var dim_color: Color = Color(0.05, 0.04, 0.06, 0.55)
+@export var panel_color: Color = Color(0.10, 0.08, 0.12, 0.94)
 
 var _open: bool = false
 var _index: int = 0
 var _menu_font: Font
 var _dim: ColorRect
 var _panel: PanelContainer
+var _root: VBoxContainer
+var _title: Label
 var _row_labels: Array[Label] = []
 var _value_labels: Array[Label] = []
 var _volume_slider: HSlider
@@ -27,6 +29,7 @@ var _desc_label: Label
 var _built: bool = false
 var _nav := MenuNavGate.new()
 var _controls: Control
+var _base_font_size: int = 28
 
 
 func _ready() -> void:
@@ -34,6 +37,7 @@ func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	visible = false
+	_base_font_size = font_size
 	_menu_font = load(FONT_PATH) as Font
 	_build_ui()
 	resized.connect(_fit_panel)
@@ -54,7 +58,7 @@ func open() -> void:
 	_nav.reset()
 	_refresh_values()
 	_update_visuals()
-	_fit_panel()
+	call_deferred("_fit_panel")
 
 
 func close() -> void:
@@ -136,22 +140,23 @@ func _build_ui() -> void:
 	panel_style.border_color = Color(text_color, 0.35)
 	panel_style.set_border_width_all(2)
 	panel_style.set_corner_radius_all(10)
-	panel_style.content_margin_left = 36.0
-	panel_style.content_margin_right = 36.0
-	panel_style.content_margin_top = 28.0
-	panel_style.content_margin_bottom = 28.0
+	panel_style.content_margin_left = 28.0
+	panel_style.content_margin_right = 28.0
+	panel_style.content_margin_top = 20.0
+	panel_style.content_margin_bottom = 20.0
 	_panel.add_theme_stylebox_override("panel", panel_style)
 	add_child(_panel)
 
-	var vbox := VBoxContainer.new()
-	vbox.add_theme_constant_override("separation", 16)
-	_panel.add_child(vbox)
+	_root = VBoxContainer.new()
+	_root.name = "Root"
+	_root.add_theme_constant_override("separation", 12)
+	_panel.add_child(_root)
 
-	var title := Label.new()
-	title.text = "Options"
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_apply_font(title, font_size + 8)
-	vbox.add_child(title)
+	_title = Label.new()
+	_title.text = "Options"
+	_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_apply_font(_title, font_size + 6)
+	_root.add_child(_title)
 
 	_row_labels.clear()
 	_value_labels.clear()
@@ -159,7 +164,7 @@ func _build_ui() -> void:
 	for i in OPTIONS_ROWS.size():
 		var row_name := OPTIONS_ROWS[i]
 		var row := HBoxContainer.new()
-		row.add_theme_constant_override("separation", 24)
+		row.add_theme_constant_override("separation", 16)
 		row.mouse_filter = Control.MOUSE_FILTER_STOP
 		var row_index := i
 		row.gui_input.connect(func(event: InputEvent) -> void:
@@ -170,7 +175,7 @@ func _build_ui() -> void:
 				_index = row_index
 				_update_visuals()
 		)
-		vbox.add_child(row)
+		_root.add_child(row)
 
 		var name_label := Label.new()
 		name_label.text = row_name
@@ -185,7 +190,7 @@ func _build_ui() -> void:
 			_volume_slider.min_value = 0.0
 			_volume_slider.max_value = 1.0
 			_volume_slider.step = VOLUME_STEP
-			_volume_slider.custom_minimum_size = Vector2(200.0, 28.0)
+			_volume_slider.custom_minimum_size = Vector2(160.0, 24.0)
 			_volume_slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			_volume_slider.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 			_volume_slider.focus_mode = Control.FOCUS_NONE
@@ -193,7 +198,7 @@ func _build_ui() -> void:
 			row.add_child(_volume_slider)
 
 			var value_label := Label.new()
-			value_label.custom_minimum_size = Vector2(72.0, 0.0)
+			value_label.custom_minimum_size = Vector2(56.0, 0.0)
 			value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 			value_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			_apply_font(value_label, font_size)
@@ -201,7 +206,7 @@ func _build_ui() -> void:
 			_value_labels.append(value_label)
 		elif row_name == "Display" or row_name == "Camera":
 			var value_label := Label.new()
-			value_label.custom_minimum_size = Vector2(200.0, 0.0)
+			value_label.custom_minimum_size = Vector2(160.0, 0.0)
 			value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 			value_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			_apply_font(value_label, font_size)
@@ -216,9 +221,9 @@ func _build_ui() -> void:
 	_desc_label = Label.new()
 	_desc_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_desc_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_desc_label.custom_minimum_size = Vector2(0.0, 48.0)
-	_apply_font(_desc_label, font_size - 12)
-	vbox.add_child(_desc_label)
+	_desc_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_apply_font(_desc_label, maxi(font_size - 8, 14))
+	_root.add_child(_desc_label)
 
 	_controls = Control.new()
 	_controls.set_script(ControlsOverlay)
@@ -236,16 +241,35 @@ func _apply_font(label: Label, size: int) -> void:
 
 
 func _fit_panel() -> void:
-	if _panel == null:
+	if _panel == null or _root == null:
 		return
 	var view := size
 	if view.x <= 1.0 or view.y <= 1.0:
 		view = get_viewport_rect().size
-	var margin := 24.0
-	var panel_w := minf(view.x - margin * 2.0, 560.0)
-	var panel_h := minf(view.y - margin * 2.0, 420.0)
-	panel_w = maxf(panel_w, 320.0)
-	panel_h = maxf(panel_h, 280.0)
+
+	var margin := 20.0
+	var available_w := maxf(view.x - margin * 2.0, 200.0)
+	var available_h := maxf(view.y - margin * 2.0, 160.0)
+	var panel_w := minf(available_w, 520.0)
+
+	# Shrink type on short screens so all rows fit without scrolling.
+	var scale := clampf(available_h / 520.0, 0.65, 1.0)
+	font_size = maxi(int(round(float(_base_font_size) * scale)), 16)
+	_apply_responsive_fonts()
+
+	# Width first so wrapped description measures correctly.
+	_panel.size = Vector2(panel_w, 1.0)
+	_root.reset_size()
+	var natural := _panel.get_combined_minimum_size()
+	# If still too tall, keep reducing font until it fits (or hit the floor).
+	while natural.y > available_h and font_size > 14:
+		font_size -= 1
+		_apply_responsive_fonts()
+		_panel.size = Vector2(panel_w, 1.0)
+		_root.reset_size()
+		natural = _panel.get_combined_minimum_size()
+
+	var panel_h := minf(natural.y, available_h)
 	_panel.size = Vector2(panel_w, panel_h)
 	_panel.position = Vector2((view.x - panel_w) * 0.5, (view.y - panel_h) * 0.5)
 
@@ -327,7 +351,6 @@ func _on_volume_slider_changed(value: float) -> void:
 func _refresh_values(sync_slider: bool = true) -> void:
 	if GameSettings == null:
 		return
-	# Volume is index 0, Display 1, Camera 2.
 	if _volume_slider != null and sync_slider:
 		_volume_slider.set_value_no_signal(GameSettings.master_volume)
 	if _value_labels.size() > 0 and _value_labels[0] != null:
@@ -353,6 +376,20 @@ func _update_description() -> void:
 			_desc_label.text = "Master volume."
 		_:
 			_desc_label.text = ""
+
+
+func _apply_responsive_fonts() -> void:
+	if _title != null:
+		_apply_font(_title, font_size + 6)
+	for label in _row_labels:
+		if label != null:
+			_apply_font(label, font_size)
+	for label in _value_labels:
+		if label != null:
+			_apply_font(label, font_size)
+	if _desc_label != null:
+		_apply_font(_desc_label, maxi(font_size - 8, 14))
+	_update_visuals()
 
 
 func _update_visuals() -> void:

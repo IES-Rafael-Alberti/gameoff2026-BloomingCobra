@@ -4,10 +4,10 @@ extends Control
 
 signal closed
 
-const FONT_PATH := "res://assets/fonts/MagicalNeverlandRegular-JpRZ7.ttf"
+const FONT_PATH := "res://assets/fonts/Poppins-SemiBold.ttf"
 const MenuNavGate := preload("res://assets/scripts/hud/menu_nav_gate.gd")
 
-@export var font_size: int = 26
+@export var font_size: int = 22
 @export var text_color: Color = Color(0.96, 0.92, 0.86, 1.0)
 @export var dim_color: Color = Color(0.04, 0.03, 0.05, 0.72)
 @export var panel_color: Color = Color(0.10, 0.08, 0.12, 0.94)
@@ -18,7 +18,9 @@ var _listening: bool = false
 var _gamepad_scheme: bool = false
 var _menu_font: Font
 var _dim: ColorRect
-var _panel: PanelContainer
+var _panel: Panel
+var _margin: MarginContainer
+var _root: VBoxContainer
 var _scroll: ScrollContainer
 var _list: VBoxContainer
 var _title: Label
@@ -30,6 +32,12 @@ var _row_controls: Array[Control] = []
 var _built: bool = false
 var _nav := MenuNavGate.new()
 var _rows: Array[Dictionary] = []
+var _base_font_size: int = 22
+const _MARGIN_L := 20
+const _MARGIN_R := 20
+const _MARGIN_T := 14
+const _MARGIN_B := 14
+const _ROOT_SEP := 6
 
 
 func _ready() -> void:
@@ -37,6 +45,7 @@ func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	visible = false
+	_base_font_size = font_size
 	_menu_font = load(FONT_PATH) as Font
 	_build_rows()
 	_build_ui()
@@ -60,7 +69,7 @@ func open() -> void:
 	_detect_initial_scheme()
 	_refresh_values()
 	_update_visuals()
-	_fit_panel()
+	call_deferred("_fit_panel")
 
 
 func close() -> void:
@@ -117,7 +126,6 @@ func handle_input(_event: InputEvent) -> bool:
 
 func _detect_initial_scheme() -> void:
 	_gamepad_scheme = not Input.get_connected_joypads().is_empty()
-	# Prefer keyboard if no pad activity yet this session and pads aren't the only hint.
 	for pad in Input.get_connected_joypads():
 		if Input.is_joy_known(pad):
 			_gamepad_scheme = true
@@ -149,7 +157,6 @@ func _try_capture(event: InputEvent) -> bool:
 		_refresh_values()
 		return true
 
-	# Cancel listen with B / ui_cancel (pad) without binding it.
 	if event.is_action_pressed("ui_cancel") and event is InputEventJoypadButton:
 		_listening = false
 		_refresh_values()
@@ -200,7 +207,8 @@ func _build_ui() -> void:
 	_dim.mouse_filter = Control.MOUSE_FILTER_STOP
 	add_child(_dim)
 
-	_panel = PanelContainer.new()
+	# Panel (not PanelContainer): keeps the size we assign instead of growing with content.
+	_panel = Panel.new()
 	_panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	_panel.clip_contents = true
 	var panel_style := StyleBoxFlat.new()
@@ -208,38 +216,47 @@ func _build_ui() -> void:
 	panel_style.border_color = Color(text_color, 0.35)
 	panel_style.set_border_width_all(2)
 	panel_style.set_corner_radius_all(10)
-	panel_style.content_margin_left = 20.0
-	panel_style.content_margin_right = 20.0
-	panel_style.content_margin_top = 16.0
-	panel_style.content_margin_bottom = 16.0
+	panel_style.content_margin_left = 0.0
+	panel_style.content_margin_right = 0.0
+	panel_style.content_margin_top = 0.0
+	panel_style.content_margin_bottom = 0.0
 	_panel.add_theme_stylebox_override("panel", panel_style)
 	add_child(_panel)
 
-	var root := VBoxContainer.new()
-	root.add_theme_constant_override("separation", 8)
-	root.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_panel.add_child(root)
+	_margin = MarginContainer.new()
+	_margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_margin.add_theme_constant_override("margin_left", _MARGIN_L)
+	_margin.add_theme_constant_override("margin_right", _MARGIN_R)
+	_margin.add_theme_constant_override("margin_top", _MARGIN_T)
+	_margin.add_theme_constant_override("margin_bottom", _MARGIN_B)
+	_panel.add_child(_margin)
+
+	_root = VBoxContainer.new()
+	_root.add_theme_constant_override("separation", _ROOT_SEP)
+	_root.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_root.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_margin.add_child(_root)
 
 	_title = Label.new()
 	_title.text = "Controls"
 	_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_apply_font(_title, font_size + 6)
-	root.add_child(_title)
+	_apply_font(_title, font_size + 4)
+	_root.add_child(_title)
 
 	_scheme_label = Label.new()
 	_scheme_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_apply_font(_scheme_label, font_size - 4)
-	root.add_child(_scheme_label)
+	_apply_font(_scheme_label, maxi(font_size - 4, 14))
+	_root.add_child(_scheme_label)
 
+	# Height is set explicitly in _fit_panel so we don't leave a blank hole.
 	_scroll = ScrollContainer.new()
-	_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
-	root.add_child(_scroll)
+	_root.add_child(_scroll)
 
 	_list = VBoxContainer.new()
-	_list.add_theme_constant_override("separation", 4)
+	_list.add_theme_constant_override("separation", 2)
 	_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_scroll.add_child(_list)
 
@@ -271,7 +288,7 @@ func _build_ui() -> void:
 		_row_labels.append(name_label)
 
 		var value_label := Label.new()
-		value_label.custom_minimum_size = Vector2(160.0, 0.0)
+		value_label.custom_minimum_size = Vector2(150.0, 0.0)
 		value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 		value_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		_apply_font(value_label, font_size)
@@ -281,8 +298,8 @@ func _build_ui() -> void:
 	_hint_label = Label.new()
 	_hint_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_hint_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_apply_font(_hint_label, maxi(font_size - 8, 16))
-	root.add_child(_hint_label)
+	_apply_font(_hint_label, maxi(font_size - 6, 13))
+	_root.add_child(_hint_label)
 
 
 func _apply_font(label: Label, size: int) -> void:
@@ -293,19 +310,55 @@ func _apply_font(label: Label, size: int) -> void:
 
 
 func _fit_panel() -> void:
-	if _panel == null:
+	if _panel == null or _list == null:
 		return
-	var view := size
-	if view.x <= 1.0 or view.y <= 1.0:
-		view = get_viewport_rect().size
-	var margin := 24.0
-	var panel_w := minf(view.x - margin * 2.0, 560.0)
-	var panel_h := minf(view.y - margin * 2.0, view.y * 0.88)
-	panel_w = maxf(panel_w, 320.0)
-	panel_h = maxf(panel_h, 280.0)
+	var view := get_viewport_rect().size
+	if size.x > 1.0 and size.y > 1.0:
+		view = size
+
+	var screen_margin := 16.0
+	var available_w := maxf(view.x - screen_margin * 2.0, 200.0)
+	var available_h := maxf(view.y - screen_margin * 2.0, 160.0)
+	var panel_w := minf(available_w, 520.0)
+
+	var scale := clampf(available_h / 640.0, 0.7, 1.0)
+	font_size = maxi(int(round(float(_base_font_size) * scale)), 14)
+	_apply_responsive_fonts()
+
+	# Measure real row-list height, then shrink the panel around it.
+	_list.reset_size()
+	var list_h := _list.get_combined_minimum_size().y
+	var title_h := _title.get_combined_minimum_size().y if _title != null else 0.0
+	var scheme_h := _scheme_label.get_combined_minimum_size().y if _scheme_label != null else 0.0
+	var hint_h := _hint_label.get_combined_minimum_size().y if _hint_label != null else 0.0
+	var pad := float(_MARGIN_T + _MARGIN_B)
+	var seps := float(_ROOT_SEP * 3) # title, scheme, scroll, hint → 3 gaps
+	var chrome := title_h + scheme_h + hint_h + pad + seps
+	var max_list_h := maxf(available_h - chrome, 80.0)
+	var used_list_h := minf(list_h, max_list_h)
+	_scroll.custom_minimum_size = Vector2(0.0, used_list_h)
+	_scroll.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+
+	var panel_h := minf(chrome + used_list_h, available_h)
 	_panel.size = Vector2(panel_w, panel_h)
 	_panel.position = Vector2((view.x - panel_w) * 0.5, (view.y - panel_h) * 0.5)
 	_ensure_selection_visible()
+
+
+func _apply_responsive_fonts() -> void:
+	if _title != null:
+		_apply_font(_title, font_size + 4)
+	if _scheme_label != null:
+		_apply_font(_scheme_label, maxi(font_size - 4, 14))
+	for label in _row_labels:
+		if label != null:
+			_apply_font(label, font_size)
+	for label in _value_labels:
+		if label != null:
+			_apply_font(label, font_size)
+	if _hint_label != null:
+		_apply_font(_hint_label, maxi(font_size - 6, 13))
+	_update_visuals()
 
 
 func _on_row_gui_input(index: int, event: InputEvent) -> void:
