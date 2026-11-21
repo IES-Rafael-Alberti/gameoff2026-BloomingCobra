@@ -21,6 +21,7 @@ ErrorHandler="*res://assets/scripts/common/error_handler.gd"
 WorldMode="*res://assets/scripts/game/world_mode.gd"
 RunState="*res://assets/scripts/game/run_state.gd"
 GameSettings="*res://assets/scripts/game/game_settings.gd"
+SceneTransition="*res://assets/scripts/common/scene_transition.gd"
 
 [display]
 

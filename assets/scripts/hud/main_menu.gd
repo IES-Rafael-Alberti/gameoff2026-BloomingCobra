@@ -204,7 +204,11 @@ func _start_game() -> void:
 	_input_enabled = false
 	if RunState != null and RunState.has_method("reset"):
 		RunState.reset()
-	get_tree().change_scene_to_file(GAME_SCENE)
+	var transition := get_tree().root.get_node_or_null("SceneTransition")
+	if transition != null and transition.has_method("change_to"):
+		transition.call("change_to", GAME_SCENE)
+	else:
+		get_tree().change_scene_to_file(GAME_SCENE)
 
 
 func _open_options() -> void:

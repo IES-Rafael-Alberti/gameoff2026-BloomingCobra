@@ -195,10 +195,9 @@ animations = [{
 }]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_qytdv"]
-radius = 6.0
+radius = 8.0
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_hchvl"]
-radius = 8.0
 
 [node name="Divider_1" type="CharacterBody2D" unique_id=1299799807]
 script = ExtResource("1_atykh")
@@ -206,7 +205,7 @@ move_speed = 35.0
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1132272824]
 position = Vector2(0.99999994, -5.9999995)
-scale = Vector2(0.05, 0.05)
+scale = Vector2(0.06, 0.06)
 sprite_frames = SubResource("SpriteFrames_4cjgm")
 animation = &"divide"
 
