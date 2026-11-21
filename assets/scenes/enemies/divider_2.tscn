@@ -239,10 +239,10 @@ animations = [{
 }]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_2p4dl"]
-radius = 6.0
+radius = 7.0
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_mw4fl"]
-radius = 8.0
+radius = 9.0
 
 [node name="Divider_2" type="CharacterBody2D" unique_id=1299799807]
 script = ExtResource("1_4cjgm")
@@ -250,19 +250,19 @@ move_speed = 35.0
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=528877787]
 position = Vector2(0.99999994, -8)
-scale = Vector2(0.06, 0.06)
+scale = Vector2(0.07, 0.07)
 sprite_frames = SubResource("SpriteFrames_tb71y")
 animation = &"walking_upRight"
 frame_progress = 0.5188004
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1300228507]
-position = Vector2(0, -7)
+position = Vector2(0, -6)
 shape = SubResource("CircleShape2D_2p4dl")
 
 [node name="Hurtbox" type="Area2D" parent="." unique_id=720486569]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox" unique_id=2018376634]
-position = Vector2(0, -7)
+position = Vector2(0, -6)
 shape = SubResource("CircleShape2D_mw4fl")
 
 [node name="Damageable" type="Node2D" parent="." unique_id=819508183]
