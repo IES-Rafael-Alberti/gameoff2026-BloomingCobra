@@ -1,6 +1,10 @@
 class_name Door
 extends StaticBody2D
 
+## Drag-drop door prop. Collision when closed, Trigger Area when open,
+## sprite swaps between closed/open. Place under Switchable/Pesadilla or
+## Switchable/Sueño for mode-scoped doors (like other props).
+
 ## Layer bits (1-based Godot layers):
 ## 1 world, 2 player, 3 enemy, 4 door_enemy, 5 door_player
 const LAYER_DOOR_ENEMY := 1 << 3
@@ -13,6 +17,10 @@ const LAYER_PLAYER := 1 << 1
 ## Door id inside the destination room where the player should spawn.
 @export var target_door_id: StringName = &""
 @export var starts_open: bool = false
+@export var closed_texture: Texture2D
+@export var open_texture: Texture2D
+
+@onready var sprite: Sprite2D = get_node_or_null("Sprite2D") as Sprite2D
 
 var _open: bool = false
 var _trigger: Area2D = null
@@ -26,13 +34,18 @@ func _ready() -> void:
 	collision_mask = 0
 	# Stay solid even if the parent room pauses with PROCESS_MODE_DISABLED.
 	disable_mode = CollisionObject2D.DISABLE_MODE_KEEP_ACTIVE
+	z_index = maxi(z_index, 1)
 
 	if door_id == &"":
 		door_id = StringName(name.to_lower())
 
+	# Legacy rooms marked open by disabling the body shape in the editor.
 	var shape := get_node_or_null("CollisionShape2D") as CollisionShape2D
 	if shape != null and shape.disabled:
 		starts_open = true
+
+	if sprite == null:
+		sprite = get_node_or_null("Sprite2D") as Sprite2D
 
 	_ensure_spawn()
 	_ensure_trigger()
@@ -118,6 +131,20 @@ func _apply_state() -> void:
 		var trigger_shape := _trigger_shape()
 		if trigger_shape != null:
 			trigger_shape.set_deferred("disabled", not can_transport)
+
+	_update_visual(present)
+
+
+func _update_visual(present: bool = true) -> void:
+	if sprite == null:
+		sprite = get_node_or_null("Sprite2D") as Sprite2D
+	if sprite == null:
+		return
+
+	sprite.visible = present
+	var tex := open_texture if _open else closed_texture
+	if tex != null:
+		sprite.texture = tex
 
 
 func _ensure_spawn() -> void:
