@@ -5,7 +5,7 @@ signal mode_changed(index: int)
 const MODE_PESADILLA := 0
 const MODE_SUENO := 1
 
-## Mode roots (Pesadilla / Sueño). Put TileMapLayer(s) + mode-only props under each.
+## Mode roots (Pesadilla / Sueño). Put TileMapLayer(s), mode-only props, and doors under each.
 ## If empty, auto-detects children named Pesadilla/Sueño (or direct tile layers).
 @export var variants: Array[Node2D] = []
 @export var start_index: int = 0

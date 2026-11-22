@@ -15,7 +15,8 @@ const GAME_SCENE := "res://assets/scenes/game.tscn"
 ## Isaac-style map grid cell for this room.
 @export var map_cell: Vector2i = Vector2i.ZERO
 
-## Optional: drag Door StaticBodies here. If empty, auto-detects Door children.
+## Optional: drag Door StaticBodies here. If empty, auto-detects Door nodes
+## (including under Switchable/Pesadilla or Switchable/Sueño, like props).
 @export var doors: Array[Door] = []
 ## Grace time after enter before sealing doors.
 @export var door_close_delay: float = 0.15
@@ -496,10 +497,16 @@ func get_doors() -> Array[Door]:
 		return assigned
 
 	var found: Array[Door] = []
-	for child in get_children():
-		if child is Door:
-			found.append(child as Door)
+	_collect_doors(self, found)
 	return found
+
+
+func _collect_doors(node: Node, out: Array[Door]) -> void:
+	for child in node.get_children():
+		if child is Door:
+			out.append(child as Door)
+		else:
+			_collect_doors(child, out)
 
 
 func get_spawn_points() -> Array[EnemySpawnPoint]:

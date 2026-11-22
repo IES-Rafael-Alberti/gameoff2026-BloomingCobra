@@ -18,6 +18,7 @@ var _open: bool = false
 var _trigger: Area2D = null
 var _spawn: Marker2D = null
 var _requesting_transition: bool = false
+var _switchable: Node = null
 
 
 func _ready() -> void:
@@ -35,7 +36,10 @@ func _ready() -> void:
 
 	_ensure_spawn()
 	_ensure_trigger()
+	_bind_switchable_mode()
 	set_open(starts_open)
+	# Switchable._ready runs after children; reconcile once mode roots are applied.
+	call_deferred("_apply_state")
 
 
 func is_linked() -> bool:
@@ -49,18 +53,7 @@ func get_spawn_position() -> Vector2:
 
 func set_open(open: bool) -> void:
 	_open = open
-	for child in get_children():
-		if child is CollisionShape2D and child != _trigger_shape():
-			# Shapes stay enabled; open/closed is handled by layers.
-			# Defer in case this is called from a physics body_entered callback.
-			child.set_deferred("disabled", false)
-
-	# Only enemies collide when open — player can pass.
-	var layer := LAYER_DOOR_ENEMY if _open else (LAYER_DOOR_ENEMY | LAYER_DOOR_PLAYER)
-	set_deferred("collision_layer", layer)
-
-	if _trigger != null:
-		_trigger.monitoring = _open and is_linked()
+	_apply_state()
 
 
 func is_open() -> bool:
@@ -69,6 +62,62 @@ func is_open() -> bool:
 
 func toggle_open() -> void:
 	set_open(not _open)
+
+
+## True when this door belongs to the active WorldMode branch (or is not mode-scoped).
+## Place doors under Switchable/Pesadilla or Switchable/Sueño like props to scope them.
+func is_mode_present() -> bool:
+	if _switchable == null:
+		_switchable = _find_owning_switchable()
+	if _switchable == null:
+		return true
+	return is_visible_in_tree()
+
+
+func _bind_switchable_mode() -> void:
+	_switchable = _find_owning_switchable()
+	if _switchable == null:
+		return
+	if _switchable.has_signal("mode_changed") and not _switchable.mode_changed.is_connected(_on_switchable_mode_changed):
+		_switchable.mode_changed.connect(_on_switchable_mode_changed)
+
+
+func _find_owning_switchable() -> Node:
+	var node: Node = get_parent()
+	while node != null:
+		if node.is_in_group("switchable"):
+			return node
+		if node is Room:
+			return null
+		node = node.get_parent()
+	return null
+
+
+func _on_switchable_mode_changed(_index: int) -> void:
+	# Deferred so Switchable finishes toggling variant visibility / collisions first.
+	call_deferred("_apply_state")
+
+
+func _apply_state() -> void:
+	var present := is_mode_present()
+
+	for child in get_children():
+		if child is CollisionShape2D and child != _trigger_shape():
+			# Present: shapes stay enabled; open/closed is handled by layers.
+			# Absent: keep disabled so we do not undo Switchable's mode hide.
+			child.set_deferred("disabled", not present)
+
+	var layer := 0
+	if present:
+		layer = LAYER_DOOR_ENEMY if _open else (LAYER_DOOR_ENEMY | LAYER_DOOR_PLAYER)
+	set_deferred("collision_layer", layer)
+
+	if _trigger != null:
+		var can_transport := present and _open and is_linked()
+		_trigger.monitoring = can_transport
+		var trigger_shape := _trigger_shape()
+		if trigger_shape != null:
+			trigger_shape.set_deferred("disabled", not can_transport)
 
 
 func _ensure_spawn() -> void:
@@ -130,7 +179,7 @@ func _collision_local_center() -> Vector2:
 
 
 func _on_trigger_body_entered(body: Node) -> void:
-	if _requesting_transition or not _open or not is_linked():
+	if _requesting_transition or not _open or not is_linked() or not is_mode_present():
 		return
 	if body == null or not body.is_in_group("player"):
 		return
