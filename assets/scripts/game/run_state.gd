@@ -14,6 +14,8 @@ var start_room: String = DEFAULT_START_ROOM
 var room_scenes: Dictionary = {}
 ## room_id -> Vector2i map cell
 var room_cells: Dictionary = {}
+## room_id -> Room.MapShape as int
+var room_shapes: Dictionary = {}
 ## room_id -> Array of { door_id, target_room, target_door_id } for map neighbors
 var room_links: Dictionary = {}
 
@@ -23,6 +25,7 @@ func reset() -> void:
 	debug_start.clear()
 	room_scenes.clear()
 	room_cells.clear()
+	room_shapes.clear()
 	room_links.clear()
 	start_room = DEFAULT_START_ROOM
 
@@ -56,11 +59,17 @@ func mark_cleared(room_id: StringName, cleared: bool = true) -> void:
 	ensure_room(room_id)["cleared"] = cleared
 
 
-func register_room_meta(room_id: StringName, scene_path: String, map_cell: Vector2i) -> void:
+func register_room_meta(
+	room_id: StringName,
+	scene_path: String,
+	map_cell: Vector2i,
+	map_shape: int = 0
+) -> void:
 	var key := String(room_id)
 	if not scene_path.is_empty():
 		room_scenes[key] = scene_path
 	room_cells[key] = map_cell
+	room_shapes[key] = map_shape
 
 
 func register_room_links(room_id: StringName, links: Array) -> void:

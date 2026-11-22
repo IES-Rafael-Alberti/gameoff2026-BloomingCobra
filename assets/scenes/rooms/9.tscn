@@ -11,8 +11,10 @@ size = Vector2(208, 16)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_p81wj"]
 size = Vector2(12.5, 167.5)
 
-[node name="17" type="Node2D" unique_id=1556955998]
+[node name="9" type="Node2D" unique_id=1556955998]
 script = ExtResource("1_fr1tw")
+room_id = &"9"
+map_shape = 2
 
 [node name="Switchable" type="Node2D" parent="." unique_id=884800511]
 script = ExtResource("2_r3vjn")

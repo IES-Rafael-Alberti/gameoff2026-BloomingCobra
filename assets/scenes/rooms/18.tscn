@@ -5,8 +5,10 @@
 [ext_resource type="TileSet" uid="uid://mo5sa42ii37l" path="res://assets/resources/tilesets/tileset_pesadilla_red.tres" id="3_n53mt"]
 [ext_resource type="TileSet" uid="uid://bk7uacfb2knda" path="res://assets/resources/tilesets/tileset_vigilia_red.tres" id="4_quejo"]
 
-[node name="17" type="Node2D" unique_id=1556955998]
+[node name="18" type="Node2D" unique_id=1556955998]
 script = ExtResource("1_p6c2f")
+room_id = &"18"
+map_shape = 1
 
 [node name="Switchable" type="Node2D" parent="." unique_id=884800511]
 script = ExtResource("2_wqd8q")

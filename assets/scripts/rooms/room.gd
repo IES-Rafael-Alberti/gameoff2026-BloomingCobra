@@ -12,8 +12,12 @@ const GAME_SCENE := "res://assets/scenes/game.tscn"
 
 ## Unique id for RunState. Empty = basename of scene_file_path.
 @export var room_id: StringName = &""
-## Isaac-style map grid cell for this room.
+## Isaac-style map grid cell for this room (top-left of the shape bounding box).
 @export var map_cell: Vector2i = Vector2i.ZERO
+## Minimap footprint. CELL=1x1, TALL=1x2, WIDE=2x1,
+## L_NO_TL=2x2 missing top-left, L_NO_BR=2x2 missing bottom-right.
+enum MapShape { CELL, TALL, WIDE, L_NO_TL, L_NO_BR }
+@export var map_shape: MapShape = MapShape.CELL
 
 ## Optional: drag Door StaticBodies here. If empty, auto-detects Door nodes
 ## (including under Switchable/Pesadilla or Switchable/Sueño, like props).
@@ -114,7 +118,36 @@ func _default_room_id() -> StringName:
 
 
 func _register_meta_with_run_state() -> void:
-	RunState.register_room_meta(room_id, scene_file_path, map_cell)
+	RunState.register_room_meta(room_id, scene_file_path, map_cell, int(map_shape))
+
+
+## Absolute map cells occupied by this room's minimap footprint.
+func get_map_footprint() -> Array[Vector2i]:
+	return map_footprint_for(map_cell, map_shape)
+
+
+static func map_footprint_for(origin: Vector2i, shape: MapShape) -> Array[Vector2i]:
+	var cells: Array[Vector2i] = []
+	match shape:
+		MapShape.TALL:
+			cells.append(origin)
+			cells.append(origin + Vector2i(0, 1))
+		MapShape.WIDE:
+			cells.append(origin)
+			cells.append(origin + Vector2i(1, 0))
+		MapShape.L_NO_TL:
+			# 2x2 bbox; missing top-left.
+			cells.append(origin + Vector2i(1, 0))
+			cells.append(origin + Vector2i(0, 1))
+			cells.append(origin + Vector2i(1, 1))
+		MapShape.L_NO_BR:
+			# 2x2 bbox; missing bottom-right.
+			cells.append(origin)
+			cells.append(origin + Vector2i(1, 0))
+			cells.append(origin + Vector2i(0, 1))
+		_:
+			cells.append(origin)
+	return cells
 
 
 func _register_links_with_run_state() -> void:
@@ -243,7 +276,7 @@ func save_state(_run_state: Node = null) -> void:
 	state["cleared"] = _state_cleared or bool(state.get("cleared", false))
 	state["buttons_committed"] = _button_unlock_committed or bool(state.get("buttons_committed", false))
 	_register_links_with_run_state()
-	RunState.register_room_meta(room_id, scene_file_path, map_cell)
+	RunState.register_room_meta(room_id, scene_file_path, map_cell, int(map_shape))
 
 
 func load_state(_run_state: Node = null) -> void:

@@ -9,6 +9,8 @@
 
 [node name="13" type="Node2D" unique_id=65810185]
 script = ExtResource("1_xbpoo")
+room_id = &"13"
+map_shape = 3
 
 [node name="Switchable" type="Node2D" parent="." unique_id=1950648767]
 script = ExtResource("1_yrbbf")
