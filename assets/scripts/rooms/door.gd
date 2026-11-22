@@ -32,6 +32,8 @@ var _switchable: Node = null
 func _ready() -> void:
 	add_to_group("door")
 	collision_mask = 0
+	# Keep receiving mode_changed / deferred applies while under an inactive Sueño/Pesadilla root.
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	# Stay solid even if the parent room pauses with PROCESS_MODE_DISABLED.
 	disable_mode = CollisionObject2D.DISABLE_MODE_KEEP_ACTIVE
 	z_index = maxi(z_index, 1)
@@ -53,6 +55,14 @@ func _ready() -> void:
 	set_open(starts_open)
 	# Switchable._ready runs after children; reconcile once mode roots are applied.
 	call_deferred("_apply_state")
+
+
+func _notification(what: int) -> void:
+	# When Sueño/Pesadilla is re-enabled, re-apply in case deferred calls were skipped while disabled.
+	if what == NOTIFICATION_VISIBILITY_CHANGED and is_visible_in_tree():
+		call_deferred("_apply_state")
+	elif what == NOTIFICATION_ENTER_TREE:
+		call_deferred("_apply_state")
 
 
 func is_linked() -> bool:
@@ -77,14 +87,20 @@ func toggle_open() -> void:
 	set_open(not _open)
 
 
-## True when this door belongs to the active WorldMode branch (or is not mode-scoped).
+## True when this door belongs to the active Switchable mode branch (or is not mode-scoped).
 ## Place doors under Switchable/Pesadilla or Switchable/Sueño like props to scope them.
 func is_mode_present() -> bool:
 	if _switchable == null:
 		_switchable = _find_owning_switchable()
 	if _switchable == null:
 		return true
-	return is_visible_in_tree()
+	var mode_root := _find_mode_variant_root()
+	if mode_root == null:
+		return true
+	if _switchable.has_method("get_mode_root"):
+		var active: Node = _switchable.call("get_mode_root")
+		return active == mode_root
+	return mode_root.visible
 
 
 func _bind_switchable_mode() -> void:
@@ -103,6 +119,23 @@ func _find_owning_switchable() -> Node:
 		if node is Room:
 			return null
 		node = node.get_parent()
+	return null
+
+
+func _find_mode_variant_root() -> Node2D:
+	## Direct child of Switchable that contains this door (Pesadilla / Sueño).
+	if _switchable == null:
+		_switchable = _find_owning_switchable()
+	if _switchable == null:
+		return null
+	var node: Node = self
+	while node != null:
+		var parent := node.get_parent()
+		if parent == _switchable:
+			return node as Node2D
+		if parent is Room:
+			return null
+		node = parent
 	return null
 
 
@@ -132,16 +165,17 @@ func _apply_state() -> void:
 		if trigger_shape != null:
 			trigger_shape.set_deferred("disabled", not can_transport)
 
-	_update_visual(present)
+	_update_visual()
 
 
-func _update_visual(present: bool = true) -> void:
+func _update_visual() -> void:
 	if sprite == null:
 		sprite = get_node_or_null("Sprite2D") as Sprite2D
 	if sprite == null:
 		return
-
-	sprite.visible = present
+	# Never force sprite.visible=false for mode hiding — Switchable already toggles the
+	# Pesadilla/Sueño parent. Doing so stuck Vigilia doors invisible after mode swaps.
+	sprite.visible = true
 	var tex := open_texture if _open else closed_texture
 	if tex != null:
 		sprite.texture = tex
