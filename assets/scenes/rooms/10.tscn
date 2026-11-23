@@ -4,6 +4,7 @@
 [ext_resource type="Script" uid="uid://bkoec71xnejuk" path="res://assets/scripts/common/switchable.gd" id="2_k6ovj"]
 [ext_resource type="TileSet" uid="uid://mo5sa42ii37l" path="res://assets/resources/tilesets/tileset_pesadilla_red.tres" id="3_3lci5"]
 [ext_resource type="TileSet" uid="uid://bk7uacfb2knda" path="res://assets/resources/tilesets/tileset_vigilia_red.tres" id="4_bph3e"]
+[ext_resource type="PackedScene" uid="uid://cb5rvks5i5aea" path="res://assets/scenes/props/vigilia/interactive/doorVigilia.tscn" id="5_k6ovj"]
 
 [node name="17" type="Node2D" unique_id=1556955998]
 script = ExtResource("1_61tni")
@@ -27,6 +28,20 @@ position = Vector2(35.6, 6)
 scale = Vector2(0.3, 0.3)
 tile_map_data = PackedByteArray("AAD//wMAAAAAAAIAAAAAAAMAAAACAAIAAAD///r/AAAAAAAAAAAAAPr/AAACAAAAAAAAAAIAAAAEAAAAAAD//wIAAAAAAAEAAAD//wEAAAAAAAAAAAAAAAEAAAABAAAAAAABAAEAAAABAAAAAAACAAEAAAABAAAAAAADAAEAAAAGAAIAAAAEAAIAAAACAAIAAAABAAIAAAABAAIAAAACAAIAAAABAAIAAAADAAIAAAABAAIAAAAEAAEAAAACAAEAAAAEAAAAAAACAAEAAAAEAP//AAACAAAAAAD7////AAAEAAIAAAD8////AAABAAAAAAD9////AAABAAAAAAD+////AAABAAAAAAD/////AAABAAAAAAAAAP//AAABAAAAAAABAP//AAABAAAAAAACAP//AAABAAAAAAADAP//AAABAAAAAAADAAAAAAAGAAAAAAD7/wAAAAABAAIAAAD8/wAAAAABAAIAAAD9/wAAAAABAAIAAAD+/wAAAAABAAIAAAD//wAAAAABAAIAAAAAAAAAAAABAAIAAAABAAAAAAABAAIAAAACAAAAAAABAAIAAAD6/wAAAAAAAAIAAAD6////AAAAAAEAAAD6//7/AAAAAAEAAAD6//3/AAAAAAAAAAD7//3/AAABAAAAAAD8//3/AAABAAAAAAD9//3/AAABAAAAAAD+//3/AAABAAAAAAD///3/AAABAAAAAAAAAP3/AAABAAAAAAABAP3/AAABAAAAAAACAP3/AAABAAAAAAADAP3/AAAGAAIAAAD7//7/AAAEAAAAAAD8//7/AAABAAIAAAD9//7/AAABAAIAAAD+//7/AAABAAIAAAD///7/AAABAAIAAAAAAP7/AAABAAIAAAABAP7/AAABAAIAAAACAP7/AAABAAIAAAADAP7/AAABAAIAAAAEAP7/AAACAAIAAAAEAP3/AAACAAEAAAD///v/AAAAAAEAAAD///z/AAAAAAIAAAAAAPv/AAAEAAIAAAABAPv/AAABAAAAAAACAPv/AAABAAAAAAADAPv/AAABAAAAAAAEAPv/AAACAAAAAAAEAPz/AAACAAEAAAADAPz/AAAGAAAAAAAAAPz/AAABAAIAAAABAPz/AAABAAIAAAACAPz/AAABAAIAAAA=")
 tile_set = ExtResource("4_bph3e")
+
+[node name="DoorSur" parent="Switchable/Sueño" unique_id=173168588 instance=ExtResource("5_k6ovj")]
+position = Vector2(35, 122)
+rotation = 3.1415927
+door_id = &"10S"
+target_room = "uid://fk1jgyrqkm7r"
+target_door_id = &"16N"
+starts_open = true
+
+[node name="DoorNorte" parent="Switchable/Sueño" unique_id=2034880328 instance=ExtResource("5_k6ovj")]
+position = Vector2(35, -181)
+door_id = &"10N"
+target_door_id = &"6S"
+starts_open = true
 
 [node name="Walls" type="StaticBody2D" parent="." unique_id=1872382948]
 

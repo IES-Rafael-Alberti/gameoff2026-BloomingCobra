@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://ctoj8a51fem1a" path="res://assets/scripts/rooms/door.gd" id="1_door"]
 [ext_resource type="Texture2D" uid="uid://cb472df52e544" path="res://assets/sprittesheets/props/placeholders/interactive/door_vigilia_closed.png" id="2_closed"]
-[ext_resource type="Texture2D" uid="uid://c687cbb8809c4" path="res://assets/sprittesheets/props/placeholders/interactive/door_vigilia_open.png" id="3_open"]
+[ext_resource type="Texture2D" uid="uid://c687cbb881ac4" path="res://assets/sprittesheets/props/placeholders/interactive/door_vigilia_open.png" id="3_open"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_body"]
 size = Vector2(48, 14)
@@ -10,28 +10,28 @@ size = Vector2(48, 14)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_trigger"]
 size = Vector2(56, 36)
 
-[node name="DoorVigilia" type="StaticBody2D"]
+[node name="DoorVigilia" type="StaticBody2D" unique_id=173168588]
 z_index = 1
 collision_mask = 0
 script = ExtResource("1_door")
 closed_texture = ExtResource("2_closed")
 open_texture = ExtResource("3_open")
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=209599387]
 texture_filter = 1
 texture = ExtResource("2_closed")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1471642578]
 shape = SubResource("RectangleShape2D_body")
 
-[node name="Trigger" type="Area2D" parent="."]
+[node name="Trigger" type="Area2D" parent="." unique_id=704421656]
 collision_layer = 0
 collision_mask = 2
 monitoring = false
 monitorable = false
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Trigger"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Trigger" unique_id=499982673]
 shape = SubResource("RectangleShape2D_trigger")
 
-[node name="Spawn" type="Marker2D" parent="."]
+[node name="Spawn" type="Marker2D" parent="." unique_id=1072968614]
 position = Vector2(0, 28)

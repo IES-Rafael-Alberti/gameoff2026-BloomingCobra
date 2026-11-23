@@ -1,8 +1,8 @@
 [gd_scene format=3 uid="uid://b41468s5i5aea"]
 
 [ext_resource type="Script" uid="uid://ctoj8a51fem1a" path="res://assets/scripts/rooms/door.gd" id="1_door"]
-[ext_resource type="Texture2D" uid="uid://b82efb6e52964" path="res://assets/sprittesheets/props/placeholders/interactive/door_pesadilla_closed.png" id="2_closed"]
-[ext_resource type="Texture2D" uid="uid://c943ddbba5d04" path="res://assets/sprittesheets/props/placeholders/interactive/door_pesadilla_open.png" id="3_open"]
+[ext_resource type="Texture2D" uid="uid://b82efb6e53a64" path="res://assets/sprittesheets/props/placeholders/interactive/door_pesadilla_closed.png" id="2_closed"]
+[ext_resource type="Texture2D" uid="uid://da43ddbba5d04" path="res://assets/sprittesheets/props/placeholders/interactive/door_pesadilla_open.png" id="3_open"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_body"]
 size = Vector2(48, 14)
@@ -10,28 +10,28 @@ size = Vector2(48, 14)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_trigger"]
 size = Vector2(56, 36)
 
-[node name="DoorPesadilla" type="StaticBody2D"]
+[node name="DoorPesadilla" type="StaticBody2D" unique_id=268869019]
 z_index = 1
 collision_mask = 0
 script = ExtResource("1_door")
 closed_texture = ExtResource("2_closed")
 open_texture = ExtResource("3_open")
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=903759878]
 texture_filter = 1
 texture = ExtResource("2_closed")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1643669076]
 shape = SubResource("RectangleShape2D_body")
 
-[node name="Trigger" type="Area2D" parent="."]
+[node name="Trigger" type="Area2D" parent="." unique_id=1143175168]
 collision_layer = 0
 collision_mask = 2
 monitoring = false
 monitorable = false
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Trigger"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Trigger" unique_id=998101227]
 shape = SubResource("RectangleShape2D_trigger")
 
-[node name="Spawn" type="Marker2D" parent="."]
+[node name="Spawn" type="Marker2D" parent="." unique_id=1777308686]
 position = Vector2(0, 28)
