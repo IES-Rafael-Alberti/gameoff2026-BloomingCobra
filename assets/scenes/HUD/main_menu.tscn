@@ -14,6 +14,8 @@
 [ext_resource type="Texture2D" uid="uid://cwj8ea7couom" path="res://assets/sprittesheets/HUD/definitivo/colgante_inicio_4.png" id="7_ae2ix"]
 [ext_resource type="Texture2D" uid="uid://c4d05jvrqslpi" path="res://assets/sprittesheets/HUD/definitivo/colgante_inicio_5.png" id="8_1rvki"]
 [ext_resource type="Texture2D" uid="uid://bwo6eb6on3uyh" path="res://assets/sprittesheets/HUD/definitivo/colgante_inicio_6.png" id="9_1481d"]
+[ext_resource type="Shader" uid="uid://bak538msrbjhb" path="res://assets/shaders/luz_menu.gdshader" id="15_ae2ix"]
+[ext_resource type="Texture2D" uid="uid://cl0bcbmbrrvvn" path="res://icon.svg" id="16_1rvki"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_7bbcu"]
 shader = ExtResource("5_ae2ix")
@@ -25,7 +27,7 @@ shader_parameter/noise_scale = 23.766001033885
 shader_parameter/warp = 0.0
 shader_parameter/sweep = 0.198000009405
 shader_parameter/sweep_angle = -0.56259977106745
-shader_parameter/edge_width = 0.0
+shader_parameter/edge_width = 0.10000000475
 shader_parameter/edge_color = Color(1, 1, 1, 1)
 shader_parameter/edge_hot = Color(1, 1, 1, 1)
 
@@ -65,6 +67,287 @@ _data = {
 &"RESET": SubResource("Animation_7bbcu"),
 &"balanceo": SubResource("Animation_ae2ix")
 }
+
+[sub_resource type="Animation" id="Animation_ijtlv"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:rotation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.0]
+}
+
+[sub_resource type="Animation" id="Animation_5a3l3"]
+resource_name = "anim_1"
+length = 2.7
+loop_mode = 2
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:rotation")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 2.7),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [-0.061086523819801536, 0.061086523819801536]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_5eu3w"]
+_data = {
+&"RESET": SubResource("Animation_ijtlv"),
+&"anim_1": SubResource("Animation_5a3l3")
+}
+
+[sub_resource type="Animation" id="Animation_5eu3w"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:rotation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.0]
+}
+
+[sub_resource type="Animation" id="Animation_8xvag"]
+resource_name = "anim_2"
+length = 1.3
+loop_mode = 2
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:rotation")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1.3),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [0.017453292519943295, -0.017453292519943295]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_qj7op"]
+_data = {
+&"RESET": SubResource("Animation_5eu3w"),
+&"anim_2": SubResource("Animation_8xvag")
+}
+
+[sub_resource type="Animation" id="Animation_luokn"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:rotation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.0]
+}
+
+[sub_resource type="Animation" id="Animation_wifs4"]
+resource_name = "anim_3"
+length = 3.5000000000000004
+loop_mode = 2
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:rotation")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 3.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [-0.05235987755982989, 0.05235987755982989]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_ugpxw"]
+_data = {
+&"RESET": SubResource("Animation_luokn"),
+&"anim_3": SubResource("Animation_wifs4")
+}
+
+[sub_resource type="Animation" id="Animation_qj7op"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:rotation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.0]
+}
+
+[sub_resource type="Animation" id="Animation_ugpxw"]
+resource_name = "anim_4"
+length = 3.0
+loop_mode = 2
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:rotation")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 3, 6.0333333),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [-0.04363323129985824, 0.04363323129985824, -0.04363323]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_xkwfa"]
+_data = {
+&"RESET": SubResource("Animation_qj7op"),
+&"anim_4": SubResource("Animation_ugpxw")
+}
+
+[sub_resource type="Animation" id="Animation_pgoip"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:rotation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.0]
+}
+
+[sub_resource type="Animation" id="Animation_3tr25"]
+resource_name = "anim_5"
+length = 1.5
+loop_mode = 2
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:rotation")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [0.017453292519943295, -0.017453292519943295]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_dudtl"]
+_data = {
+&"RESET": SubResource("Animation_pgoip"),
+&"anim_5": SubResource("Animation_3tr25")
+}
+
+[sub_resource type="Animation" id="Animation_xkwfa"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:rotation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.0]
+}
+
+[sub_resource type="Animation" id="Animation_vwp0a"]
+resource_name = "anim_6"
+length = 4.0
+loop_mode = 2
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:rotation")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 4),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [-0.03490658503988659, 0.03490658503988659]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_g41qf"]
+_data = {
+&"RESET": SubResource("Animation_xkwfa"),
+&"anim_6": SubResource("Animation_vwp0a")
+}
+
+[sub_resource type="Animation" id="Animation_1481d"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(0, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_1rvki"]
+resource_name = "bajan colgantes"
+length = 2.91
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 2.9),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(0, -474.38), Vector2(0, 0)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_1481d"]
+_data = {
+&"RESET": SubResource("Animation_1481d"),
+&"bajan colgantes": SubResource("Animation_1rvki")
+}
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_rvyf8"]
+shader = ExtResource("15_ae2ix")
+shader_parameter/ray_angle = -6.285
+shader_parameter/ray_position = -0.2
+shader_parameter/spread = 0.0
+shader_parameter/cutoff = -0.5949999807624999
+shader_parameter/falloff = 1.0
+shader_parameter/edge_fade = 0.3850000182875
+shader_parameter/speed = 1.8
+shader_parameter/ray1_density = 13.395
+shader_parameter/ray2_density = 15.05
+shader_parameter/ray2_intensity = 0.610000028975
+shader_parameter/color = Vector4(7, 3, 1, 0.8)
+shader_parameter/hdr = false
+shader_parameter/seed = 5.0
 
 [node name="MainMenu" type="Control" unique_id=1842389175]
 layout_mode = 3
@@ -146,7 +429,7 @@ anchor_bottom = 0.5
 offset_left = -19.0
 offset_top = 474.0
 offset_right = 1133.0
-offset_bottom = 530.0038
+offset_bottom = 530.00476
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_fonts/font = ExtResource("5_7bbcu")
@@ -177,35 +460,52 @@ offset_bottom = 40.0
 layout_mode = 1
 anchors_preset = 9
 anchor_bottom = 1.0
-offset_left = 104.0
-offset_right = 238.0
-offset_bottom = 496.0
+offset_left = 81.99999
+offset_top = 8.0
+offset_right = 216.0
+offset_bottom = 504.0
 grow_vertical = 2
 scale = Vector2(0.600686, 0.600686)
+pivot_offset = Vector2(54.93718, -26.636211)
 texture = ExtResource("4_xrb2t")
+
+[node name="anim_1" type="AnimationPlayer" parent="UI/Colgantes/colg_1" unique_id=777390000]
+libraries/ = SubResource("AnimationLibrary_5eu3w")
+autoplay = &"anim_1"
 
 [node name="colg_2" type="TextureRect" parent="UI/Colgantes" unique_id=651543639]
 layout_mode = 1
 anchors_preset = 9
 anchor_bottom = 1.0
-offset_left = 172.00002
-offset_right = 306.0
-offset_bottom = 362.0
+offset_left = 157.0
+offset_top = 39.0
+offset_right = 291.0
+offset_bottom = 401.0
 grow_vertical = 2
 scale = Vector2(0.5998955, 0.5998955)
+pivot_offset = Vector2(38.339996, -105.0183)
 texture = ExtResource("5_bffep")
+
+[node name="anim_2" type="AnimationPlayer" parent="UI/Colgantes/colg_2" unique_id=1220597246]
+libraries/ = SubResource("AnimationLibrary_qj7op")
+autoplay = &"anim_2"
 
 [node name="colg_3" type="TextureRect" parent="UI/Colgantes" unique_id=246492224]
 layout_mode = 1
 anchors_preset = 9
 anchor_bottom = 1.0
-offset_left = 207.0
-offset_top = 1.0
-offset_right = 341.0
-offset_bottom = 765.0
+offset_left = 188.0
+offset_top = 20.0
+offset_right = 322.0
+offset_bottom = 784.0
 grow_vertical = 2
 scale = Vector2(0.59972227, 0.59972227)
+pivot_offset = Vector2(46.688293, -58.360348)
 texture = ExtResource("6_7bbcu")
+
+[node name="anim_3" type="AnimationPlayer" parent="UI/Colgantes/colg_3" unique_id=1626592776]
+libraries/ = SubResource("AnimationLibrary_ugpxw")
+autoplay = &"anim_3"
 
 [node name="colg_4" type="TextureRect" parent="UI/Colgantes" unique_id=247752448]
 layout_mode = 1
@@ -213,13 +513,19 @@ anchors_preset = 11
 anchor_left = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 809.0
-offset_right = 943.0
-offset_bottom = 496.0
+offset_left = 791.00006
+offset_top = 34.0
+offset_right = 925.00006
+offset_bottom = 530.0
 grow_horizontal = 0
 grow_vertical = 2
 scale = Vector2(0.6010606, 0.6010606)
+pivot_offset = Vector2(44.920532, -91.50491)
 texture = ExtResource("7_ae2ix")
+
+[node name="anim_4" type="AnimationPlayer" parent="UI/Colgantes/colg_4" unique_id=1528134127]
+libraries/ = SubResource("AnimationLibrary_xkwfa")
+autoplay = &"anim_4"
 
 [node name="colg_5" type="TextureRect" parent="UI/Colgantes" unique_id=282112414]
 layout_mode = 1
@@ -227,13 +533,19 @@ anchors_preset = 11
 anchor_left = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 869.0
-offset_right = 1004.0
-offset_bottom = 362.0
+offset_left = 846.0
+offset_top = 69.00001
+offset_right = 981.0
+offset_bottom = 431.0
 grow_horizontal = 0
 grow_vertical = 2
 scale = Vector2(0.60112816, 0.60112816)
+pivot_offset = Vector2(58.223877, -179.66219)
 texture = ExtResource("8_1rvki")
+
+[node name="anim_5" type="AnimationPlayer" parent="UI/Colgantes/colg_5" unique_id=2118108961]
+libraries/ = SubResource("AnimationLibrary_dudtl")
+autoplay = &"anim_5"
 
 [node name="colg_6" type="TextureRect" parent="UI/Colgantes" unique_id=16813037]
 layout_mode = 1
@@ -241,13 +553,22 @@ anchors_preset = 11
 anchor_left = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 934.0
-offset_right = 1067.0
-offset_bottom = 764.0
+offset_left = 913.0
+offset_top = 65.0
+offset_right = 1046.0
+offset_bottom = 829.0
 grow_horizontal = 0
 grow_vertical = 2
 scale = Vector2(0.6003077, 0.6003077)
+pivot_offset = Vector2(51.64026, -169.91286)
 texture = ExtResource("9_1481d")
+
+[node name="anim_6" type="AnimationPlayer" parent="UI/Colgantes/colg_6" unique_id=291137906]
+libraries/ = SubResource("AnimationLibrary_g41qf")
+autoplay = &"anim_6"
+
+[node name="bajan colgantes" type="AnimationPlayer" parent="UI/Colgantes" unique_id=171215153]
+libraries/ = SubResource("AnimationLibrary_1481d")
 
 [node name="Logo" type="TextureRect" parent="UI" unique_id=1984630384]
 visible = false
@@ -270,10 +591,9 @@ anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 7.0
-offset_top = -136.0
-offset_right = 3.0
-offset_bottom = -104.0
+offset_top = -153.0
+offset_right = 1.0
+offset_bottom = -98.0
 grow_horizontal = 2
 grow_vertical = 0
 theme_override_constants/separation = 72
@@ -313,3 +633,13 @@ mouse_filter = 2
 texture = ExtResource("6_brand")
 expand_mode = 1
 stretch_mode = 5
+
+[node name="luz" type="TextureRect" parent="." unique_id=665226611]
+material = SubResource("ShaderMaterial_rvyf8")
+layout_mode = 0
+offset_left = 914.0
+offset_top = 861.0
+offset_right = 2062.0
+offset_bottom = 1431.0
+rotation = 3.1408134
+texture = ExtResource("16_1rvki")

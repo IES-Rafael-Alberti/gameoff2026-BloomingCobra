@@ -24,12 +24,19 @@ const MENU_LABELS: PackedStringArray = ["Play", "Options", "Exit"]
 @onready var _selector_right: TextureRect = $UI/SelectorRight
 @onready var _welcome: TextureRect = $"Welcome title/Logoblanco"
 @onready var _welcome_text: Label = $"Welcome title/Label"
+@onready var bajan_colgantes: AnimationPlayer = $"UI/Colgantes/bajan colgantes"
+
 
 var _menu_items: Array[Label] = []
 var _selected_index: int = 0
 var _input_enabled: bool = false
 var _intro_done: bool = false
 var _menu_font: Font
+
+
+
+# Voy a intentar que las estrellas bajen con el fondo con un await para que no empiecen hasta que presiones algun botón ("press any button")
+# No he sabido
 
 
 func _ready() -> void:
@@ -44,7 +51,7 @@ func _ready() -> void:
 	resized.connect(_on_resized)
 	_on_resized()
 	
-	# 
+	
 	await _play_intro()
 	_input_enabled = true
 	_update_selection_visuals()
@@ -90,7 +97,7 @@ func _play_intro() -> void:
 	await get_tree().process_frame
 	
 	# wait 2 seconds before logo fade in 
-	await get_tree().create_timer(1.0).timeout
+	await get_tree().create_timer(0.5).timeout
 	
 	_welcome.modulate.a = 1.0
 	
@@ -110,7 +117,15 @@ func _play_intro() -> void:
 	await interacted
 	
 	# remove welcome text
-	_welcome_text.modulate.a = 0.0
+	#_welcome_text.modulate.a = 0.0
+	
+	#remove welcome text pero con un fade
+	var fadeout_welcome_text := create_tween()
+	fadeout_welcome_text.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	fadeout_welcome_text.tween_property(_welcome_text, "modulate:a", 0.0, 1.0)
+	
+	#me ha salío oleee :D
+	
 	
 	_layout_scroll_background(false)
 
@@ -262,7 +277,7 @@ func _on_resized() -> void:
 	_layout_scroll_background(_intro_done)
 	#_fit_logo()
 	#_fit_colgantes()
-	_fit_brand()
+	#_fit_brand()
 	_fit_menu_row()
 	_fit_selectors()
 	if _input_enabled:
