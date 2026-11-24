@@ -5,6 +5,7 @@
 [ext_resource type="Texture2D" uid="uid://cbd6oij8vo0su" path="res://assets/sprittesheets/HUD/definitivo/logo_inicio.png" id="3_logo"]
 [ext_resource type="Texture2D" uid="uid://cg5imfc1dibyg" path="res://assets/sprittesheets/HUD/definitivo/maintittle_reference.jpg" id="3_rwffj"]
 [ext_resource type="Texture2D" uid="uid://dffgiumb4t8ee" path="res://assets/sprittesheets/HUD/definitivo/colgante_inicio_1.png" id="4_xrb2t"]
+[ext_resource type="FontFile" uid="uid://brnbuey8wndyf" path="res://assets/fonts/MagicalNeverlandRegular-JpRZ7.ttf" id="5_7bbcu"]
 [ext_resource type="Texture2D" uid="uid://gey8axtdsxaw" path="res://assets/sprittesheets/HUD/definitivo/colgante_inicio_2.png" id="5_bffep"]
 [ext_resource type="Texture2D" uid="uid://jc3hfx67tbte" path="res://assets/sprittesheets/HUD/definitivo/Seleccionador.png" id="5_selector"]
 [ext_resource type="Texture2D" uid="uid://dufkotctkb71e" path="res://assets/sprittesheets/HUD/definitivo/colgante_inicio_3.png" id="6_7bbcu"]
@@ -39,10 +40,54 @@ texture = ExtResource("2_bg")
 expand_mode = 1
 
 [node name="MaintittleReference" type="Sprite2D" parent="Background" unique_id=312124993]
+visible = false
 modulate = Color(1, 1, 1, 0.2509804)
 position = Vector2(576.33325, 324.25)
 scale = Vector2(0.600463, 0.6004629)
 texture = ExtResource("3_rwffj")
+
+[node name="Welcome title" type="Control" parent="." unique_id=238483649]
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Logo" type="TextureRect" parent="Welcome title" unique_id=117667643]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 267.00003
+offset_top = 51.0
+offset_right = 948.81836
+offset_bottom = 512.36383
+grow_horizontal = 2
+grow_vertical = 2
+scale = Vector2(0.8799999, 0.8799999)
+mouse_filter = 2
+texture = ExtResource("3_logo")
+expand_mode = 1
+stretch_mode = 4
+
+[node name="Label" type="Label" parent="Welcome title" unique_id=322769706]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -11.0
+offset_top = 482.0
+offset_right = 1138.0
+offset_bottom = 538.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_fonts/font = ExtResource("5_7bbcu")
+theme_override_font_sizes/font_size = 48
+text = "Press any key"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="UI" type="Control" parent="." unique_id=1641608196]
 layout_mode = 1
@@ -135,13 +180,13 @@ scale = Vector2(0.6003077, 0.6003077)
 texture = ExtResource("9_1481d")
 
 [node name="Logo" type="TextureRect" parent="UI" unique_id=1984630384]
+visible = false
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
-offset_left = 92.0
-offset_top = 59.000004
-offset_right = 76.0
-offset_bottom = 543.091
+offset_top = 49.000004
+offset_right = 190.04578
+offset_bottom = 533.091
 grow_horizontal = 2
 scale = Vector2(0.8799999, 0.8799999)
 mouse_filter = 2
@@ -155,9 +200,9 @@ anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 371.0
+offset_left = 7.0
 offset_top = -136.0
-offset_right = -371.0
+offset_right = 3.0
 offset_bottom = -104.0
 grow_horizontal = 2
 grow_vertical = 0

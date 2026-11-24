@@ -22,8 +22,7 @@ WorldMode="*res://assets/scripts/game/world_mode.gd"
 
 [display]
 
-window/stretch/mode="canvas_items"
-window/stretch/aspect="expand"
+window/stretch/mode="viewport"
 
 [input]
 

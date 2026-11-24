@@ -22,6 +22,8 @@ const MENU_LABELS: PackedStringArray = ["Play", "Options", "Exit"]
 @onready var _menu_row: HBoxContainer = $UI/MenuRow
 @onready var _selector_left: TextureRect = $UI/SelectorLeft
 @onready var _selector_right: TextureRect = $UI/SelectorRight
+@onready var _welcome: TextureRect = $"Welcome title/Logo"
+@onready var _welcome_text: Label = $"Welcome title/Label"
 
 var _menu_items: Array[Label] = []
 var _selected_index: int = 0
@@ -35,10 +37,14 @@ func _ready() -> void:
 	_menu_font = load(FONT_PATH) as Font
 	_setup_menu_labels()
 	_ui.modulate.a = 0.0
+	_welcome.modulate.a = 0.0
+	_welcome_text.modulate.a = 0.0
 	_selector_left.visible = false
 	_selector_right.visible = false
 	resized.connect(_on_resized)
 	_on_resized()
+	
+	# 
 	await _play_intro()
 	_input_enabled = true
 	_update_selection_visuals()
@@ -68,8 +74,32 @@ func _mark_input_handled() -> void:
 		viewport.set_input_as_handled()
 
 
+signal interacted
+
+func _input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed:
+	#if event.is_action_pressed("attack"):
+		interacted.emit()
+
 func _play_intro() -> void:
 	await get_tree().process_frame
+	
+	#await get_tree().create_timer(5).timeout
+	var fade_welcome := create_tween()
+	fade_welcome.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	fade_welcome.tween_property(_welcome, "modulate:a", 1.0, 3.0)
+	await fade_welcome.finished
+
+	var fade_welcome_text := create_tween()
+	fade_welcome_text.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	fade_welcome_text.tween_property(_welcome_text, "modulate:a", 1.0, 0.25)
+	await fade_welcome_text.finished
+	
+	# wait for key pressed
+	await interacted
+	
+	_welcome_text.modulate.a = 0.0
+	
 	_layout_scroll_background(false)
 
 	var start_y := _scroll_start_y()
@@ -218,7 +248,7 @@ func _place_selectors() -> void:
 
 func _on_resized() -> void:
 	_layout_scroll_background(_intro_done)
-	_fit_logo()
+	#_fit_logo()
 	#_fit_colgantes()
 	_fit_brand()
 	_fit_menu_row()
