@@ -9,18 +9,6 @@
 atlas = ExtResource("4_qipfk")
 region = Rect2(0, 1652, 826, 826)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_qipfk"]
-atlas = ExtResource("4_qipfk")
-region = Rect2(826, 1652, 826, 826)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_a8jr0"]
-atlas = ExtResource("4_qipfk")
-region = Rect2(1652, 1652, 826, 826)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_ii0t4"]
-atlas = ExtResource("4_qipfk")
-region = Rect2(2478, 1652, 826, 826)
-
 [sub_resource type="AtlasTexture" id="AtlasTexture_3ba3f"]
 atlas = ExtResource("4_qipfk")
 region = Rect2(0, 1652, 826, 826)
@@ -42,15 +30,6 @@ animations = [{
 "frames": [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_lrger")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_qipfk")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_a8jr0")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_ii0t4")
 }],
 "loop": 1,
 "name": &"Cargar",
@@ -75,10 +54,10 @@ animations = [{
 }]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_body"]
-radius = 16.0
+radius = 22.0
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_weak"]
-radius = 14.0
+radius = 18.0
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_aoe"]
 radius = 8.0
@@ -93,18 +72,18 @@ fill_from = Vector2(0.5, 0.5)
 fill_to = Vector2(0.5, 0)
 
 [node name="BossCabeza" type="CharacterBody2D" unique_id=285394883]
+scale = Vector2(1.85, 1.85)
 collision_layer = 4
 collision_mask = 43
 script = ExtResource("1_head")
 projectile_scene = ExtResource("5_proj")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=618288645]
-position = Vector2(0, -2.9999995)
-scale = Vector2(0.06, 0.06)
+position = Vector2(0, -3)
+scale = Vector2(0.065, 0.065)
 sprite_frames = SubResource("SpriteFrames_bhbtl")
-animation = &"Cargar"
+animation = &"Idle"
 autoplay = "Idle"
-frame_progress = 0.075239904
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1154603756]
 shape = SubResource("CircleShape2D_body")
@@ -131,9 +110,10 @@ polygon = PackedVector2Array(-6, -6, 6, -6, 6, 6, -6, 6)
 
 [node name="LaserLine" type="Line2D" parent="." unique_id=984344726]
 visible = false
-z_index = 4
-width = 4.0
-default_color = Color(1, 0.2, 0.35, 0.9)
+z_index = 20
+z_as_relative = false
+width = 5.0
+default_color = Color(1, 0.2, 0.35, 0.95)
 joint_mode = 2
 begin_cap_mode = 2
 end_cap_mode = 2

@@ -23,8 +23,9 @@ func _ready() -> void:
 	add_to_group("prop_pickup")
 	collision_layer = 0
 	collision_mask = 1 << 1 # player
-	monitoring = true
-	monitorable = false
+	# Deferred: pickups may spawn during physics callbacks (boss heal drop, etc.).
+	set_deferred("monitoring", true)
+	set_deferred("monitorable", false)
 	apply_definition()
 	_sprite_base_pos = sprite.position
 	_float_phase = randf() * TAU
@@ -108,16 +109,15 @@ func _play_collect_fade() -> void:
 func _apply_pickup(player: Node) -> void:
 	var kind := get_pickup_type()
 	var amount := get_pickup_amount()
-	var duration := get_pickup_duration()
 	match kind:
 		&"heal", &"cat_heal":
 			_apply_heal(player, float(amount))
 		&"max_health", &"maxhealth":
 			_apply_max_health(player, float(amount))
 		&"attack_boost", &"attack":
-			_apply_attack_boost(player, amount, duration)
+			_apply_attack_boost(player, amount)
 		&"projectile_boost", &"projectile":
-			_apply_projectile_boost(player, amount, duration)
+			_apply_projectile_boost(player, amount)
 		&"shield":
 			_apply_shield(player, amount)
 		_:
@@ -142,16 +142,16 @@ func _apply_max_health(player: Node, amount: float) -> void:
 		vit.call("increase_max", amount)
 
 
-func _apply_attack_boost(player: Node, bonus: int, duration: float) -> void:
+func _apply_attack_boost(player: Node, stacks: int) -> void:
 	var buffs := _get_buffs(player)
 	if buffs != null and buffs.has_method("apply_attack_boost"):
-		buffs.call("apply_attack_boost", duration, bonus)
+		buffs.call("apply_attack_boost", stacks)
 
 
-func _apply_projectile_boost(player: Node, bonus: int, duration: float) -> void:
+func _apply_projectile_boost(player: Node, stacks: int) -> void:
 	var buffs := _get_buffs(player)
 	if buffs != null and buffs.has_method("apply_projectile_boost"):
-		buffs.call("apply_projectile_boost", duration, bonus)
+		buffs.call("apply_projectile_boost", stacks)
 
 
 func _apply_shield(player: Node, hits: int) -> void:

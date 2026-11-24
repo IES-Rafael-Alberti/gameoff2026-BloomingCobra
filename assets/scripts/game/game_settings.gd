@@ -52,7 +52,7 @@ const REMAPPABLE_ACTIONS: Array[Dictionary] = [
 ## Linear volume 0.0–1.0 applied to the Master bus.
 var master_volume: float = 0.8
 var display_mode: int = DisplayMode.WINDOWED
-var camera_mode: int = CameraMode.FIXED
+var camera_mode: int = CameraMode.FOLLOW
 
 
 func _ready() -> void:

@@ -10,6 +10,8 @@ extends Area2D
 @export var float_speed: float = 7.0
 @export var impact_anim: StringName = &"impact"
 @export var fly_anim: StringName = &"fly"
+## When false, the bolt only hits the player (used by the external boss perch).
+@export var collide_with_world: bool = true
 
 const MASK_WORLD := 1 << 0
 const MASK_PLAYER := 1 << 1
@@ -61,7 +63,10 @@ func _cache_sprite() -> void:
 
 func _apply_collision() -> void:
 	collision_layer = 0
-	collision_mask = MASK_WORLD | MASK_PLAYER | MASK_DOOR_ENEMY
+	if collide_with_world:
+		collision_mask = MASK_WORLD | MASK_PLAYER | MASK_DOOR_ENEMY
+	else:
+		collision_mask = MASK_PLAYER
 
 
 func _orient_to_direction() -> void:
@@ -126,7 +131,7 @@ func _handle_hit(body: Object) -> void:
 	if _impacting or not _alive:
 		return
 	_alive = false
-	monitoring = false
+	set_deferred("monitoring", false)
 
 	if body is Node and (body as Node).is_in_group("player"):
 		var player := body as Node2D
@@ -147,7 +152,6 @@ func _begin_impact() -> void:
 		return
 	_impacting = true
 	_alive = false
-	monitoring = false
 	set_deferred("monitoring", false)
 	# Impact FX is drawn upright; undo flight rotation.
 	rotation = 0.0

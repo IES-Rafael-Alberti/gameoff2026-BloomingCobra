@@ -13,4 +13,3 @@ z_index = 1
 sprite_scale = 0.18
 pickup_type = &"attack_boost"
 amount = 1
-duration = 12.0

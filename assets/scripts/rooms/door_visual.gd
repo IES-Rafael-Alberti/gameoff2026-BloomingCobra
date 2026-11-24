@@ -45,7 +45,9 @@ func apply(orientation: int, is_open: bool) -> void:
 	if tex == null:
 		return
 
-	var scale_val := open_scale if show_open else sprite_scale
+	var scale_closed := _float_or(sprite_scale, 0.3)
+	var scale_open := _float_or(open_scale, 0.5)
+	var scale_val := scale_open if show_open else scale_closed
 	sprite.visible = true
 	sprite.texture = tex
 	sprite.scale = Vector2(scale_val, scale_val)
@@ -56,8 +58,18 @@ func apply(orientation: int, is_open: bool) -> void:
 	if closed_size == Vector2.ZERO:
 		closed_size = _visual_size(tex, scale_val, show_open, orientation)
 
-	var body_size := _slab_size(closed_size, orientation, body_span_mul, body_depth)
-	var trigger_size := _slab_size(closed_size, orientation, trigger_span_mul, trigger_depth)
+	var body_size := _slab_size(
+		closed_size,
+		orientation,
+		_float_or(body_span_mul, 0.85),
+		_float_or(body_depth, 14.0)
+	)
+	var trigger_size := _slab_size(
+		closed_size,
+		orientation,
+		_float_or(trigger_span_mul, 0.7),
+		_float_or(trigger_depth, 18.0)
+	)
 	_apply_body_shape(door, body_size)
 	_apply_trigger_shape(door, trigger_size)
 	_apply_spawn(door, orientation, body_size)
@@ -101,11 +113,17 @@ func _open_rotation(orientation: int) -> float:
 			return 0.0
 
 
+func _float_or(value: Variant, fallback: float) -> float:
+	if value == null:
+		return fallback
+	return float(value)
+
+
 func _closed_visual_size(orientation: int) -> Vector2:
 	var tex := closed_texture_for(orientation)
 	if tex == null:
 		return Vector2.ZERO
-	return tex.get_size() * sprite_scale
+	return tex.get_size() * _float_or(sprite_scale, 0.3)
 
 
 func _visual_size(tex: Texture2D, scale_val: float, rotating_open: bool, orientation: int) -> Vector2:
@@ -125,17 +143,17 @@ func _slab_size(closed_size: Vector2, orientation: int, span_mul: float, depth: 
 	return Vector2(maxf(closed_size.x * span_mul, 8.0), maxf(depth, 4.0))
 
 
-func _apply_body_shape(door: StaticBody2D, size: Vector2) -> void:
+func _apply_body_shape(door: StaticBody2D, shape_size: Vector2) -> void:
 	var shape_node := door.get_node_or_null("CollisionShape2D") as CollisionShape2D
 	if shape_node == null:
 		return
 	var rect := RectangleShape2D.new()
-	rect.size = size
+	rect.size = shape_size
 	shape_node.shape = rect
 	shape_node.position = Vector2.ZERO
 
 
-func _apply_trigger_shape(door: StaticBody2D, size: Vector2) -> void:
+func _apply_trigger_shape(door: StaticBody2D, shape_size: Vector2) -> void:
 	var trigger := door.get_node_or_null("Trigger") as Area2D
 	if trigger == null:
 		return
@@ -143,7 +161,7 @@ func _apply_trigger_shape(door: StaticBody2D, size: Vector2) -> void:
 	if shape_node == null:
 		return
 	var rect := RectangleShape2D.new()
-	rect.size = size
+	rect.size = shape_size
 	shape_node.shape = rect
 	shape_node.position = Vector2.ZERO
 
@@ -154,7 +172,7 @@ func _apply_spawn(door: StaticBody2D, orientation: int, body_size: Vector2) -> v
 		return
 	var inward := _inward_dir(orientation)
 	var depth := body_size.y if absf(inward.y) > absf(inward.x) else body_size.x
-	spawn.position = inward * (depth * 0.5 + spawn_margin)
+	spawn.position = inward * (depth * 0.5 + _float_or(spawn_margin, 12.0))
 
 
 func _inward_dir(orientation: int) -> Vector2:

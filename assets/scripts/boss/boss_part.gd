@@ -11,25 +11,34 @@ signal attack_finished
 
 @onready var animated_sprite: AnimatedSprite2D = get_node_or_null("AnimatedSprite2D") as AnimatedSprite2D
 
+const _MASK_PLAYER := 1 << 1
+
 var _busy: bool = false
+var _cancel_requested: bool = false
 var _contact_cd: float = 0.0
+var _hazard_active: bool = false
 var _hurtboxes: Array[Area2D] = []
 var _home_position: Vector2 = Vector2.ZERO
 var _arena: Rect2 = Rect2()
+var _base_collision_layer: int = 0
+var _base_collision_mask: int = 0
 
 
 func _ready() -> void:
 	z_index = maxi(z_index, 3)
 	# Layer 3 (enemy). Mask: world + player + door_enemy + spikes_enemy.
 	collision_layer = 1 << 2
-	collision_mask = (1 << 0) | (1 << 1) | (1 << 3) | (1 << 5)
+	collision_mask = (1 << 0) | _MASK_PLAYER | (1 << 3) | (1 << 5)
+	_base_collision_layer = collision_layer
+	_base_collision_mask = collision_mask
 	_home_position = global_position
 	_configure_hurtboxes()
+	set_hazard_active(false)
 
 
 func _physics_process(delta: float) -> void:
 	_contact_cd = maxf(_contact_cd - delta, 0.0)
-	if _busy:
+	if _busy and _hazard_active:
 		_try_hurtbox_contact()
 
 
@@ -55,6 +64,15 @@ func get_arena() -> Rect2:
 
 func get_player() -> Node2D:
 	return get_tree().get_first_node_in_group("player") as Node2D
+
+
+func shake_camera(amplitude: float = 4.0, duration: float = 0.25) -> void:
+	var player := get_player()
+	if player == null:
+		return
+	var cam := player.get_node_or_null("Camera2D")
+	if cam != null and cam.has_method("shake"):
+		cam.call("shake", amplitude, duration)
 
 
 func deal_player_hit(player: Node2D, amount: int = -1, knockback_force: float = -1.0) -> bool:
@@ -90,6 +108,8 @@ func play_anim(anim_name: StringName, force: bool = false) -> void:
 
 
 func return_home(duration: float = 0.35) -> void:
+	# Recovering should never hurt or shove the player.
+	set_hazard_active(false)
 	if duration <= 0.0:
 		global_position = _home_position
 		return
@@ -102,16 +122,47 @@ func return_home(duration: float = 0.35) -> void:
 	await tween.finished
 
 
+func set_hazard_active(active: bool) -> void:
+	_hazard_active = active
+	for area in _hurtboxes:
+		if area == null or not is_instance_valid(area):
+			continue
+		area.set_deferred("monitoring", active)
+	if active:
+		collision_layer = _base_collision_layer
+		collision_mask = _base_collision_mask
+	else:
+		# Keep world colliders; drop player body interaction so recovery tweens don't push.
+		collision_layer = 0
+		collision_mask = _base_collision_mask & ~_MASK_PLAYER
+
+
+func request_cancel() -> void:
+	_cancel_requested = true
+
+
+func is_cancel_requested() -> bool:
+	return _cancel_requested
+
+
 func _begin_attack() -> bool:
 	if _busy:
 		return false
 	_busy = true
+	_cancel_requested = false
+	set_hazard_active(false)
 	return true
 
 
 func _end_attack() -> void:
 	_busy = false
+	_cancel_requested = false
+	set_hazard_active(false)
 	attack_finished.emit()
+
+
+func _should_abort() -> bool:
+	return _cancel_requested or not _can_await()
 
 
 func _try_hurtbox_contact() -> void:
@@ -151,20 +202,27 @@ func _configure_area_tree(node: Node) -> void:
 
 
 func _wait(seconds: float) -> bool:
-	if not _can_await():
+	if not _can_await() or _cancel_requested:
 		return false
 	if seconds <= 0.0:
 		await get_tree().process_frame
-		return _can_await()
-	await get_tree().create_timer(seconds).timeout
-	return _can_await()
+		return _can_await() and not _cancel_requested
+	var left := seconds
+	while left > 0.0:
+		if not _can_await() or _cancel_requested:
+			return false
+		await get_tree().physics_frame
+		if not _can_await() or _cancel_requested:
+			return false
+		left -= get_physics_process_delta_time()
+	return _can_await() and not _cancel_requested
 
 
 func _await_physics() -> bool:
-	if not _can_await():
+	if not _can_await() or _cancel_requested:
 		return false
 	await get_tree().physics_frame
-	return _can_await()
+	return _can_await() and not _cancel_requested
 
 
 func _can_await() -> bool:

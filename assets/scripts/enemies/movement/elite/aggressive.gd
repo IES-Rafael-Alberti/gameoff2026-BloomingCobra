@@ -51,7 +51,9 @@ func physics_update(delta: float) -> void:
 	if brain.circular != null and brain.circular.is_busy():
 		brain.circular.physics_update(delta)
 		return
-	# Cooldown tick for circular even when idle in this state.
+	# Cooldown ticks while not mid-attack.
+	if brain.charge != null and brain.charge.has_method("tick_cooldown"):
+		brain.charge.tick_cooldown(delta)
 	if brain.circular != null:
 		brain.circular.physics_update(delta)
 
@@ -81,7 +83,7 @@ func physics_update(delta: float) -> void:
 		brain.charge.begin(to_player)
 		return
 
-	# Slow advance through the room.
+	# Walk toward the player when outside charge band / on charge cooldown.
 	var dir: Vector2 = brain.cardinal_from(to_player)
 	brain.set_facing(dir)
 	enemy.velocity = dir * move_speed

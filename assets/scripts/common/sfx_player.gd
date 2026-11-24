@@ -201,7 +201,7 @@ func _as_looping(stream: AudioStream) -> AudioStream:
 		var end_frame := wav.loop_end
 		if end_frame <= wav.loop_begin:
 			var rate := maxi(wav.mix_rate, 1)
-			end_frame = maxi(int(ceil(wav.get_length() * float(rate))) - 1, 1)
+			end_frame = maxi(ceili(wav.get_length() * float(rate)) - 1, 1)
 		wav.loop_end = end_frame
 	return copy
 
