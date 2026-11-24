@@ -22,7 +22,7 @@ const MENU_LABELS: PackedStringArray = ["Play", "Options", "Exit"]
 @onready var _menu_row: HBoxContainer = $UI/MenuRow
 @onready var _selector_left: TextureRect = $UI/SelectorLeft
 @onready var _selector_right: TextureRect = $UI/SelectorRight
-@onready var _welcome: TextureRect = $"Welcome title/Logo"
+@onready var _welcome: TextureRect = $"Welcome title/Logoblanco"
 @onready var _welcome_text: Label = $"Welcome title/Label"
 
 var _menu_items: Array[Label] = []
@@ -76,30 +76,40 @@ func _mark_input_handled() -> void:
 
 signal interacted
 
+# detect key pressed activating signal 'interacted'
+# interacted is used to wait any key
 func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed:
-	#if event.is_action_pressed("attack"):
 		interacted.emit()
+
+# used for dissolve tween
+func shader_dissolve(value: float):
+	_welcome.material.set_shader_parameter("dissolve", value)
 
 func _play_intro() -> void:
 	await get_tree().process_frame
 	
+	# wait 2 seconds before logo fade in 
 	await get_tree().create_timer(2).timeout
 	
-	#await get_tree().create_timer(5).timeout
+	_welcome.modulate.a = 1.0
+	
+	# inverted dissolve for logo fade in
 	var fade_welcome := create_tween()
 	fade_welcome.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	fade_welcome.tween_property(_welcome, "modulate:a", 1.0, 5.0)
+	fade_welcome.tween_method(shader_dissolve, 1.0, 0.0, 2.0)
 	await fade_welcome.finished
 
+	# fade in welcome text: 'Press any key'
 	var fade_welcome_text := create_tween()
 	fade_welcome_text.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	fade_welcome_text.tween_property(_welcome_text, "modulate:a", 1.0, 0.5)
 	await fade_welcome_text.finished
 	
-	# wait for key pressed
+	# wait for any key pressed
 	await interacted
 	
+	# remove welcome text
 	_welcome_text.modulate.a = 0.0
 	
 	_layout_scroll_background(false)

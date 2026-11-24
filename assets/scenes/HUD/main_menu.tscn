@@ -18,10 +18,10 @@
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_7bbcu"]
 shader = ExtResource("5_ae2ix")
 shader_parameter/tint_color = Color(1, 1, 1, 1)
-shader_parameter/intensity = 1.0
+shader_parameter/intensity = 0.0
 shader_parameter/sheet_frames = Vector2(1, 1)
-shader_parameter/dissolve = 0.2370000112575
-shader_parameter/noise_scale = 5.2630001549925005
+shader_parameter/dissolve = 0.0
+shader_parameter/noise_scale = 32.1950014342625
 shader_parameter/warp = 1.0
 shader_parameter/sweep = 0.0
 shader_parameter/sweep_angle = 1.5708
@@ -55,6 +55,7 @@ texture = ExtResource("2_bg")
 expand_mode = 1
 
 [node name="MaintittleReference" type="Sprite2D" parent="Background" unique_id=312124993]
+visible = false
 modulate = Color(1, 1, 1, 0.16470589)
 position = Vector2(576.33325, 324.25)
 scale = Vector2(0.600463, 0.6004629)

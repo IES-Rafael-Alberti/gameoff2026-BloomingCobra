@@ -22,6 +22,7 @@ WorldMode="*res://assets/scripts/game/world_mode.gd"
 
 [display]
 
+window/size/mode=2
 window/stretch/mode="viewport"
 
 [input]

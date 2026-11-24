@@ -5,11 +5,6 @@ shader_type canvas_item;
 uniform vec3 tint_color : source_color = vec3(1.0, 1.0, 1.0);
 uniform float intensity : hint_range(0, 1) = 1.0;
 
-//void fragment(){
-    //vec4 front = texture(TEXTURE, UV);
-    //COLOR = mix(front, vec4(tint_color, front.a), intensity);
-//}
-
 // Disintegration with a glowing ember front. Animate `dissolve` from 0 (untouched)
 // to 1 (completely gone). The hot rim follows the burn line and cools to ember
 // toward the untouched pixels.
@@ -59,7 +54,10 @@ void vertex() {
 }
 
 void fragment() {
-	vec4 col = texture(TEXTURE, UV);
+	vec4 front = texture(TEXTURE, UV);
+
+	//vec4 col = texture(TEXTURE, UV);
+	vec4 col = mix(front, vec4(tint_color, front.a), intensity);
 	// the UV inside the current frame (1 x 1: the whole texture, as before)
 	vec2 fuv = UV * sheet_frames - min(floor(UV * sheet_frames), sheet_frames - 1.0);
 	vec2 p = fuv * noise_scale * 0.35;
