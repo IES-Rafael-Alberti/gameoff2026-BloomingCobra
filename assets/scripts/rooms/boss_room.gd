@@ -8,10 +8,15 @@ extends Room
 @export var auto_start_fight: bool = true
 ## Extra margin around wall collision when computing camera bounds.
 @export var camera_bounds_padding: float = 8.0
+## Extra padding when fitting the whole arena into view.
+@export var camera_fit_padding: float = 1.08
+## Extra space north of the playable floor so the external head stays on screen.
+@export var camera_north_margin: float = 120.0
 
 var _boss: Boss = null
 var _fight_started: bool = false
 var _boss_defeated: bool = false
+var _camera_locked: bool = false
 
 
 func _ready() -> void:
@@ -42,6 +47,10 @@ func on_player_entered(player: Node2D) -> void:
 		call_deferred("_start_boss_fight", player)
 
 
+func on_player_exited(_player: Node2D) -> void:
+	_unlock_boss_camera()
+
+
 func _start_boss_fight(_player: Node2D) -> void:
 	if _fight_started or _boss_defeated:
 		return
@@ -49,21 +58,59 @@ func _start_boss_fight(_player: Node2D) -> void:
 	if _boss == null:
 		return
 	_fight_started = true
+	var arena := get_camera_bounds()
 	var slots: Array = []
 	var slots_node := get_node_or_null(button_slots_path)
 	if slots_node != null:
 		for child in slots_node.get_children():
 			if child is Marker2D:
 				slots.append(child)
-	_boss.start_fight(get_camera_bounds(), slots)
+	_lock_boss_camera(arena)
+	_boss.start_fight(arena, slots)
 
 
 func _on_boss_defeated() -> void:
 	_boss_defeated = true
 	_fight_started = false
+	_unlock_boss_camera()
 	mark_room_cleared()
 	cancel_pending_door_close()
 	set_all_doors_open(true)
+
+
+func _lock_boss_camera(arena: Rect2) -> void:
+	var cam := _player_camera()
+	if cam == null or not cam.has_method("lock_to_world_point"):
+		return
+	var view := arena
+	if view.size != Vector2.ZERO and camera_north_margin > 0.0:
+		# Include the head parked above the north wall in the framed view.
+		view = Rect2(
+			view.position.x,
+			view.position.y - camera_north_margin,
+			view.size.x,
+			view.size.y + camera_north_margin
+		)
+	var center := view.get_center() if view.size != Vector2.ZERO else global_position
+	var fit := view.size if view.size != Vector2.ZERO else Vector2.ZERO
+	cam.lock_to_world_point(center, fit, camera_fit_padding)
+	_camera_locked = true
+
+
+func _unlock_boss_camera() -> void:
+	if not _camera_locked:
+		return
+	var cam := _player_camera()
+	if cam != null and cam.has_method("unlock_world_point"):
+		cam.unlock_world_point()
+	_camera_locked = false
+
+
+func _player_camera() -> Camera2D:
+	var player := get_tree().get_first_node_in_group("player") as Node2D
+	if player == null:
+		return null
+	return player.get_node_or_null("Camera2D") as Camera2D
 
 
 func _bounds_from_walls() -> Rect2:

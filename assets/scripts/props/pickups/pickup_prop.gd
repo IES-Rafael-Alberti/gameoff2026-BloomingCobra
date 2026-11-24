@@ -23,8 +23,9 @@ func _ready() -> void:
 	add_to_group("prop_pickup")
 	collision_layer = 0
 	collision_mask = 1 << 1 # player
-	monitoring = true
-	monitorable = false
+	# Deferred: pickups may spawn during physics callbacks (boss heal drop, etc.).
+	set_deferred("monitoring", true)
+	set_deferred("monitorable", false)
 	apply_definition()
 	_sprite_base_pos = sprite.position
 	_float_phase = randf() * TAU

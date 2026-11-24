@@ -20,7 +20,7 @@ func on_player_entered(player: Node2D) -> void:
 		_heal_player(true)
 
 
-func on_player_exited(_player: Node2D) -> void:
+func on_player_exited(_exiting: Node2D) -> void:
 	_player = null
 	_heal_accumulator = 0.0
 	_set_safe_music(false)
