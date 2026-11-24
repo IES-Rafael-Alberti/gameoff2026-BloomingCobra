@@ -15,6 +15,7 @@ func on_player_entered(player: Node2D) -> void:
 	_player = player
 	_heal_accumulator = 0.0
 	_force_pesadilla_and_lock()
+	_set_safe_music(true)
 	if heal_on_enter:
 		_heal_player(true)
 
@@ -22,6 +23,7 @@ func on_player_entered(player: Node2D) -> void:
 func on_player_exited(_player: Node2D) -> void:
 	_player = null
 	_heal_accumulator = 0.0
+	_set_safe_music(false)
 	_unlock_switch()
 
 
@@ -39,6 +41,16 @@ func _force_pesadilla_and_lock() -> void:
 
 func _unlock_switch() -> void:
 	WorldMode.set_locked(false)
+
+
+func _set_safe_music(active: bool) -> void:
+	var sfx := get_tree().get_first_node_in_group("sfx_general")
+	if sfx == null:
+		return
+	if active and sfx.has_method("set_room_music"):
+		sfx.call("set_room_music", &"safe_zone")
+	elif not active and sfx.has_method("clear_room_music"):
+		sfx.call("clear_room_music")
 
 
 func _process(delta: float) -> void:

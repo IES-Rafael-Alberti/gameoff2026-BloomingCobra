@@ -1,11 +1,12 @@
 [gd_scene format=3 uid="uid://ch57l1467b64o"]
 
-[ext_resource type="Script" uid="uid://cdoordebugroom1" path="res://assets/scripts/rooms/door_debug_room.gd" id="1_room"]
+[ext_resource type="Script" uid="uid://bikswul83o1qs" path="res://assets/scripts/rooms/door_debug_room.gd" id="1_room"]
 [ext_resource type="Script" uid="uid://bkoec71xnejuk" path="res://assets/scripts/common/switchable.gd" id="2_switch"]
 [ext_resource type="PackedScene" uid="uid://b41468s5i5aea" path="res://assets/scenes/props/pesadilla/interactive/doorPesadilla.tscn" id="3_door_p"]
 [ext_resource type="PackedScene" uid="uid://cb5rvks5i5aea" path="res://assets/scenes/props/vigilia/interactive/doorVigilia.tscn" id="4_door_v"]
 [ext_resource type="PackedScene" uid="uid://tvq6u6rrx621" path="res://assets/scenes/props/pesadilla/interactive/buttonPesadilla.tscn" id="5_btn_p"]
 [ext_resource type="PackedScene" uid="uid://cm16eeyma7gae" path="res://assets/scenes/props/vigilia/interactive/buttonVigilia.tscn" id="6_btn_v"]
+[ext_resource type="PackedScene" uid="uid://d0bcr6ctny2xs" path="res://assets/scenes/enemies/elite.tscn" id="7_jfa24"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wall_h"]
 size = Vector2(150, 24)
@@ -13,115 +14,122 @@ size = Vector2(150, 24)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wall_v"]
 size = Vector2(24, 150)
 
-[node name="HabitacionDoorDebug" type="Node2D" node_paths=PackedStringArray("unlock_buttons")]
+[node name="HabitacionDoorDebug" type="Node2D" unique_id=469190002 node_paths=PackedStringArray("unlock_buttons")]
 script = ExtResource("1_room")
 room_id = &"habitacion_door_debug"
 unlock_doors_with_buttons = true
 unlock_buttons = [NodePath("Switchable/Pesadilla/ButtonPesadilla"), NodePath("Switchable/Sueño/ButtonVigilia")]
 require_all_buttons = false
 
-[node name="Switchable" type="Node2D" parent="."]
+[node name="Switchable" type="Node2D" parent="." unique_id=1951390640]
 script = ExtResource("2_switch")
 
-[node name="Pesadilla" type="Node2D" parent="Switchable"]
+[node name="Pesadilla" type="Node2D" parent="Switchable" unique_id=561919387]
 
-[node name="Floor" type="Polygon2D" parent="Switchable/Pesadilla"]
+[node name="Floor" type="Polygon2D" parent="Switchable/Pesadilla" unique_id=46794726]
 z_index = -2
 color = Color(0.22, 0.08, 0.12, 1)
 polygon = PackedVector2Array(-200, -200, 200, -200, 200, 200, -200, 200)
 
-[node name="DoorNorte" parent="Switchable/Pesadilla" instance=ExtResource("3_door_p")]
+[node name="DoorNorte" parent="Switchable/Pesadilla" unique_id=2142786073 instance=ExtResource("3_door_p")]
 position = Vector2(0, -188)
 door_id = &"debugN"
-starts_open = false
 
-[node name="DoorEste" parent="Switchable/Pesadilla" instance=ExtResource("3_door_p")]
+[node name="DoorEste" parent="Switchable/Pesadilla" unique_id=453112697 instance=ExtResource("3_door_p")]
 position = Vector2(188, 0)
-orientation = 1
 door_id = &"debugE"
-starts_open = false
+orientation = 1
 
-[node name="DoorSur" parent="Switchable/Pesadilla" instance=ExtResource("3_door_p")]
+[node name="DoorSur" parent="Switchable/Pesadilla" unique_id=595433712 instance=ExtResource("3_door_p")]
 position = Vector2(0, 188)
-orientation = 2
 door_id = &"debugS"
-starts_open = false
+orientation = 2
 
-[node name="DoorOeste" parent="Switchable/Pesadilla" instance=ExtResource("3_door_p")]
+[node name="DoorOeste" parent="Switchable/Pesadilla" unique_id=767043366 instance=ExtResource("3_door_p")]
 position = Vector2(-188, 0)
-orientation = 3
 door_id = &"debugO"
-starts_open = false
+orientation = 3
 
-[node name="ButtonPesadilla" parent="Switchable/Pesadilla" instance=ExtResource("5_btn_p")]
+[node name="ButtonPesadilla" parent="Switchable/Pesadilla" unique_id=1462103195 instance=ExtResource("5_btn_p")]
 position = Vector2(0, 40)
 
-[node name="Sueño" type="Node2D" parent="Switchable"]
+[node name="Sueño" type="Node2D" parent="Switchable" unique_id=1922022956]
 
-[node name="Floor" type="Polygon2D" parent="Switchable/Sueño"]
+[node name="Floor" type="Polygon2D" parent="Switchable/Sueño" unique_id=431287619]
 z_index = -2
 color = Color(0.12, 0.28, 0.22, 1)
 polygon = PackedVector2Array(-200, -200, 200, -200, 200, 200, -200, 200)
 
-[node name="DoorNorte" parent="Switchable/Sueño" instance=ExtResource("4_door_v")]
+[node name="DoorNorte" parent="Switchable/Sueño" unique_id=216170245 instance=ExtResource("4_door_v")]
+process_mode = 3
 position = Vector2(0, -188)
+disable_mode = 2
+collision_layer = 24
 door_id = &"debugN"
-starts_open = false
 
-[node name="DoorEste" parent="Switchable/Sueño" instance=ExtResource("4_door_v")]
+[node name="DoorEste" parent="Switchable/Sueño" unique_id=328057475 instance=ExtResource("4_door_v")]
+process_mode = 3
 position = Vector2(188, 0)
-orientation = 1
+disable_mode = 2
+collision_layer = 24
 door_id = &"debugE"
-starts_open = false
+orientation = 1
 
-[node name="DoorSur" parent="Switchable/Sueño" instance=ExtResource("4_door_v")]
+[node name="DoorSur" parent="Switchable/Sueño" unique_id=2089937348 instance=ExtResource("4_door_v")]
+process_mode = 3
 position = Vector2(0, 188)
-orientation = 2
+disable_mode = 2
+collision_layer = 24
 door_id = &"debugS"
-starts_open = false
+orientation = 2
 
-[node name="DoorOeste" parent="Switchable/Sueño" instance=ExtResource("4_door_v")]
+[node name="DoorOeste" parent="Switchable/Sueño" unique_id=780638612 instance=ExtResource("4_door_v")]
+process_mode = 3
 position = Vector2(-188, 0)
-orientation = 3
+disable_mode = 2
+collision_layer = 24
 door_id = &"debugO"
-starts_open = false
+orientation = 3
 
-[node name="ButtonVigilia" parent="Switchable/Sueño" instance=ExtResource("6_btn_v")]
+[node name="ButtonVigilia" parent="Switchable/Sueño" unique_id=987177911 instance=ExtResource("6_btn_v")]
 position = Vector2(0, 40)
 
-[node name="Walls" type="StaticBody2D" parent="."]
+[node name="Walls" type="StaticBody2D" parent="." unique_id=888467850]
 
-[node name="NorthLeft" type="CollisionShape2D" parent="Walls"]
+[node name="NorthLeft" type="CollisionShape2D" parent="Walls" unique_id=1027098805]
 position = Vector2(-125, -200)
 shape = SubResource("RectangleShape2D_wall_h")
 
-[node name="NorthRight" type="CollisionShape2D" parent="Walls"]
+[node name="NorthRight" type="CollisionShape2D" parent="Walls" unique_id=1586842430]
 position = Vector2(125, -200)
 shape = SubResource("RectangleShape2D_wall_h")
 
-[node name="SouthLeft" type="CollisionShape2D" parent="Walls"]
+[node name="SouthLeft" type="CollisionShape2D" parent="Walls" unique_id=294668184]
 position = Vector2(-125, 200)
 shape = SubResource("RectangleShape2D_wall_h")
 
-[node name="SouthRight" type="CollisionShape2D" parent="Walls"]
+[node name="SouthRight" type="CollisionShape2D" parent="Walls" unique_id=1204314798]
 position = Vector2(125, 200)
 shape = SubResource("RectangleShape2D_wall_h")
 
-[node name="WestTop" type="CollisionShape2D" parent="Walls"]
+[node name="WestTop" type="CollisionShape2D" parent="Walls" unique_id=541330384]
 position = Vector2(-200, -125)
 shape = SubResource("RectangleShape2D_wall_v")
 
-[node name="WestBottom" type="CollisionShape2D" parent="Walls"]
+[node name="WestBottom" type="CollisionShape2D" parent="Walls" unique_id=90884611]
 position = Vector2(-200, 125)
 shape = SubResource("RectangleShape2D_wall_v")
 
-[node name="EastTop" type="CollisionShape2D" parent="Walls"]
+[node name="EastTop" type="CollisionShape2D" parent="Walls" unique_id=89239338]
 position = Vector2(200, -125)
 shape = SubResource("RectangleShape2D_wall_v")
 
-[node name="EastBottom" type="CollisionShape2D" parent="Walls"]
+[node name="EastBottom" type="CollisionShape2D" parent="Walls" unique_id=465114232]
 position = Vector2(200, 125)
 shape = SubResource("RectangleShape2D_wall_v")
 
-[node name="Spawn" type="Marker2D" parent="."]
+[node name="Spawn" type="Marker2D" parent="." unique_id=1948255777]
 position = Vector2(0, -20)
+
+[node name="Elite" parent="." unique_id=1480324047 instance=ExtResource("7_jfa24")]
+position = Vector2(89, -23)

@@ -262,7 +262,6 @@ animations = [{
 radius = 8.0
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_bhbtl"]
-radius = 10.0
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_i4vja"]
 atlas = ExtResource("2_wrehw")
@@ -280,6 +279,7 @@ animations = [{
 }]
 
 [node name="Hunter" type="CharacterBody2D" unique_id=1191328024]
+scale = Vector2(1.5, 1.5)
 script = ExtResource("1_kbpvo")
 attack_cooldown = 0.8
 
@@ -327,3 +327,4 @@ z_index = 1
 scale = Vector2(0.055, 0.055)
 sprite_frames = SubResource("SpriteFrames_bhbtl")
 animation = &"attack"
+flip_h = true

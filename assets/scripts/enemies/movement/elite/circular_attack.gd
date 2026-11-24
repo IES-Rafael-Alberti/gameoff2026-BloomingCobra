@@ -1,6 +1,7 @@
 extends Node
 
 ## Close-range circular AoE with a short windup.
+## Plays rotate_attack with resting overlay in the pre-attack facing.
 
 @export var trigger_distance: float = 42.0
 @export var windup_time: float = 0.45
@@ -35,6 +36,7 @@ func reset() -> void:
 	_timer = 0.0
 	_hit_ids.clear()
 	_set_area(false)
+	_clear_overlay()
 
 
 func is_busy() -> bool:
@@ -60,7 +62,9 @@ func physics_update(delta: float) -> bool:
 			return false
 		Phase.WINDUP:
 			_brain.get_enemy().velocity = Vector2.ZERO
-			# Animation already started in begin(); don't restart it each tick.
+			# Keep rotate + resting overlay without restarting the clip.
+			if _brain.has_method("play_rotate_attack"):
+				_brain.play_rotate_attack()
 			_timer -= delta
 			if _timer <= 0.0:
 				_phase = Phase.ACTIVE
@@ -69,9 +73,12 @@ func physics_update(delta: float) -> bool:
 			return true
 		Phase.ACTIVE:
 			_brain.get_enemy().velocity = Vector2.ZERO
+			if _brain.has_method("play_rotate_attack"):
+				_brain.play_rotate_attack()
 			_timer -= delta
 			if _timer <= 0.0:
 				_set_area(false)
+				_clear_overlay()
 				_phase = Phase.COOLDOWN
 				_timer = cooldown
 			return true
@@ -81,6 +88,11 @@ func physics_update(delta: float) -> bool:
 				_phase = Phase.IDLE
 			return false
 	return false
+
+
+func _clear_overlay() -> void:
+	if _brain != null and _brain.has_method("clear_rotate_attack_overlay"):
+		_brain.clear_rotate_attack_overlay()
 
 
 func _set_area(enabled: bool) -> void:

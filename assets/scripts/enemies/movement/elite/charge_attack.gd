@@ -1,16 +1,19 @@
 extends Node
 
 ## Slow approach → windup → accelerating dash with fixed travel time → done.
+## Charge clips: windup frames first, last frame held while dashing.
 
-@export var approach_speed: float = 28.0
 ## Only charge in this band so close range can use the spin attack.
+## Keep below Elite detection_radius so the elite walks in before charging.
 @export var min_distance: float = 44.0
-@export var trigger_distance: float = 110.0
+@export var trigger_distance: float = 72.0
 @export var windup_time: float = 0.45
 @export var travel_time: float = 0.85
 @export var start_speed: float = 40.0
 @export var end_speed: float = 190.0
 @export var contact_damage: int = 1
+## Walk time after a charge before another dash can start.
+@export var cooldown: float = 1.75
 
 enum Phase { IDLE, WINDUP, DASH, DONE }
 
@@ -20,6 +23,7 @@ var _phase: Phase = Phase.IDLE
 var _timer: float = 0.0
 var _dash_dir: Vector2 = Vector2.DOWN
 var _hit_player: bool = false
+var _cooldown_left: float = 0.0
 
 
 func setup(brain: Node, hurtbox: Area2D) -> void:
@@ -40,6 +44,11 @@ func reset() -> void:
 	_timer = 0.0
 	_hit_player = false
 	_set_hurtbox(false)
+	# Keep _cooldown_left so aggressive re-entry after resting still walks.
+
+
+func tick_cooldown(delta: float) -> void:
+	_cooldown_left = maxf(_cooldown_left - delta, 0.0)
 
 
 func is_busy() -> bool:
@@ -49,6 +58,7 @@ func is_busy() -> bool:
 func can_trigger(distance: float) -> bool:
 	return (
 		_phase == Phase.IDLE
+		and _cooldown_left <= 0.0
 		and distance <= trigger_distance
 		and distance >= min_distance
 	)
@@ -61,7 +71,7 @@ func begin(to_player: Vector2) -> void:
 	_dash_dir = _cardinal(to_player)
 	_brain.set_facing(_dash_dir)
 	_brain.get_enemy().velocity = Vector2.ZERO
-	_brain.play_charge_anim(_dash_dir)
+	_brain.play_charge_windup(_dash_dir)
 	_set_hurtbox(false)
 
 
@@ -73,10 +83,11 @@ func physics_update(delta: float, player: Node2D) -> bool:
 		Phase.WINDUP:
 			_brain.get_enemy().velocity = Vector2.ZERO
 			_timer -= delta
-			_brain.play_charge_anim(_dash_dir)
+			_brain.play_charge_windup(_dash_dir)
 			if _timer <= 0.0:
 				_phase = Phase.DASH
 				_timer = travel_time
+				_brain.play_charge_dash(_dash_dir)
 				_set_hurtbox(true)
 			return true
 		Phase.DASH:
@@ -86,7 +97,7 @@ func physics_update(delta: float, player: Node2D) -> bool:
 			var speed := lerpf(start_speed, end_speed, t * t)
 			_brain.get_enemy().velocity = _dash_dir * speed
 			_brain.set_facing(_dash_dir)
-			_brain.play_charge_anim(_dash_dir)
+			_brain.play_charge_dash(_dash_dir)
 			if _timer <= 0.0:
 				_finish()
 			return true
@@ -100,6 +111,7 @@ func _finish() -> void:
 	_set_hurtbox(false)
 	_brain.get_enemy().velocity = Vector2.ZERO
 	_phase = Phase.IDLE
+	_cooldown_left = cooldown
 	if _brain != null and _brain.has_method("on_charge_finished"):
 		_brain.on_charge_finished()
 

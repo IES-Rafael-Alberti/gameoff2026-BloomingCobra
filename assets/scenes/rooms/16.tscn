@@ -28,20 +28,23 @@ tile_set = ExtResource("3_ylfcf")
 
 [node name="DoorOeste" parent="Switchable/Pesadilla" unique_id=268869019 instance=ExtResource("4_ylfcf")]
 position = Vector2(-162.745, -18)
-orientation = 3
+collision_layer = 8
 door_id = &"16O"
 target_room = "uid://dqm5wmuukt5yb"
 target_door_id = &"15E"
 starts_open = true
+orientation = 3
 
 [node name="DoorNorte" parent="Switchable/Pesadilla" unique_id=703991051 instance=ExtResource("4_ylfcf")]
 position = Vector2(21, -167.115)
+collision_layer = 8
 door_id = &"16N"
 target_room = "uid://bcqy01nkfeyn1"
 target_door_id = &"10S"
 starts_open = true
 
 [node name="Sueño" type="Node2D" parent="Switchable" unique_id=1018947006]
+visible = false
 
 [node name="Tiles" type="TileMapLayer" parent="Switchable/Sueño" unique_id=1715976387]
 position = Vector2(35.6, 6)
@@ -50,21 +53,28 @@ tile_map_data = PackedByteArray("AAD6//v/AAAAAAAAAAD7//v/AAABAAAAAAD8//v/AAABAAA
 tile_set = ExtResource("4_ng6g8")
 
 [node name="DoorOeste" parent="Switchable/Sueño" unique_id=173168588 instance=ExtResource("6_ng6g8")]
+process_mode = 3
 position = Vector2(-163, -18)
-orientation = 3
+disable_mode = 2
+collision_layer = 8
 door_id = &"16O"
 target_room = "uid://dqm5wmuukt5yb"
 target_door_id = &"15E"
 starts_open = true
+orientation = 3
 
 [node name="DoorNorte" parent="Switchable/Sueño" unique_id=26908483 instance=ExtResource("6_ng6g8")]
+process_mode = 3
 position = Vector2(21, -167)
+disable_mode = 2
+collision_layer = 8
 door_id = &"16N"
 target_room = "uid://bcqy01nkfeyn1"
 target_door_id = &"10S"
 starts_open = true
 
 [node name="Walls" type="StaticBody2D" parent="." unique_id=1872382948]
+visible = false
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Walls" unique_id=1275960346]
 position = Vector2(-70, -182)
