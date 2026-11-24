@@ -6,6 +6,7 @@
 [ext_resource type="Texture2D" uid="uid://cg5imfc1dibyg" path="res://assets/sprittesheets/HUD/definitivo/maintittle_reference.jpg" id="3_rwffj"]
 [ext_resource type="Texture2D" uid="uid://dffgiumb4t8ee" path="res://assets/sprittesheets/HUD/definitivo/colgante_inicio_1.png" id="4_xrb2t"]
 [ext_resource type="FontFile" uid="uid://brnbuey8wndyf" path="res://assets/fonts/MagicalNeverlandRegular-JpRZ7.ttf" id="5_7bbcu"]
+[ext_resource type="Shader" uid="uid://cakt1hdgucsv2" path="res://assets/shaders/logo_blanco.gdshader" id="5_ae2ix"]
 [ext_resource type="Texture2D" uid="uid://gey8axtdsxaw" path="res://assets/sprittesheets/HUD/definitivo/colgante_inicio_2.png" id="5_bffep"]
 [ext_resource type="Texture2D" uid="uid://jc3hfx67tbte" path="res://assets/sprittesheets/HUD/definitivo/Seleccionador.png" id="5_selector"]
 [ext_resource type="Texture2D" uid="uid://dufkotctkb71e" path="res://assets/sprittesheets/HUD/definitivo/colgante_inicio_3.png" id="6_7bbcu"]
@@ -13,6 +14,20 @@
 [ext_resource type="Texture2D" uid="uid://cwj8ea7couom" path="res://assets/sprittesheets/HUD/definitivo/colgante_inicio_4.png" id="7_ae2ix"]
 [ext_resource type="Texture2D" uid="uid://c4d05jvrqslpi" path="res://assets/sprittesheets/HUD/definitivo/colgante_inicio_5.png" id="8_1rvki"]
 [ext_resource type="Texture2D" uid="uid://bwo6eb6on3uyh" path="res://assets/sprittesheets/HUD/definitivo/colgante_inicio_6.png" id="9_1481d"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_7bbcu"]
+shader = ExtResource("5_ae2ix")
+shader_parameter/tint_color = Color(1, 1, 1, 1)
+shader_parameter/intensity = 1.0
+shader_parameter/sheet_frames = Vector2(1, 1)
+shader_parameter/dissolve = 0.2370000112575
+shader_parameter/noise_scale = 5.2630001549925005
+shader_parameter/warp = 1.0
+shader_parameter/sweep = 0.0
+shader_parameter/sweep_angle = 1.5708
+shader_parameter/edge_width = 0.25
+shader_parameter/edge_color = Color(1, 1, 1, 1)
+shader_parameter/edge_hot = Color(1, 1, 1, 1)
 
 [node name="MainMenu" type="Control" unique_id=1842389175]
 layout_mode = 3
@@ -40,8 +55,7 @@ texture = ExtResource("2_bg")
 expand_mode = 1
 
 [node name="MaintittleReference" type="Sprite2D" parent="Background" unique_id=312124993]
-visible = false
-modulate = Color(1, 1, 1, 0.2509804)
+modulate = Color(1, 1, 1, 0.16470589)
 position = Vector2(576.33325, 324.25)
 scale = Vector2(0.600463, 0.6004629)
 texture = ExtResource("3_rwffj")
@@ -52,19 +66,33 @@ offset_right = 40.0
 offset_bottom = 40.0
 
 [node name="Logo" type="TextureRect" parent="Welcome title" unique_id=117667643]
+visible = false
 layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = 267.00003
-offset_top = 51.0
-offset_right = 948.81836
-offset_bottom = 512.36383
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 278.00003
+offset_top = 65.00001
+offset_right = 985.6194
+offset_bottom = 562.7274
 grow_horizontal = 2
-grow_vertical = 2
-scale = Vector2(0.8799999, 0.8799999)
+scale = Vector2(0.83999956, 0.83999956)
+mouse_filter = 2
+texture = ExtResource("3_logo")
+expand_mode = 1
+stretch_mode = 4
+
+[node name="Logoblanco" type="TextureRect" parent="Welcome title" unique_id=430522782]
+texture_filter = 2
+material = SubResource("ShaderMaterial_7bbcu")
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 278.00003
+offset_top = 65.00001
+offset_right = 985.6194
+offset_bottom = 562.7274
+grow_horizontal = 2
+scale = Vector2(0.83999956, 0.83999956)
 mouse_filter = 2
 texture = ExtResource("3_logo")
 expand_mode = 1

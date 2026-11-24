@@ -84,15 +84,17 @@ func _input(event: InputEvent) -> void:
 func _play_intro() -> void:
 	await get_tree().process_frame
 	
+	await get_tree().create_timer(2).timeout
+	
 	#await get_tree().create_timer(5).timeout
 	var fade_welcome := create_tween()
 	fade_welcome.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	fade_welcome.tween_property(_welcome, "modulate:a", 1.0, 3.0)
+	fade_welcome.tween_property(_welcome, "modulate:a", 1.0, 5.0)
 	await fade_welcome.finished
 
 	var fade_welcome_text := create_tween()
 	fade_welcome_text.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	fade_welcome_text.tween_property(_welcome_text, "modulate:a", 1.0, 0.25)
+	fade_welcome_text.tween_property(_welcome_text, "modulate:a", 1.0, 0.5)
 	await fade_welcome_text.finished
 	
 	# wait for key pressed
