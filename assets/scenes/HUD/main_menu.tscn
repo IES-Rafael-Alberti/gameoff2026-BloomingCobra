@@ -21,13 +21,50 @@ shader_parameter/tint_color = Color(1, 1, 1, 1)
 shader_parameter/intensity = 0.0
 shader_parameter/sheet_frames = Vector2(1, 1)
 shader_parameter/dissolve = 0.0
-shader_parameter/noise_scale = 32.1950014342625
-shader_parameter/warp = 1.0
-shader_parameter/sweep = 0.0
-shader_parameter/sweep_angle = 1.5708
-shader_parameter/edge_width = 0.25
+shader_parameter/noise_scale = 23.766001033885
+shader_parameter/warp = 0.0
+shader_parameter/sweep = 0.198000009405
+shader_parameter/sweep_angle = -0.56259977106745
+shader_parameter/edge_width = 0.0
 shader_parameter/edge_color = Color(1, 1, 1, 1)
 shader_parameter/edge_hot = Color(1, 1, 1, 1)
+
+[sub_resource type="Animation" id="Animation_7bbcu"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(1, 494)]
+}
+
+[sub_resource type="Animation" id="Animation_ae2ix"]
+resource_name = "balanceo"
+loop_mode = 2
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(1, 494), Vector2(1, 500)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_1rvki"]
+_data = {
+&"RESET": SubResource("Animation_7bbcu"),
+&"balanceo": SubResource("Animation_ae2ix")
+}
 
 [node name="MainMenu" type="Control" unique_id=1842389175]
 layout_mode = 3
@@ -106,17 +143,21 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -11.0
-offset_top = 482.0
-offset_right = 1138.0
-offset_bottom = 538.0
+offset_left = -19.0
+offset_top = 474.0
+offset_right = 1133.0
+offset_bottom = 530.0038
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_fonts/font = ExtResource("5_7bbcu")
-theme_override_font_sizes/font_size = 48
-text = "Press any key"
+theme_override_font_sizes/font_size = 38
+text = "Press any button"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="Balanceo" type="AnimationPlayer" parent="Welcome title/Label" unique_id=599546459]
+libraries/ = SubResource("AnimationLibrary_1rvki")
+autoplay = &"balanceo"
 
 [node name="UI" type="Control" parent="." unique_id=1641608196]
 layout_mode = 1
