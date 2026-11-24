@@ -30,27 +30,30 @@ tile_set = ExtResource("3_geaiu")
 
 [node name="DoorOeste" parent="Switchable/Pesadilla" unique_id=268869019 instance=ExtResource("4_geaiu")]
 position = Vector2(-162.745, -18)
-orientation = 3
+collision_layer = 8
 door_id = &"4O"
 target_room = "uid://dsu4ceiblws3x"
 target_door_id = &"3E"
 starts_open = true
+orientation = 3
 
 [node name="DoorEste" parent="Switchable/Pesadilla" unique_id=1754255394 instance=ExtResource("4_geaiu")]
 position = Vector2(198.415, -18)
-orientation = 1
+collision_layer = 8
 door_id = &"4E"
 target_room = "uid://bwkaa8ycbdfuy"
 target_door_id = &"5O1"
 starts_open = true
+orientation = 1
 
 [node name="DoorSur" parent="Switchable/Pesadilla" unique_id=118426188 instance=ExtResource("4_geaiu")]
 position = Vector2(21, 136)
-orientation = 2
+collision_layer = 8
 door_id = &"4S"
 target_room = "uid://coibogjaxjonl"
 target_door_id = &"9N"
 starts_open = true
+orientation = 2
 
 [node name="BarreraPesadilla" type="TileMapLayer" parent="Switchable/Pesadilla" unique_id=1043736227]
 scale = Vector2(0.3, 0.3)
@@ -66,28 +69,37 @@ tile_map_data = PackedByteArray("AAD6//v/AAAAAAAAAAD7//v/AAABAAAAAAD8//v/AAABAAA
 tile_set = ExtResource("4_1gwah")
 
 [node name="DoorOeste" parent="Switchable/Sueño" unique_id=173168588 instance=ExtResource("6_1gwah")]
+process_mode = 3
 position = Vector2(-163, -18)
-orientation = 3
+disable_mode = 2
+collision_layer = 8
 door_id = &"4O"
 target_room = "uid://dsu4ceiblws3x"
 target_door_id = &"3E"
 starts_open = true
+orientation = 3
 
 [node name="DoorEste" parent="Switchable/Sueño" unique_id=1497967749 instance=ExtResource("6_1gwah")]
+process_mode = 3
 position = Vector2(199, -18)
-orientation = 1
+disable_mode = 2
+collision_layer = 8
 door_id = &"4E"
 target_room = "uid://bwkaa8ycbdfuy"
 target_door_id = &"5O1"
 starts_open = true
+orientation = 1
 
 [node name="DoorSur" parent="Switchable/Sueño" unique_id=1242554514 instance=ExtResource("6_1gwah")]
+process_mode = 3
 position = Vector2(21, 136)
-orientation = 2
+disable_mode = 2
+collision_layer = 8
 door_id = &"4S"
 target_room = "uid://coibogjaxjonl"
 target_door_id = &"9N"
 starts_open = true
+orientation = 2
 
 [node name="BarreraVigila" type="TileMapLayer" parent="Switchable/Sueño" unique_id=500641600]
 tile_set = ExtResource("8_mpfgx")

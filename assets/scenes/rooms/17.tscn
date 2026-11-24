@@ -22,14 +22,16 @@ tile_set = ExtResource("4_l0d6y")
 
 [node name="DoorEste" parent="Switchable/Pesadilla" unique_id=268869019 instance=ExtResource("4_rihe3")]
 position = Vector2(198.415, -18)
-orientation = 1
+collision_layer = 8
 door_id = &"17E"
 target_room = "uid://ctawxi625peqa"
 target_door_id = &"13O2"
 starts_open = true
+orientation = 1
 
 [node name="DoorNorte" parent="Switchable/Pesadilla" unique_id=980627680 instance=ExtResource("4_rihe3")]
 position = Vector2(21, -167.115)
+collision_layer = 8
 door_id = &"17N"
 target_room = "uid://8jabqmbopiw5"
 target_door_id = &"11S"
@@ -45,21 +47,28 @@ tile_map_data = PackedByteArray("AAD9//v/AAAAAAAAAAD+//v/AAABAAAAAAD///v/AAABAAA
 tile_set = ExtResource("4_lb8lx")
 
 [node name="DoorEste" parent="Switchable/Sueño" unique_id=173168588 instance=ExtResource("6_p81wj")]
+process_mode = 3
 position = Vector2(199, -18)
-orientation = 1
+disable_mode = 2
+collision_layer = 8
 door_id = &"17E"
 target_room = "uid://ctawxi625peqa"
 target_door_id = &"13O2"
 starts_open = true
+orientation = 1
 
 [node name="DoorNorte" parent="Switchable/Sueño" unique_id=1218557529 instance=ExtResource("6_p81wj")]
+process_mode = 3
 position = Vector2(21, -167)
+disable_mode = 2
+collision_layer = 8
 door_id = &"17N"
 target_room = "uid://8jabqmbopiw5"
 target_door_id = &"11S"
 starts_open = true
 
 [node name="Walls" type="StaticBody2D" parent="." unique_id=1872382948]
+visible = false
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Walls" unique_id=840627076]
 polygon = PackedVector2Array(-148, -66, -185, -64, -182, 31, -149, 32, -146, 63, -106, 69, -106, 97, -69, 102, -69, 138, 102, 144, 102, 112, 135, 102, 135, 66, 177, 69, 179, 23, 215, 32, 214, -62, 179, -64, 182, -85, 243, -78, 234, 163, -259, 163, -255, -113, -138, -110, -137, -101)
