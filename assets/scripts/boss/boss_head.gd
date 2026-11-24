@@ -21,6 +21,10 @@ signal weakpoint_damaged(amount: int, current_health: int)
 @export var shift_burst_count: int = 5
 @export var shift_burst_speed: float = 130.0
 @export var projectile_scene: PackedScene
+@export_group("Hit Feedback")
+@export var hit_knockback: float = 40.0
+@export var hit_knockback_decay: float = 900.0
+@export var hit_flash_time: float = 0.14
 
 @onready var weakpoint: Area2D = get_node_or_null("Weakpoint") as Area2D
 @onready var weakpoint_shape: CollisionShape2D = get_node_or_null("Weakpoint/CollisionShape2D") as CollisionShape2D
@@ -36,12 +40,18 @@ var _weakpoint_exposed: bool = false
 var _laser_active: bool = false
 var _laser_hit_cd: float = 0.0
 var _projectiles_parent: Node = null
+var _knockback: Vector2 = Vector2.ZERO
+var _last_hit_origin: Vector2 = Vector2.ZERO
+var _has_hit_origin: bool = false
+var _flash_mat: ShaderMaterial
+var _hit_flash: float = 0.0
 
 
 func _ready() -> void:
 	super._ready()
 	# Head can be hit by player attacks while weakpoint is exposed.
 	add_to_group("enemy")
+	_setup_white_flash_material()
 	if damageable != null:
 		damageable.max_health = weakpoint_max_hp
 		damageable.health = weakpoint_max_hp
@@ -63,6 +73,10 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	super._physics_process(delta)
 	_laser_hit_cd = maxf(_laser_hit_cd - delta, 0.0)
+	_update_hit_flash(delta)
+	if _knockback.length() > 3.0:
+		global_position += _knockback * delta
+		_knockback = _knockback.move_toward(Vector2.ZERO, hit_knockback_decay * delta)
 	if _laser_active:
 		_tick_laser_damage()
 
@@ -109,11 +123,13 @@ func hide_weakpoint() -> void:
 
 
 ## Player attacks call this via the enemy group. Only lands while exposed.
-func try_receive_hit(amount: int, _hit_origin: Vector2) -> bool:
+func try_receive_hit(amount: int, hit_origin: Vector2) -> bool:
 	if not _weakpoint_exposed or amount <= 0:
 		return false
 	if damageable == null or not damageable.has_method("take_damage"):
 		return false
+	_last_hit_origin = hit_origin
+	_has_hit_origin = true
 	damageable.take_damage(amount)
 	return true
 
@@ -291,10 +307,66 @@ func fire_shift_burst() -> void:
 
 func _on_weakpoint_damaged(amount: int, current_health: int) -> void:
 	weakpoint_damaged.emit(amount, current_health)
+	_apply_hit_feedback()
+
+
+func _apply_hit_feedback() -> void:
+	var dir := _resolve_hit_knockback_dir()
+	if hit_knockback > 0.0 and dir != Vector2.ZERO:
+		_knockback = dir * hit_knockback
+	_play_hit_flash()
+
+
+func _resolve_hit_knockback_dir() -> Vector2:
+	if _has_hit_origin:
+		var away := global_position - _last_hit_origin
+		_has_hit_origin = false
+		if away != Vector2.ZERO:
+			return away.normalized()
+	var player := get_player()
+	if player != null:
+		var from_player := global_position - player.global_position
+		if from_player != Vector2.ZERO:
+			return from_player.normalized()
+	return Vector2.UP
+
+
+func _setup_white_flash_material() -> void:
+	if animated_sprite == null:
+		return
+	var shader := load("res://assets/shaders/white_flash.gdshader") as Shader
+	if shader == null:
+		return
+	_flash_mat = ShaderMaterial.new()
+	_flash_mat.shader = shader
+	_flash_mat.set_shader_parameter("flash", 0.0)
+	animated_sprite.material = _flash_mat
+
+
+func _play_hit_flash() -> void:
+	_hit_flash = maxf(hit_flash_time, 0.01)
+	_set_white_flash(1.0)
 	if animated_sprite != null:
-		var flash := create_tween()
-		flash.tween_property(animated_sprite, "modulate", Color(1.4, 0.6, 0.6), 0.05)
-		flash.tween_property(animated_sprite, "modulate", Color.WHITE, 0.12)
+		animated_sprite.modulate = Color(1.8, 1.8, 1.8, 1.0)
+
+
+func _set_white_flash(amount: float) -> void:
+	if _flash_mat == null:
+		return
+	_flash_mat.set_shader_parameter("flash", clampf(amount, 0.0, 1.0))
+
+
+func _update_hit_flash(delta: float) -> void:
+	if _hit_flash <= 0.0:
+		return
+	_hit_flash = maxf(_hit_flash - delta, 0.0)
+	var t := _hit_flash / maxf(hit_flash_time, 0.01)
+	_set_white_flash(t)
+	if animated_sprite != null:
+		if t <= 0.0:
+			animated_sprite.modulate = Color.WHITE
+		else:
+			animated_sprite.modulate = Color(1.0, 1.0, 1.0, 1.0).lerp(Color(1.8, 1.8, 1.8, 1.0), t)
 
 
 func _on_weakpoint_died() -> void:

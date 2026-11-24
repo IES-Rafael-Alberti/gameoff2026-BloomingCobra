@@ -6,7 +6,9 @@
 [ext_resource type="PackedScene" uid="uid://cb5rvks5i5aea" path="res://assets/scenes/props/vigilia/interactive/doorVigilia.tscn" id="4_door_v"]
 [ext_resource type="PackedScene" uid="uid://tvq6u6rrx621" path="res://assets/scenes/props/pesadilla/interactive/buttonPesadilla.tscn" id="5_btn_p"]
 [ext_resource type="PackedScene" uid="uid://cm16eeyma7gae" path="res://assets/scenes/props/vigilia/interactive/buttonVigilia.tscn" id="6_btn_v"]
-[ext_resource type="PackedScene" uid="uid://d0bcr6ctny2xs" path="res://assets/scenes/enemies/elite.tscn" id="7_jfa24"]
+[ext_resource type="PackedScene" uid="uid://dsapw6jvuy0uq" path="res://assets/scenes/enemies/divider_1.tscn" id="7_avt6d"]
+[ext_resource type="PackedScene" uid="uid://cbt3w2furilt1" path="res://assets/scenes/enemies/hunter.tscn" id="8_ea4t3"]
+[ext_resource type="PackedScene" uid="uid://biqe6ous6m14k" path="res://assets/scenes/enemies/roamer.tscn" id="9_j686y"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wall_h"]
 size = Vector2(150, 24)
@@ -131,5 +133,11 @@ shape = SubResource("RectangleShape2D_wall_v")
 [node name="Spawn" type="Marker2D" parent="." unique_id=1948255777]
 position = Vector2(0, -20)
 
-[node name="Elite" parent="." unique_id=1480324047 instance=ExtResource("7_jfa24")]
-position = Vector2(89, -23)
+[node name="Divider_1" parent="." unique_id=1299799807 instance=ExtResource("7_avt6d")]
+position = Vector2(-103, -37)
+
+[node name="Hunter" parent="." unique_id=1191328024 instance=ExtResource("8_ea4t3")]
+position = Vector2(-46, -43)
+
+[node name="Roamer" parent="." unique_id=632087891 instance=ExtResource("9_j686y")]
+position = Vector2(-94, 22)

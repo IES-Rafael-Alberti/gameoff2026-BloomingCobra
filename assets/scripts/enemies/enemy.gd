@@ -19,6 +19,14 @@ extends CharacterBody2D
 ## Alpha fade after death (and optional death clip) before freeing.
 @export var death_fade_time: float = 0.55
 
+@export_group("Hit Feedback")
+## Knockback applied when this enemy takes a hit.
+@export var hit_knockback: float = 90.0
+## Elite resists knockback (multiplies hit_knockback).
+@export var elite_knockback_scale: float = 0.4
+@export var hit_knockback_decay: float = 900.0
+@export var hit_flash_time: float = 0.12
+
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var damageable: Node2D = $Damageable
 @onready var switchable: Node2D = $Switchable
@@ -32,6 +40,11 @@ var _hurtboxes: Array[Area2D] = []
 var _hurt_lock: float = 0.0
 var _hurt_facing: Vector2 = Vector2.DOWN
 var _dying: bool = false
+var _knockback: Vector2 = Vector2.ZERO
+var _last_hit_origin: Vector2 = Vector2.ZERO
+var _has_hit_origin: bool = false
+var _flash_mat: ShaderMaterial
+var _hit_flash: float = 0.0
 
 
 func _ready() -> void:
@@ -46,6 +59,7 @@ func _ready() -> void:
 	if _movement and _movement.has_method("setup"):
 		_movement.setup(self)
 	_apply_stats()
+	_setup_white_flash_material()
 	if damageable.has_signal("died"):
 		damageable.died.connect(_on_died)
 	if damageable.has_signal("damaged"):
@@ -114,11 +128,23 @@ func _push_detection_to_idle(idle: Node) -> void:
 
 
 func _physics_process(delta: float) -> void:
+	_update_hit_flash(delta)
 	if _dying:
-		velocity = Vector2.ZERO
+		if _knockback.length() > 5.0:
+			velocity = _knockback
+			_knockback = _knockback.move_toward(Vector2.ZERO, hit_knockback_decay * delta)
+		else:
+			velocity = Vector2.ZERO
 		move_and_slide()
 		return
 	_contact_cd = maxf(_contact_cd - delta, 0.0)
+	if _knockback.length() > 5.0:
+		velocity = _knockback
+		_knockback = _knockback.move_toward(Vector2.ZERO, hit_knockback_decay * delta)
+		if _hurt_lock > 0.0:
+			_hurt_lock = maxf(_hurt_lock - delta, 0.0)
+		move_and_slide()
+		return
 	if _hurt_lock > 0.0:
 		_hurt_lock = maxf(_hurt_lock - delta, 0.0)
 		velocity = Vector2.ZERO
@@ -291,29 +317,40 @@ func deal_player_hit(player: Node2D, amount: int = -1, knockback_force: float = 
 
 ## Optional elite/shielded hit hook. Falls back to flat damage.
 func try_receive_hit(amount: int, hit_origin: Vector2) -> bool:
+	_remember_hit_origin(hit_origin)
 	if _movement != null and _movement.has_method("try_receive_hit"):
-		return bool(_movement.call("try_receive_hit", amount, hit_origin))
+		var landed := bool(_movement.call("try_receive_hit", amount, hit_origin))
+		if not landed:
+			_has_hit_origin = false
+		return landed
 	if damageable != null and damageable.has_method("take_damage"):
 		var toward := hit_origin - global_position
 		if toward != Vector2.ZERO:
 			_hurt_facing = _cardinal_from(toward)
 		damageable.take_damage(amount)
 		return true
+	_has_hit_origin = false
 	return false
 
 
 func _on_damaged(_amount: int, _current_health: int) -> void:
-	# Elite already owns its hurt feedback.
-	if get_node_or_null("Elite") != null:
-		return
 	var divisible := get_node_or_null("Dividisible")
-	if divisible != null and divisible.has_method("is_splitting") and bool(divisible.call("is_splitting")):
+	var splitting := (
+		divisible != null
+		and divisible.has_method("is_splitting")
+		and bool(divisible.call("is_splitting"))
+	)
+	if not splitting:
+		_apply_hit_feedback()
+	# Elite has no hurt clip — flash/knockback is the feedback.
+	if get_node_or_null("Elite") != null or splitting:
 		return
 	_trigger_hurt_anim()
 
 
 func clear_hurt_lock() -> void:
 	_hurt_lock = 0.0
+	_knockback = Vector2.ZERO
 
 
 func _trigger_hurt_anim() -> void:
@@ -441,6 +478,75 @@ func _configure_area_tree(node: Node) -> void:
 		_configure_area_tree(child)
 
 
+func _remember_hit_origin(hit_origin: Vector2) -> void:
+	_last_hit_origin = hit_origin
+	_has_hit_origin = true
+
+
+func _apply_hit_feedback() -> void:
+	var dir := _resolve_hit_knockback_dir()
+	var force := hit_knockback
+	if get_node_or_null("Elite") != null:
+		force *= elite_knockback_scale
+	if force > 0.0 and dir != Vector2.ZERO:
+		_knockback = dir * force
+	_play_hit_flash()
+
+
+func _resolve_hit_knockback_dir() -> Vector2:
+	if _has_hit_origin:
+		var away := global_position - _last_hit_origin
+		_has_hit_origin = false
+		if away != Vector2.ZERO:
+			return away.normalized()
+	var player := get_player()
+	if player != null:
+		var from_player := global_position - player.global_position
+		if from_player != Vector2.ZERO:
+			return from_player.normalized()
+	if _hurt_facing != Vector2.ZERO:
+		return -_hurt_facing
+	return Vector2.UP
+
+
+func _setup_white_flash_material() -> void:
+	if animated_sprite == null:
+		return
+	var shader := load("res://assets/shaders/white_flash.gdshader") as Shader
+	if shader == null:
+		return
+	_flash_mat = ShaderMaterial.new()
+	_flash_mat.shader = shader
+	_flash_mat.set_shader_parameter("flash", 0.0)
+	animated_sprite.material = _flash_mat
+
+
+func _play_hit_flash() -> void:
+	_hit_flash = maxf(hit_flash_time, 0.01)
+	_set_white_flash(1.0)
+	if animated_sprite != null:
+		animated_sprite.modulate = Color(1.8, 1.8, 1.8, 1.0)
+
+
+func _set_white_flash(amount: float) -> void:
+	if _flash_mat == null:
+		return
+	_flash_mat.set_shader_parameter("flash", clampf(amount, 0.0, 1.0))
+
+
+func _update_hit_flash(delta: float) -> void:
+	if _hit_flash <= 0.0:
+		return
+	_hit_flash = maxf(_hit_flash - delta, 0.0)
+	var t := _hit_flash / maxf(hit_flash_time, 0.01)
+	_set_white_flash(t)
+	if animated_sprite != null:
+		if t <= 0.0:
+			animated_sprite.modulate = Color.WHITE
+		else:
+			animated_sprite.modulate = Color(1.0, 1.0, 1.0, 1.0).lerp(Color(1.8, 1.8, 1.8, 1.0), t)
+
+
 func _on_died() -> void:
 	if _dying:
 		return
@@ -448,7 +554,7 @@ func _on_died() -> void:
 	_active = false
 	_attacking = false
 	_hurt_lock = 999.0
-	velocity = Vector2.ZERO
+	# Keep hit flash / residual knockback from the killing blow.
 	_set_hitboxes_enabled(false)
 	if sfx != null and sfx.has_method("stop_all"):
 		sfx.call("stop_all")
@@ -458,6 +564,8 @@ func _on_died() -> void:
 	var played_death := _play_death_animation()
 	var fade := create_tween()
 	fade.set_parallel(false)
+	# Let the kill-hit flash read before the corpse fades out.
+	fade.tween_interval(hit_flash_time * 0.55)
 	fade.tween_property(self, "modulate:a", 0.0, maxf(death_fade_time, 0.05))
 
 	if played_death and animated_sprite != null:
