@@ -28,7 +28,7 @@ tile_set = ExtResource("3_hfbph")
 
 [node name="DoorEste" parent="Switchable/Pesadilla" unique_id=268869019 instance=ExtResource("4_hfbph")]
 position = Vector2(198.415, -18)
-rotation = 1.5707964
+orientation = 1
 door_id = &"12E"
 target_room = "uid://ctawxi625peqa"
 target_door_id = &"13O1"
@@ -51,7 +51,7 @@ tile_set = ExtResource("4_x71uq")
 
 [node name="DoorEste" parent="Switchable/Sueño" unique_id=173168588 instance=ExtResource("6_x71uq")]
 position = Vector2(199, -18)
-rotation = 1.5707964
+orientation = 1
 door_id = &"12E"
 target_room = "uid://ctawxi625peqa"
 target_door_id = &"13O1"

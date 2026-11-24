@@ -255,6 +255,7 @@ disabled = true
 
 [node name="Door2" type="StaticBody2D" parent="." unique_id=401503294]
 position = Vector2(-43, 153)
+orientation = 2
 script = ExtResource("3_door")
 door_id = &"south"
 target_room = "res://assets/scenes/rooms/boss/bossRoom.tscn"
@@ -267,6 +268,7 @@ disabled = true
 
 [node name="Door3" type="StaticBody2D" parent="." unique_id=501494015]
 position = Vector2(275, -28)
+orientation = 1
 script = ExtResource("3_door")
 door_id = &"east"
 target_room = "res://assets/scenes/rooms/habitacion_trampa.tscn"
@@ -279,6 +281,7 @@ disabled = true
 
 [node name="Door4" type="StaticBody2D" parent="." unique_id=1535132777]
 position = Vector2(-356, -24)
+orientation = 3
 script = ExtResource("3_door")
 door_id = &"west"
 target_room = "res://assets/scenes/rooms/habitacion_parkour.tscn"
