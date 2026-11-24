@@ -58,7 +58,7 @@ func _process(delta: float) -> void:
 		return
 	_heal_accumulator += heal_per_second * delta
 	if _heal_accumulator >= 1.0:
-		var amount := int(floor(_heal_accumulator))
+		var amount := floori(_heal_accumulator)
 		_heal_accumulator -= float(amount)
 		_apply_heal(amount)
 

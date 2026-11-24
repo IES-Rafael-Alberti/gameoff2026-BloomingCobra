@@ -7,7 +7,7 @@ extends Node2D
 @export var green_texture: Texture2D
 @export var half_texture: Texture2D
 @export var full_texture: Texture2D
-@export var offset: Vector2 = Vector2(0, -18)
+@export var bar_offset: Vector2 = Vector2(0, -18)
 ## When the half sprite appears (matches thrust unlock).
 @export var half_threshold: float = 0.5
 ## When the full green ("entera") sprite appears, before red at 1.0.
@@ -36,7 +36,7 @@ func _ready() -> void:
 	_green.z_index = 0
 	_full.z_index = 0
 
-	position = offset
+	position = bar_offset
 	hide_bar()
 
 

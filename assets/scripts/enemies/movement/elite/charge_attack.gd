@@ -75,7 +75,7 @@ func begin(to_player: Vector2) -> void:
 	_set_hurtbox(false)
 
 
-func physics_update(delta: float, player: Node2D) -> bool:
+func physics_update(delta: float, _player: Node2D) -> bool:
 	## Returns true while this attack owns the elite.
 	match _phase:
 		Phase.IDLE:

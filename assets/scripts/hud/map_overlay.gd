@@ -385,7 +385,6 @@ func _rebuild_icons() -> void:
 	if discovered_texture != null:
 		base_tex_size = Vector2(discovered_texture.get_width(), discovered_texture.get_height())
 	var icon_size := base_tex_size * icon_scale
-	var start_size := icon_size * start_room_scale
 	var step := icon_size + Vector2(cell_gap, cell_gap)
 
 	# Local visuals per room, then center content.
@@ -405,15 +404,15 @@ func _rebuild_icons() -> void:
 			has_content = true
 
 	var vp := get_viewport().get_visible_rect().size
-	var offset := (vp - content.size) * 0.5 - content.position
-	offset = Vector2(roundf(offset.x), roundf(offset.y))
+	var map_offset := (vp - content.size) * 0.5 - content.position
+	map_offset = Vector2(roundf(map_offset.x), roundf(map_offset.y))
 
-	_layout_panel_to_grid(content.position + offset, content.size)
+	_layout_panel_to_grid(content.position + map_offset, content.size)
 
 	var current_id := _find_current_room_id()
 	var marker_points: Dictionary = {} # room_id -> Vector2 screen center for marker
 
-	_draw_connectors(visible_ids, offset, min_g, icon_size, step)
+	_draw_connectors(visible_ids, map_offset, min_g, icon_size, step)
 
 	for id in visible_ids:
 		var visual: Dictionary = local_visuals[id]
@@ -426,7 +425,7 @@ func _rebuild_icons() -> void:
 			var poly: PackedVector2Array = visual["polygon"]
 			var shifted := PackedVector2Array()
 			for p in poly:
-				shifted.append(p + offset)
+				shifted.append(p + map_offset)
 			var icon := _make_polygon_room_icon(shifted, is_current)
 			_rooms_layer.add_child(icon)
 			icons.append(icon)
@@ -434,12 +433,12 @@ func _rebuild_icons() -> void:
 			var parts: Array = visual.get("rects", [])
 			for part in parts:
 				var rect: Rect2 = part
-				var icon := _make_room_icon(rect.position + offset, rect.size, tex, is_current)
+				var icon := _make_room_icon(rect.position + map_offset, rect.size, tex, is_current)
 				_rooms_layer.add_child(icon)
 				icons.append(icon)
 		_icons[id] = icons
 		var marker_local: Vector2 = visual.get("marker", (visual["bounds"] as Rect2).get_center())
-		marker_points[id] = marker_local + offset
+		marker_points[id] = marker_local + map_offset
 
 	_place_player_marker(current_id, marker_points)
 
@@ -557,7 +556,7 @@ func _scale_visual_around_center(visual: Dictionary, scale_factor: float) -> Dic
 	return out
 
 
-func _make_room_icon(pos: Vector2, size: Vector2, tex: Texture2D, is_current: bool) -> Control:
+func _make_room_icon(pos: Vector2, icon_size: Vector2, tex: Texture2D, is_current: bool) -> Control:
 	# NinePatch keeps the 1px art border from scaling into thick slabs on tall/wide icons.
 	var icon := NinePatchRect.new()
 	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -568,8 +567,8 @@ func _make_room_icon(pos: Vector2, size: Vector2, tex: Texture2D, is_current: bo
 	icon.patch_margin_top = slice
 	icon.patch_margin_right = slice
 	icon.patch_margin_bottom = slice
-	icon.custom_minimum_size = size
-	icon.size = size
+	icon.custom_minimum_size = icon_size
+	icon.size = icon_size
 	icon.position = Vector2(roundf(pos.x), roundf(pos.y))
 	if is_current:
 		icon.modulate = current_modulate

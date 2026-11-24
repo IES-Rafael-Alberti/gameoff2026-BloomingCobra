@@ -143,17 +143,17 @@ func _slab_size(closed_size: Vector2, orientation: int, span_mul: float, depth: 
 	return Vector2(maxf(closed_size.x * span_mul, 8.0), maxf(depth, 4.0))
 
 
-func _apply_body_shape(door: StaticBody2D, size: Vector2) -> void:
+func _apply_body_shape(door: StaticBody2D, shape_size: Vector2) -> void:
 	var shape_node := door.get_node_or_null("CollisionShape2D") as CollisionShape2D
 	if shape_node == null:
 		return
 	var rect := RectangleShape2D.new()
-	rect.size = size
+	rect.size = shape_size
 	shape_node.shape = rect
 	shape_node.position = Vector2.ZERO
 
 
-func _apply_trigger_shape(door: StaticBody2D, size: Vector2) -> void:
+func _apply_trigger_shape(door: StaticBody2D, shape_size: Vector2) -> void:
 	var trigger := door.get_node_or_null("Trigger") as Area2D
 	if trigger == null:
 		return
@@ -161,7 +161,7 @@ func _apply_trigger_shape(door: StaticBody2D, size: Vector2) -> void:
 	if shape_node == null:
 		return
 	var rect := RectangleShape2D.new()
-	rect.size = size
+	rect.size = shape_size
 	shape_node.shape = rect
 	shape_node.position = Vector2.ZERO
 

@@ -13,7 +13,7 @@ enum Mode {
 
 const MODE_COUNT := 3
 
-@export var mode: Mode = Mode.FIXED:
+@export var mode: Mode = Mode.FOLLOW:
 	set(value):
 		if mode == value:
 			return
@@ -152,10 +152,10 @@ func _apply_bounds(room: Room) -> void:
 	var half_view := _half_view_extents()
 	var cam_limits := bounds.grow_individual(half_view.x, half_view.y, half_view.x, half_view.y)
 	limit_enabled = true
-	limit_left = int(floor(cam_limits.position.x))
-	limit_top = int(floor(cam_limits.position.y))
-	limit_right = int(ceil(cam_limits.end.x))
-	limit_bottom = int(ceil(cam_limits.end.y))
+	limit_left = floori(cam_limits.position.x)
+	limit_top = floori(cam_limits.position.y)
+	limit_right = ceili(cam_limits.end.x)
+	limit_bottom = ceili(cam_limits.end.y)
 
 
 func _half_view_extents() -> Vector2:

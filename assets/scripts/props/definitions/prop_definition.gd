@@ -44,8 +44,8 @@ func apply_collision_shape(shape_node: CollisionShape2D) -> void:
 
 func _make_placeholder_texture() -> Texture2D:
 	var img := Image.create(
-		maxi(int(collision_size.x), 8),
-		maxi(int(collision_size.y), 8),
+		maxi(roundi(collision_size.x), 8),
+		maxi(roundi(collision_size.y), 8),
 		false,
 		Image.FORMAT_RGBA8
 	)

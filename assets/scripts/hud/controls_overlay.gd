@@ -302,10 +302,10 @@ func _build_ui() -> void:
 	_root.add_child(_hint_label)
 
 
-func _apply_font(label: Label, size: int) -> void:
+func _apply_font(label: Label, point_size: int) -> void:
 	if _menu_font != null:
 		label.add_theme_font_override("font", _menu_font)
-	label.add_theme_font_size_override("font_size", size)
+	label.add_theme_font_size_override("font_size", point_size)
 	label.add_theme_color_override("font_color", text_color)
 
 
@@ -322,7 +322,7 @@ func _fit_panel() -> void:
 	var panel_w := minf(available_w, 520.0)
 
 	var scale := clampf(available_h / 640.0, 0.7, 1.0)
-	font_size = maxi(int(round(float(_base_font_size) * scale)), 14)
+	font_size = maxi(roundi(float(_base_font_size) * scale), 14)
 	_apply_responsive_fonts()
 
 	# Measure real row-list height, then shrink the panel around it.

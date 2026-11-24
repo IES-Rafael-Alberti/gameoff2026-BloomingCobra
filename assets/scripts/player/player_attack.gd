@@ -429,9 +429,9 @@ func _make_projectile_sprite_frames(textures: Array[Texture2D]) -> SpriteFrames:
 
 func _slice_sheet(sheet: Texture2D, frame_size: Vector2i, indices: PackedInt32Array) -> Array[Texture2D]:
 	var out: Array[Texture2D] = []
-	var size := sheet.get_size()
-	var cols := maxi(int(size.x) / frame_size.x, 1)
-	var rows := maxi(int(size.y) / frame_size.y, 1)
+	var sheet_size := sheet.get_size()
+	var cols := maxi(floori(sheet_size.x / float(frame_size.x)), 1)
+	var rows := maxi(floori(sheet_size.y / float(frame_size.y)), 1)
 	var total := cols * rows
 
 	var order: PackedInt32Array = indices
@@ -444,7 +444,7 @@ func _slice_sheet(sheet: Texture2D, frame_size: Vector2i, indices: PackedInt32Ar
 		if idx < 0 or idx >= total:
 			continue
 		var col := idx % cols
-		var row := idx / cols
+		var row := int(idx / float(cols))
 		var atlas := AtlasTexture.new()
 		atlas.atlas = sheet
 		atlas.region = Rect2(col * frame_size.x, row * frame_size.y, frame_size.x, frame_size.y)

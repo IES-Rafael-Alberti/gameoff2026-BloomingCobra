@@ -279,8 +279,8 @@ func _resolve_diagonal_anim(prefix: String, direction: Vector2, frames: SpriteFr
 	else:
 		candidates = PackedStringArray(["%s_downLeft" % prefix, "%s_down_left" % prefix])
 
-	for name in candidates:
-		var anim := StringName(name)
+	for anim_key in candidates:
+		var anim := StringName(anim_key)
 		if frames.has_animation(anim):
 			animated_sprite.flip_h = false
 			return anim
