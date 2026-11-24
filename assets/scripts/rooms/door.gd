@@ -1,9 +1,12 @@
+@tool
 class_name Door
 extends StaticBody2D
 
 ## Drag-drop door prop. Collision when closed, Trigger Area when open,
 ## sprite swaps between closed/open. Place under Switchable/Pesadilla or
 ## Switchable/Sueño for mode-scoped doors (like other props).
+##
+## Orientation is set on this node; [DoorVisual] updates sprite, collision and spawn.
 
 ## Layer bits (1-based Godot layers):
 ## 1 world, 2 player, 3 enemy, 4 door_enemy, 5 door_player
@@ -11,17 +14,33 @@ const LAYER_DOOR_ENEMY := 1 << 3
 const LAYER_DOOR_PLAYER := 1 << 4
 const LAYER_PLAYER := 1 << 1
 
+## North=0, East=1, South=2, West=3 (matches room instance overrides).
+const ORIENT_NORTH := 0
+const ORIENT_EAST := 1
+const ORIENT_SOUTH := 2
+const ORIENT_WEST := 3
+
 @export var door_id: StringName = &""
 ## Destination room scene path (use uid:// or res://). Empty = sealed barrier.
 @export_file("*.tscn") var target_room: String = ""
 ## Door id inside the destination room where the player should spawn.
 @export var target_door_id: StringName = &""
 @export var starts_open: bool = false
+## Facing of the doorway on the room wall. Updates sprite + collision via DoorVisual.
+@export_enum("North", "East", "South", "West") var orientation: int = ORIENT_NORTH:
+	get:
+		return _orientation
+	set(value):
+		_orientation = int(value)
+		if is_inside_tree():
+			_apply_orientation_layout()
+## Legacy fallbacks when DoorVisual has no oriented textures.
 @export var closed_texture: Texture2D
 @export var open_texture: Texture2D
 
 @onready var sprite: Sprite2D = get_node_or_null("Sprite2D") as Sprite2D
 
+var _orientation: int = ORIENT_NORTH
 var _open: bool = false
 var _trigger: Area2D = null
 var _spawn: Marker2D = null
@@ -52,7 +71,11 @@ func _ready() -> void:
 	_ensure_spawn()
 	_ensure_trigger()
 	_bind_switchable_mode()
-	set_open(starts_open)
+	if not Engine.is_editor_hint():
+		set_open(starts_open)
+	else:
+		_open = starts_open
+		_apply_orientation_layout()
 	# Switchable._ready runs after children; reconcile once mode roots are applied.
 	call_deferred("_apply_state")
 
@@ -90,6 +113,8 @@ func toggle_open() -> void:
 ## True when this door belongs to the active Switchable mode branch (or is not mode-scoped).
 ## Place doors under Switchable/Pesadilla or Switchable/Sueño like props to scope them.
 func is_mode_present() -> bool:
+	if Engine.is_editor_hint():
+		return true
 	if _switchable == null:
 		_switchable = _find_owning_switchable()
 	if _switchable == null:
@@ -104,6 +129,8 @@ func is_mode_present() -> bool:
 
 
 func _bind_switchable_mode() -> void:
+	if Engine.is_editor_hint():
+		return
 	_switchable = _find_owning_switchable()
 	if _switchable == null:
 		return
@@ -169,6 +196,22 @@ func _apply_state() -> void:
 
 
 func _update_visual() -> void:
+	_apply_orientation_layout()
+
+
+func _apply_orientation_layout() -> void:
+	var visual := _door_visual()
+	if visual != null and visual.has_oriented_art():
+		visual.apply(_orientation, _open)
+		return
+	_apply_legacy_textures()
+
+
+func _door_visual() -> DoorVisual:
+	return get_node_or_null("DoorVisual") as DoorVisual
+
+
+func _apply_legacy_textures() -> void:
 	if sprite == null:
 		sprite = get_node_or_null("Sprite2D") as Sprite2D
 	if sprite == null:
@@ -176,6 +219,7 @@ func _update_visual() -> void:
 	# Never force sprite.visible=false for mode hiding — Switchable already toggles the
 	# Pesadilla/Sueño parent. Doing so stuck Vigilia doors invisible after mode swaps.
 	sprite.visible = true
+	sprite.rotation = 0.0
 	var tex := open_texture if _open else closed_texture
 	if tex != null:
 		sprite.texture = tex
@@ -188,7 +232,10 @@ func _ensure_spawn() -> void:
 	_spawn = Marker2D.new()
 	_spawn.name = "Spawn"
 	add_child(_spawn)
-	# Default: a short step inward from the door collision center toward room origin.
+	var visual := _door_visual()
+	if visual != null and visual.has_oriented_art():
+		visual.apply(_orientation, _open)
+		return
 	var door_center := _collision_local_center()
 	var inward := -door_center.normalized() if door_center.length_squared() > 0.01 else Vector2.DOWN
 	_spawn.position = door_center + inward * 40.0
@@ -222,7 +269,7 @@ func _ensure_trigger() -> void:
 	_trigger.process_mode = Node.PROCESS_MODE_ALWAYS
 	_trigger.disable_mode = CollisionObject2D.DISABLE_MODE_KEEP_ACTIVE
 
-	if not _trigger.body_entered.is_connected(_on_trigger_body_entered):
+	if not Engine.is_editor_hint() and not _trigger.body_entered.is_connected(_on_trigger_body_entered):
 		_trigger.body_entered.connect(_on_trigger_body_entered)
 
 

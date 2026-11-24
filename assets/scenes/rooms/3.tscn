@@ -1,7 +1,16 @@
 [gd_scene format=4 uid="uid://dsu4ceiblws3x"]
 
 [ext_resource type="Script" uid="uid://bnjkxhgyfy8mc" path="res://assets/scripts/rooms/safe.gd" id="1_qqynm"]
+[ext_resource type="PackedScene" uid="uid://cy3nwj5nh10n6" path="res://assets/scenes/props/pesadilla/static/decorative/bottles.tscn" id="3_0mflr"]
+[ext_resource type="PackedScene" uid="uid://6y0erdtevyf" path="res://assets/scenes/props/pesadilla/static/decorative/cans.tscn" id="4_ligiw"]
+[ext_resource type="PackedScene" uid="uid://qt0m0d8adih7" path="res://assets/scenes/props/pesadilla/static/decorative/cone.tscn" id="5_cbomv"]
 [ext_resource type="Texture2D" uid="uid://bofmusj07iwon" path="res://assets/scenary/tilesetsafezoneRed.png" id="5_qqynm"]
+[ext_resource type="PackedScene" uid="uid://cgaraabnaw6lh" path="res://assets/scenes/props/vigilia/static/spikesVigilia.tscn" id="6_4na3a"]
+[ext_resource type="PackedScene" uid="uid://cak7kwxdxkomd" path="res://assets/scenes/props/vigilia/static/breakable/box1.tscn" id="7_1p2ha"]
+[ext_resource type="PackedScene" uid="uid://bv020hxmjok3d" path="res://assets/scenes/props/vigilia/static/breakable/box2.tscn" id="8_t683u"]
+[ext_resource type="PackedScene" uid="uid://coi0agnps2itj" path="res://assets/scenes/props/vigilia/static/decorative/bubbles.tscn" id="9_cbomv"]
+[ext_resource type="PackedScene" uid="uid://cqj1w0hug8op2" path="res://assets/scenes/props/vigilia/static/decorative/stars.tscn" id="10_4na3a"]
+[ext_resource type="PackedScene" path="res://assets/scenes/props/vigilia/dynamic/pusher_prop.tscn" id="11_4na3a"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_75ji7"]
 texture = ExtResource("5_qqynm")
@@ -63,6 +72,15 @@ scale = Vector2(0.3, 0.3)
 tile_map_data = PackedByteArray("AAD6//v/AAAAAAAAAAD7//v/AAABAAAAAAD8//v/AAABAAAAAAD9//v/AAABAAAAAAD+//v/AAABAAAAAAD///v/AAABAAAAAAAAAPv/AAABAAAAAAABAPv/AAABAAAAAAACAPv/AAABAAAAAAADAPv/AAABAAAAAAAEAPv/AAACAAAAAAD6//z/AAAAAAEAAAD6//3/AAAAAAEAAAD6//7/AAAAAAEAAAD6////AAAAAAEAAAD6/wAAAAAAAAEAAAD6/wEAAAAAAAEAAAD6/wIAAAAAAAEAAAD6/wMAAAAAAAIAAAD7/wMAAAABAAIAAAD8/wMAAAABAAIAAAD9/wMAAAABAAIAAAD+/wMAAAABAAIAAAD//wMAAAABAAIAAAAAAAMAAAABAAIAAAABAAMAAAABAAIAAAACAAMAAAABAAIAAAADAAMAAAABAAIAAAAEAAMAAAACAAIAAAAEAPz/AAACAAEAAAAEAP3/AAACAAEAAAAEAP7/AAACAAEAAAAEAP//AAACAAEAAAAEAAAAAAACAAEAAAAEAAEAAAACAAEAAAAEAAIAAAACAAEAAAD7//z/AAABAAEAAAD7//3/AAABAAEAAAD7//7/AAABAAEAAAD7////AAABAAEAAAD7/wAAAAABAAEAAAD7/wEAAAABAAEAAAD7/wIAAAABAAEAAAD8//z/AAABAAEAAAD8//3/AAABAAEAAAD8//7/AAABAAEAAAD8////AAABAAEAAAD8/wAAAAABAAEAAAD8/wEAAAABAAEAAAD8/wIAAAABAAEAAAD9//z/AAABAAEAAAD9//3/AAAFAAQAAAD9//7/AAAFAAUAAAD9////AAAFAAUAAAD9/wAAAAAFAAUAAAD9/wEAAAAFAAYAAAD9/wIAAAABAAEAAAD+//z/AAABAAEAAAD+//3/AAAGAAQAAAD+//7/AAAGAAUAAAD+////AAAGAAUAAAD+/wAAAAAGAAUAAAD+/wEAAAAGAAYAAAD+/wIAAAABAAEAAAD///z/AAABAAEAAAD///3/AAAGAAQAAAD///7/AAAGAAUAAAD/////AAAGAAUAAAD//wAAAAAGAAUAAAD//wEAAAAGAAYAAAD//wIAAAABAAEAAAAAAPz/AAABAAEAAAAAAP3/AAAGAAQAAAAAAP7/AAAGAAUAAAAAAP//AAAGAAUAAAAAAAAAAAAGAAUAAAAAAAEAAAAGAAYAAAAAAAIAAAABAAEAAAABAPz/AAABAAEAAAABAP3/AAAHAAQAAAABAP7/AAAHAAUAAAABAP//AAAHAAUAAAABAAAAAAAHAAUAAAABAAEAAAAHAAYAAAABAAIAAAABAAEAAAACAPz/AAABAAEAAAACAP3/AAABAAEAAAACAP7/AAABAAEAAAACAP//AAABAAEAAAACAAAAAAABAAEAAAACAAEAAAABAAEAAAACAAIAAAABAAEAAAADAPz/AAABAAEAAAADAP3/AAABAAEAAAADAP7/AAABAAEAAAADAP//AAABAAEAAAADAAAAAAABAAEAAAADAAEAAAABAAEAAAADAAIAAAABAAEAAAA=")
 tile_set = SubResource("TileSet_om7lw")
 
+[node name="DecorativeProp" parent="SafeRoom" unique_id=704718027 instance=ExtResource("3_0mflr")]
+position = Vector2(-100, 27)
+
+[node name="DecorativeProp2" parent="SafeRoom" unique_id=1406632306 instance=ExtResource("4_ligiw")]
+position = Vector2(-101, 57)
+
+[node name="DecorativeProp3" parent="SafeRoom" unique_id=95652642 instance=ExtResource("5_cbomv")]
+position = Vector2(70, 23)
+
 [node name="Walls" type="StaticBody2D" parent="." unique_id=1872382948]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Walls" unique_id=1275960346]
@@ -96,3 +114,21 @@ shape = SubResource("RectangleShape2D_p81wj")
 [node name="CollisionShape2D9" type="CollisionShape2D" parent="Walls" unique_id=773689057]
 position = Vector2(225, -95)
 shape = SubResource("RectangleShape2D_p81wj")
+
+[node name="SpikesVigilia" parent="." unique_id=1891323913 instance=ExtResource("6_4na3a")]
+position = Vector2(-22, 21)
+
+[node name="BreakableProp" parent="." unique_id=904867938 instance=ExtResource("7_1p2ha")]
+position = Vector2(23, 23)
+
+[node name="BreakableProp2" parent="." unique_id=1291973243 instance=ExtResource("8_t683u")]
+position = Vector2(25, -20)
+
+[node name="DecorativeProp" parent="." unique_id=145285363 instance=ExtResource("9_cbomv")]
+position = Vector2(-72, -16)
+
+[node name="DecorativeProp2" parent="." unique_id=1732828965 instance=ExtResource("10_4na3a")]
+position = Vector2(-21, -18)
+
+[node name="PusherProp" parent="." unique_id=1324081604 instance=ExtResource("11_4na3a")]
+position = Vector2(-58, 56)

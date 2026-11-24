@@ -16,6 +16,7 @@ size = Vector2(16, 16)
 
 [node name="BreakableProp" type="CharacterBody2D" unique_id=904867938]
 z_index = 1
+scale = Vector2(3, 3)
 collision_layer = 69
 collision_mask = 0
 motion_mode = 1

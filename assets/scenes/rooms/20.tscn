@@ -22,7 +22,7 @@ tile_set = ExtResource("3_ed1n3")
 
 [node name="DoorOeste" parent="Switchable/Pesadilla" unique_id=268869019 instance=ExtResource("4_ed1n3")]
 position = Vector2(-162.745, -18)
-rotation = 4.712389
+orientation = 3
 door_id = &"20O"
 target_room = "uid://bcbo8le7eca2c"
 target_door_id = &"19E"
@@ -30,7 +30,7 @@ starts_open = true
 
 [node name="DoorSur" parent="Switchable/Pesadilla" unique_id=1639127600 instance=ExtResource("4_ed1n3")]
 position = Vector2(21, 136)
-rotation = 3.1415927
+orientation = 2
 door_id = &"20S"
 target_door_id = &"25N"
 starts_open = true
@@ -45,7 +45,7 @@ tile_set = ExtResource("4_yl8s8")
 
 [node name="DoorOeste" parent="Switchable/Sueño" unique_id=173168588 instance=ExtResource("6_yl8s8")]
 position = Vector2(-163, -18)
-rotation = 4.712389
+orientation = 3
 door_id = &"20O"
 target_room = "uid://bcbo8le7eca2c"
 target_door_id = &"19E"
@@ -53,7 +53,7 @@ starts_open = true
 
 [node name="DoorSur" parent="Switchable/Sueño" unique_id=1838181197 instance=ExtResource("6_yl8s8")]
 position = Vector2(21, 136)
-rotation = 3.1415927
+orientation = 2
 door_id = &"20S"
 target_door_id = &"25N"
 starts_open = true

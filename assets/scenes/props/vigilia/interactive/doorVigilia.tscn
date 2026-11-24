@@ -1,25 +1,53 @@
 [gd_scene format=3 uid="uid://cb5rvks5i5aea"]
 
 [ext_resource type="Script" uid="uid://ctoj8a51fem1a" path="res://assets/scripts/rooms/door.gd" id="1_door"]
-[ext_resource type="Texture2D" uid="uid://cb472df52e544" path="res://assets/sprittesheets/props/placeholders/interactive/door_vigilia_closed.png" id="2_closed"]
-[ext_resource type="Texture2D" uid="uid://c687cbb881ac4" path="res://assets/sprittesheets/props/placeholders/interactive/door_vigilia_open.png" id="3_open"]
+[ext_resource type="Script" uid="uid://b6fcwsj538mpy" path="res://assets/scripts/rooms/door_visual.gd" id="2_visual"]
+[ext_resource type="Texture2D" uid="uid://b7ryas6e5dlkr" path="res://assets/scenary/tilesetpuertas.png" id="3_sheet"]
+[ext_resource type="Texture2D" uid="uid://d22ohf2dud0r6" path="res://assets/scenary/suelo puertas.png" id="4_open"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_north"]
+atlas = ExtResource("3_sheet")
+region = Rect2(435, 529, 274, 314)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_east"]
+atlas = ExtResource("3_sheet")
+region = Rect2(250, 750, 152, 274)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_south"]
+atlas = ExtResource("3_sheet")
+region = Rect2(716, 764, 279, 260)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_west"]
+atlas = ExtResource("3_sheet")
+region = Rect2(0, 778, 131, 246)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_open"]
+atlas = ExtResource("4_open")
+region = Rect2(0, 0, 133, 210)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_body"]
-size = Vector2(48, 14)
+size = Vector2(69.87, 14)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_trigger"]
-size = Vector2(56, 36)
+size = Vector2(57.54, 18)
 
 [node name="DoorVigilia" type="StaticBody2D" unique_id=173168588]
 z_index = 1
 collision_mask = 0
 script = ExtResource("1_door")
-closed_texture = ExtResource("2_closed")
-open_texture = ExtResource("3_open")
+
+[node name="DoorVisual" type="Node" parent="."]
+script = ExtResource("2_visual")
+north_closed = SubResource("AtlasTexture_north")
+east_closed = SubResource("AtlasTexture_east")
+south_closed = SubResource("AtlasTexture_south")
+west_closed = SubResource("AtlasTexture_west")
+open_texture = SubResource("AtlasTexture_open")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=209599387]
 texture_filter = 1
-texture = ExtResource("2_closed")
+scale = Vector2(0.3, 0.3)
+texture = SubResource("AtlasTexture_north")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1471642578]
 shape = SubResource("RectangleShape2D_body")
@@ -34,4 +62,4 @@ monitorable = false
 shape = SubResource("RectangleShape2D_trigger")
 
 [node name="Spawn" type="Marker2D" parent="." unique_id=1072968614]
-position = Vector2(0, 28)
+position = Vector2(0, 19)

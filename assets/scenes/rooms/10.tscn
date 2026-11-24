@@ -31,7 +31,7 @@ tile_set = ExtResource("4_bph3e")
 
 [node name="DoorSur" parent="Switchable/Sueño" unique_id=173168588 instance=ExtResource("5_k6ovj")]
 position = Vector2(35, 122)
-rotation = 3.1415927
+orientation = 2
 door_id = &"10S"
 target_room = "uid://fk1jgyrqkm7r"
 target_door_id = &"16N"

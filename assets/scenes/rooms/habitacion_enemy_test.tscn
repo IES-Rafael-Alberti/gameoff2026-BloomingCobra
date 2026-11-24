@@ -226,6 +226,7 @@ disabled = true
 
 [node name="Door2" type="StaticBody2D" parent="." unique_id=1627573497]
 position = Vector2(-34, -83)
+orientation = 2
 script = ExtResource("4_lrekn")
 door_id = &"south"
 
@@ -236,6 +237,7 @@ disabled = true
 
 [node name="Door3" type="StaticBody2D" parent="." unique_id=1900700370]
 position = Vector2(-34, -83)
+orientation = 1
 script = ExtResource("4_lrekn")
 door_id = &"east"
 
@@ -246,6 +248,7 @@ disabled = true
 
 [node name="Door4" type="StaticBody2D" parent="." unique_id=1315555281]
 position = Vector2(-34, -83)
+orientation = 3
 script = ExtResource("4_lrekn")
 door_id = &"west"
 

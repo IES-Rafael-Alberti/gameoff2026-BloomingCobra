@@ -242,6 +242,7 @@ shape = SubResource("RectangleShape2D_t3rxn")
 
 [node name="Door3" type="StaticBody2D" parent="." unique_id=1900700370]
 position = Vector2(-34, -83)
+orientation = 1
 script = ExtResource("4_akf3y")
 door_id = &"east"
 target_room = "res://assets/scenes/rooms/habitacion_start.tscn"
@@ -254,6 +255,7 @@ disabled = true
 
 [node name="Door4" type="StaticBody2D" parent="." unique_id=1315555281]
 position = Vector2(-34, -83)
+orientation = 3
 script = ExtResource("4_akf3y")
 door_id = &"west"
 
