@@ -1,9 +1,11 @@
 [gd_scene format=4 uid="uid://bcbo8le7eca2c"]
 
 [ext_resource type="Script" uid="uid://bnjkxhgyfy8mc" path="res://assets/scripts/rooms/safe.gd" id="1_usi51"]
+[ext_resource type="Shader" uid="uid://6p4fxek8qx0s" path="res://assets/shaders/celestial_pool.gdshader" id="3_i4v0p"]
+[ext_resource type="Shader" uid="uid://dql88870gaqc8" path="res://assets/shaders/celestial_beam.gdshader" id="4_usi51"]
 [ext_resource type="Texture2D" uid="uid://bofmusj07iwon" path="res://assets/scenary/tilesetsafezoneRed.png" id="5_b6h2t"]
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_75ji7"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ep5hh"]
 texture = ExtResource("5_b6h2t")
 texture_region_size = Vector2i(128, 128)
 4:1/0 = 0
@@ -42,57 +44,171 @@ texture_region_size = Vector2i(128, 128)
 0:5/0 = 0
 0:6/0 = 0
 
-[sub_resource type="TileSet" id="TileSet_om7lw"]
+[sub_resource type="TileSet" id="TileSet_dt1j3"]
 tile_size = Vector2i(128, 128)
-sources/0 = SubResource("TileSetAtlasSource_75ji7")
+sources/0 = SubResource("TileSetAtlasSource_ep5hh")
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_rihe3"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_kd6bk"]
 size = Vector2(208, 16)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_p81wj"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_b6h2t"]
 size = Vector2(12.5, 167.5)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_73wj3"]
+shader = ExtResource("3_i4v0p")
+shader_parameter/rect_half_size = Vector2(26, 9)
+shader_parameter/glow_color = Color(1, 0.91, 0.68, 1)
+shader_parameter/intensity = 0.55
+shader_parameter/opacity = 1.0
+shader_parameter/core_size = 0.12
+shader_parameter/core_softness = 0.26
+shader_parameter/pulse_speed = 0.55
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_w0mo3"]
+blend_mode = 1
+
+[sub_resource type="Gradient" id="Gradient_mote_sprite"]
+offsets = PackedFloat32Array(0, 0.35, 1)
+colors = PackedColorArray(1, 1, 0.9, 1, 1, 0.95, 0.72, 0.8, 1, 0.9, 0.6, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_s16s2"]
+gradient = SubResource("Gradient_mote_sprite")
+width = 16
+height = 16
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[sub_resource type="Gradient" id="Gradient_ixfws"]
+offsets = PackedFloat32Array(0, 0.3, 1)
+colors = PackedColorArray(1, 0.98, 0.85, 0, 1, 0.95, 0.7, 0.9, 1, 0.9, 0.6, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_mote"]
+gradient = SubResource("Gradient_ixfws")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_j8731"]
+particle_flag_disable_z = true
+emission_shape_offset = Vector3(0, 40, 0)
+emission_shape = 3
+emission_box_extents = Vector3(48, 95, 1)
+direction = Vector3(0, -1, 0)
+spread = 20.0
+initial_velocity_min = 2.0
+initial_velocity_max = 6.0
+gravity = Vector3(0, -1, 0)
+scale_min = 0.08
+scale_max = 0.22
+color_ramp = SubResource("GradientTexture1D_mote")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_51e0d"]
+shader = ExtResource("4_usi51")
+shader_parameter/rect_half_size = Vector2(70, 110)
+shader_parameter/beam_color = Color(1, 0.93, 0.74, 1)
+shader_parameter/intensity = 0.42
+shader_parameter/opacity = 0.2999999932944
+shader_parameter/top_half_width = 0.09
+shader_parameter/bottom_half_width = 0.37
+shader_parameter/edge_softness = 0.55
+shader_parameter/floor_fade_start = 0.35
+shader_parameter/floor_fade_end = 0.94
+shader_parameter/floor_edge_softness = 1.7
+shader_parameter/ray_strength = 0.18
+shader_parameter/flicker_speed = 0.45
+shader_parameter/dust_amount = 0.35
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_i02a7"]
+shader = ExtResource("3_i4v0p")
+shader_parameter/rect_half_size = Vector2(65, 35)
+shader_parameter/glow_color = Color(1, 0.91, 0.68, 1)
+shader_parameter/intensity = 0.55
+shader_parameter/opacity = 1.0
+shader_parameter/core_size = 0.12
+shader_parameter/core_softness = 0.26
+shader_parameter/pulse_speed = 0.55
 
 [node name="19" type="Node2D" unique_id=1556955998]
 script = ExtResource("1_usi51")
 
-[node name="SafeRoom" type="Node2D" parent="." unique_id=122311486]
+[node name="SafeRoom" type="Node2D" parent="." unique_id=985697552]
 
-[node name="TileMapLayer" type="TileMapLayer" parent="SafeRoom" unique_id=823034349]
+[node name="TileMapLayer" type="TileMapLayer" parent="SafeRoom" unique_id=1557288879]
 position = Vector2(35, 6)
 scale = Vector2(0.3, 0.3)
-tile_map_data = PackedByteArray("AAD6//v/AAAAAAAAAAD7//v/AAABAAAAAAD8//v/AAABAAAAAAD9//v/AAABAAAAAAD+//v/AAABAAAAAAD///v/AAABAAAAAAAAAPv/AAABAAAAAAABAPv/AAABAAAAAAACAPv/AAABAAAAAAADAPv/AAABAAAAAAAEAPv/AAACAAAAAAD6//z/AAAAAAEAAAD6//3/AAAAAAEAAAD6//7/AAAAAAEAAAD6////AAAAAAEAAAD6/wAAAAAAAAEAAAD6/wEAAAAAAAEAAAD6/wIAAAAAAAEAAAD6/wMAAAAAAAIAAAD7/wMAAAABAAIAAAD8/wMAAAABAAIAAAD9/wMAAAABAAIAAAD+/wMAAAABAAIAAAD//wMAAAABAAIAAAAAAAMAAAABAAIAAAABAAMAAAABAAIAAAACAAMAAAABAAIAAAADAAMAAAABAAIAAAAEAAMAAAACAAIAAAAEAPz/AAACAAEAAAAEAP3/AAACAAEAAAAEAP7/AAACAAEAAAAEAP//AAACAAEAAAAEAAAAAAACAAEAAAAEAAEAAAACAAEAAAAEAAIAAAACAAEAAAD7//z/AAABAAEAAAD7//3/AAABAAEAAAD7//7/AAABAAEAAAD7////AAABAAEAAAD7/wAAAAABAAEAAAD7/wEAAAABAAEAAAD7/wIAAAABAAEAAAD8//z/AAABAAEAAAD8//3/AAABAAEAAAD8//7/AAABAAEAAAD8////AAABAAEAAAD8/wAAAAABAAEAAAD8/wEAAAABAAEAAAD8/wIAAAABAAEAAAD9//z/AAABAAEAAAD9//3/AAAFAAQAAAD9//7/AAAFAAUAAAD9////AAAFAAUAAAD9/wAAAAAFAAUAAAD9/wEAAAAFAAYAAAD9/wIAAAABAAEAAAD+//z/AAABAAEAAAD+//3/AAAGAAQAAAD+//7/AAAGAAUAAAD+////AAAGAAUAAAD+/wAAAAAGAAUAAAD+/wEAAAAGAAYAAAD+/wIAAAABAAEAAAD///z/AAABAAEAAAD///3/AAAGAAQAAAD///7/AAAGAAUAAAD/////AAAGAAUAAAD//wAAAAAGAAUAAAD//wEAAAAGAAYAAAD//wIAAAABAAEAAAAAAPz/AAABAAEAAAAAAP3/AAAGAAQAAAAAAP7/AAAGAAUAAAAAAP//AAAGAAUAAAAAAAAAAAAGAAUAAAAAAAEAAAAGAAYAAAAAAAIAAAABAAEAAAABAPz/AAABAAEAAAABAP3/AAAHAAQAAAABAP7/AAAHAAUAAAABAP//AAAHAAUAAAABAAAAAAAHAAUAAAABAAEAAAAHAAYAAAABAAIAAAABAAEAAAACAPz/AAABAAEAAAACAP3/AAABAAEAAAACAP7/AAABAAEAAAACAP//AAABAAEAAAACAAAAAAABAAEAAAACAAEAAAABAAEAAAACAAIAAAABAAEAAAADAPz/AAABAAEAAAADAP3/AAABAAEAAAADAP7/AAABAAEAAAADAP//AAABAAEAAAADAAAAAAABAAEAAAADAAEAAAABAAEAAAADAAIAAAABAAEAAAA=")
-tile_set = SubResource("TileSet_om7lw")
+tile_map_data = PackedByteArray("AAD8//3/AAAAAAAAAAD8//7/AAAAAAEAAAD8////AAAAAAEAAAD8/wAAAAAAAAEAAAD8/wEAAAAAAAIAAAD9//3/AAABAAAAAAD9//7/AAABAAEAAAD9////AAABAAEAAAD9/wAAAAABAAEAAAD9/wEAAAABAAIAAAD+//3/AAABAAAAAAD+//7/AAABAAEAAAD+////AAABAAEAAAD+/wAAAAABAAEAAAD+/wEAAAABAAIAAAD///3/AAABAAAAAAD///7/AAABAAEAAAD/////AAABAAEAAAD//wAAAAABAAEAAAD//wEAAAABAAIAAAAAAP3/AAABAAAAAAAAAP7/AAABAAEAAAAAAP//AAABAAEAAAAAAAAAAAABAAEAAAAAAAEAAAABAAIAAAABAP3/AAABAAAAAAABAP7/AAABAAEAAAABAP//AAABAAEAAAABAAAAAAABAAEAAAABAAEAAAABAAIAAAACAP3/AAACAAAAAAACAP7/AAACAAEAAAACAP//AAACAAEAAAACAAAAAAACAAEAAAACAAEAAAACAAIAAAA=")
+tile_set = SubResource("TileSet_dt1j3")
 
-[node name="Walls" type="StaticBody2D" parent="." unique_id=1872382948]
+[node name="TileMapLayer2" type="TileMapLayer" parent="SafeRoom" unique_id=18337542]
+position = Vector2(35, 6)
+scale = Vector2(0.3, 0.3)
+tile_map_data = PackedByteArray("AAABAP7/AAABAAEAAAABAP//AAABAAEAAAABAAAAAAABAAEAAAAAAP7/AAAHAAQAAAAAAP//AAAHAAUAAAAAAAAAAAAHAAYAAAD8//3/AAAAAAAAAAD8//7/AAAAAAEAAAD8////AAAAAAEAAAD8/wAAAAAAAAEAAAD8/wEAAAAAAAIAAAD9//3/AAABAAAAAAD9//7/AAABAAEAAAD9////AAABAAEAAAD9/wAAAAABAAEAAAD9/wEAAAABAAIAAAD+//3/AAABAAAAAAD+//7/AAAFAAQAAAD+////AAAFAAUAAAD+/wAAAAAFAAYAAAD+/wEAAAABAAIAAAD///3/AAABAAAAAAD///7/AAAGAAQAAAD/////AAAGAAUAAAD//wAAAAAGAAYAAAD//wEAAAABAAIAAAAAAP3/AAABAAAAAAAAAAEAAAABAAIAAAABAP3/AAABAAAAAAABAAEAAAABAAIAAAACAP3/AAACAAAAAAACAP7/AAACAAEAAAACAP//AAACAAEAAAACAAAAAAACAAEAAAACAAEAAAACAAIAAAA=")
+tile_set = SubResource("TileSet_dt1j3")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls" unique_id=1275960346]
-position = Vector2(-70, -182)
-shape = SubResource("RectangleShape2D_rihe3")
+[node name="Walls" type="StaticBody2D" parent="." unique_id=1849972134]
 
-[node name="CollisionShape2D2" type="CollisionShape2D" parent="Walls" unique_id=1454824898]
-position = Vector2(-71, 151)
-shape = SubResource("RectangleShape2D_rihe3")
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls" unique_id=1824123698]
+position = Vector2(-67, -107)
+shape = SubResource("RectangleShape2D_kd6bk")
 
-[node name="CollisionShape2D3" type="CollisionShape2D" parent="Walls" unique_id=1253905346]
-position = Vector2(137, 151)
-shape = SubResource("RectangleShape2D_rihe3")
+[node name="CollisionShape2D2" type="CollisionShape2D" parent="Walls" unique_id=547708080]
+position = Vector2(-140, 75)
+shape = SubResource("RectangleShape2D_kd6bk")
 
-[node name="CollisionShape2D4" type="CollisionShape2D" parent="Walls" unique_id=1157865004]
-position = Vector2(137, -182)
-shape = SubResource("RectangleShape2D_rihe3")
+[node name="CollisionShape2D3" type="CollisionShape2D" parent="Walls" unique_id=1773625081]
+position = Vector2(69, 74)
+shape = SubResource("RectangleShape2D_kd6bk")
 
-[node name="CollisionShape2D5" type="CollisionShape2D" parent="Walls" unique_id=160418552]
-position = Vector2(-181, -91)
-shape = SubResource("RectangleShape2D_p81wj")
+[node name="CollisionShape2D4" type="CollisionShape2D" parent="Walls" unique_id=1492901975]
+position = Vector2(141, -107)
+shape = SubResource("RectangleShape2D_kd6bk")
 
-[node name="CollisionShape2D6" type="CollisionShape2D" parent="Walls" unique_id=319886355]
-position = Vector2(-181, 77)
-shape = SubResource("RectangleShape2D_p81wj")
+[node name="CollisionShape2D5" type="CollisionShape2D" parent="Walls" unique_id=1415527853]
+position = Vector2(-117, -74)
+shape = SubResource("RectangleShape2D_b6h2t")
 
-[node name="CollisionShape2D8" type="CollisionShape2D" parent="Walls" unique_id=711331064]
+[node name="CollisionShape2D6" type="CollisionShape2D" parent="Walls" unique_id=1384213315]
+position = Vector2(-117, 93)
+shape = SubResource("RectangleShape2D_b6h2t")
+
+[node name="CollisionShape2D8" type="CollisionShape2D" parent="Walls" unique_id=520406272]
 position = Vector2(226, 68.25)
-shape = SubResource("RectangleShape2D_p81wj")
+shape = SubResource("RectangleShape2D_b6h2t")
 
-[node name="CollisionShape2D9" type="CollisionShape2D" parent="Walls" unique_id=773689057]
-position = Vector2(225, -95)
-shape = SubResource("RectangleShape2D_p81wj")
+[node name="CollisionShape2D9" type="CollisionShape2D" parent="Walls" unique_id=485911941]
+position = Vector2(146, -13)
+shape = SubResource("RectangleShape2D_b6h2t")
+
+[node name="CelestialSource" type="Polygon2D" parent="." unique_id=875299893]
+visible = false
+z_index = 1
+material = SubResource("ShaderMaterial_73wj3")
+position = Vector2(16, -184)
+polygon = PackedVector2Array(-26, -9, 26, -9, 26, 9, -26, 9)
+uv = PackedVector2Array(0, 0, 1, 0, 1, 1, 0, 1)
+
+[node name="CelestialMotes" type="GPUParticles2D" parent="." unique_id=1001718005]
+z_index = 1
+material = SubResource("CanvasItemMaterial_w0mo3")
+position = Vector2(16, -80)
+amount = 12
+texture = SubResource("GradientTexture2D_s16s2")
+lifetime = 5.0
+preprocess = 2.5
+randomness = 0.7
+visibility_rect = Rect2(-80, -120, 160, 240)
+process_material = SubResource("ParticleProcessMaterial_j8731")
+
+[node name="CelestialBeam" type="Polygon2D" parent="." unique_id=1241409810]
+z_index = 3
+material = SubResource("ShaderMaterial_51e0d")
+position = Vector2(20, -82)
+scale = Vector2(1.65, 1.65)
+polygon = PackedVector2Array(-70, -176, 70, -176, 70, 44, -70, 44)
+uv = PackedVector2Array(0, 0, 1, 0, 1, 1, 0, 1)
+
+[node name="CelestialPool" type="Polygon2D" parent="." unique_id=1820506251]
+z_index = 3
+material = SubResource("ShaderMaterial_i02a7")
+position = Vector2(19, -16)
+scale = Vector2(4.655, 4.655)
+polygon = PackedVector2Array(-65, -35, 65, -35, 65, 35, -65, 35)
+uv = PackedVector2Array(0, 0, 1, 0, 1, 1, 0, 1)
