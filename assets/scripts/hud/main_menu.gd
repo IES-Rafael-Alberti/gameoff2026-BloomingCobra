@@ -97,7 +97,7 @@ func _play_intro() -> void:
 	await get_tree().process_frame
 	
 	# wait 2 seconds before logo fade in 
-	await get_tree().create_timer(0.5).timeout
+	await get_tree().create_timer(1).timeout
 	
 	_welcome.modulate.a = 1.0
 	

@@ -97,7 +97,7 @@ tracks/0/keys = {
 "times": PackedFloat32Array(0, 2.7),
 "transitions": PackedFloat32Array(1, 1),
 "update": 0,
-"values": [-0.061086523819801536, 0.061086523819801536]
+"values": [-0.06108652381980153, 0.06108652381980153]
 }
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_5eu3w"]
@@ -135,7 +135,7 @@ tracks/0/keys = {
 "times": PackedFloat32Array(0, 1.3),
 "transitions": PackedFloat32Array(1, 1),
 "update": 0,
-"values": [0.017453292519943295, -0.017453292519943295]
+"values": [0.01745329251994329, -0.01745329251994329]
 }
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_qj7op"]
@@ -249,7 +249,7 @@ tracks/0/keys = {
 "times": PackedFloat32Array(0, 1.5),
 "transitions": PackedFloat32Array(1, 1),
 "update": 0,
-"values": [0.017453292519943295, -0.017453292519943295]
+"values": [0.01745329251994329, -0.01745329251994329]
 }
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_dudtl"]
@@ -341,11 +341,11 @@ shader_parameter/spread = 0.0
 shader_parameter/cutoff = -0.5949999807624999
 shader_parameter/falloff = 1.0
 shader_parameter/edge_fade = 0.3850000182875
-shader_parameter/speed = 1.8
+shader_parameter/speed = 1.0
 shader_parameter/ray1_density = 13.395
 shader_parameter/ray2_density = 15.05
 shader_parameter/ray2_intensity = 0.610000028975
-shader_parameter/color = Vector4(7, 3, 1, 0.8)
+shader_parameter/color = Vector4(8, 4, 2, 0.8)
 shader_parameter/hdr = false
 shader_parameter/seed = 5.0
 
