@@ -101,6 +101,10 @@ target_door_id = &"3O"
 starts_open = true
 orientation = 1
 
+[node name="Polygon2D" type="Polygon2D" parent="Memoria" unique_id=476589656]
+color = Color(0.012617188, 0.012617188, 0.012617188, 1)
+polygon = PackedVector2Array(250, -684, 942, -353, 1154, 656, -1131, 712, -959, -653, -54, -714, 135, -700)
+
 [node name="Walls" type="StaticBody2D" parent="." unique_id=1849972134]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Walls" unique_id=1824123698]
