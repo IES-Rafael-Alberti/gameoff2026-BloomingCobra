@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://bikswul83o1qs" path="res://assets/scripts/rooms/door_debug_room.gd" id="1_room"]
 [ext_resource type="Script" uid="uid://bkoec71xnejuk" path="res://assets/scripts/common/switchable.gd" id="2_switch"]
 [ext_resource type="PackedScene" uid="uid://b41468s5i5aea" path="res://assets/scenes/props/pesadilla/interactive/doorPesadilla.tscn" id="3_door_p"]
+[ext_resource type="TileSet" uid="uid://cod5hqlj1hrki" path="res://assets/resources/tilesets/tileset_spikes_pesadilla.tres" id="3_ea4t3"]
 [ext_resource type="PackedScene" uid="uid://cb5rvks5i5aea" path="res://assets/scenes/props/vigilia/interactive/doorVigilia.tscn" id="4_door_v"]
 [ext_resource type="PackedScene" uid="uid://tvq6u6rrx621" path="res://assets/scenes/props/pesadilla/interactive/buttonPesadilla.tscn" id="5_btn_p"]
 [ext_resource type="PackedScene" uid="uid://cm16eeyma7gae" path="res://assets/scenes/props/vigilia/interactive/buttonVigilia.tscn" id="6_btn_v"]
@@ -27,6 +28,9 @@ require_all_buttons = false
 script = ExtResource("2_switch")
 
 [node name="Pesadilla" type="Node2D" parent="Switchable" unique_id=561919387]
+
+[node name="TileMapLayer" type="TileMapLayer" parent="Switchable/Pesadilla" unique_id=652417084]
+tile_set = ExtResource("3_ea4t3")
 
 [node name="Floor" type="Polygon2D" parent="Switchable/Pesadilla" unique_id=46794726]
 z_index = -2

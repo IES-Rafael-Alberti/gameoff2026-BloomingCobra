@@ -72,6 +72,7 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_DISABLED
 	_keep_world_collision_when_disabled()
 	_register_preplaced_residents()
+	call_deferred("_install_spike_tile_damage")
 	call_deferred("_setup_button_unlock")
 	call_deferred("_seal_unlinked_doors")
 	call_deferred("_register_links_with_run_state")
@@ -325,6 +326,39 @@ func _door_world_center(door: Door) -> Vector2:
 	if rect.size != Vector2.ZERO:
 		return rect.get_center()
 	return door.global_position
+
+
+const _SPIKE_DAMAGE_SCRIPT: GDScript = preload("res://assets/scripts/props/static/spike_tile_damage.gd")
+
+## Attach SpikeTileDamage to any TileMapLayer painted with a spikes tileset,
+## even if the designer forgot to set spikes_tile_layer.gd on the node.
+func _install_spike_tile_damage() -> void:
+	for node in find_children("*", "TileMapLayer", true, false):
+		var layer := node as TileMapLayer
+		if layer == null or layer.tile_set == null:
+			continue
+		if not _tile_set_has_spike_data(layer.tile_set):
+			continue
+		if layer.get_node_or_null("SpikeTileDamage") != null:
+			continue
+		var helper: Node = _SPIKE_DAMAGE_SCRIPT.new()
+		helper.name = "SpikeTileDamage"
+		layer.add_child(helper)
+		layer.z_index = maxi(layer.z_index, 1)
+		if not layer.is_in_group("prop_spikes"):
+			layer.add_to_group("prop_spikes")
+
+
+func _tile_set_has_spike_data(ts: TileSet) -> bool:
+	if ts == null:
+		return false
+	var path := ts.resource_path
+	if path.ends_with("tileset_spikes_pesadilla.tres") or path.ends_with("tileset_spikes_vigilia.tres"):
+		return true
+	for i in ts.get_custom_data_layers_count():
+		if ts.get_custom_data_layer_name(i) == &"spikes":
+			return true
+	return false
 
 
 func _keep_world_collision_when_disabled() -> void:
