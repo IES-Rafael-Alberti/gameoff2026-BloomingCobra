@@ -3,7 +3,6 @@
 [ext_resource type="Script" uid="uid://dgvwro07yrgfh" path="res://assets/scripts/props/static/decorative_prop.gd" id="1_2eknn"]
 [ext_resource type="Texture2D" uid="uid://dkoxsii0qwbwu" path="res://assets/sprittesheets/props/definitivo/props_vigilia_Y.png" id="2_h6e1n"]
 [ext_resource type="Script" uid="uid://io6b21mdmm74" path="res://assets/scripts/props/definitions/prop_decorative_def.gd" id="3_def"]
-[ext_resource type="Texture2D" uid="uid://2sctsss1nkxk" path="res://logs/attack_cell_3_4.png" id="4_1su88"]
 
 [sub_resource type="Resource" id="PropDecorativeDef_star"]
 script = ExtResource("3_def")
@@ -15,10 +14,6 @@ region = Rect2(134, 0, 73, 69)
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_add"]
 blend_mode = 1
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_0qoo8"]
-atlas = ExtResource("4_1su88")
-region = Rect2(139, 43, 35, 34)
 
 [sub_resource type="Gradient" id="Gradient_sparkle"]
 offsets = PackedFloat32Array(0, 0.18, 0.55, 1)
@@ -70,7 +65,7 @@ z_index = 1
 material = SubResource("CanvasItemMaterial_add")
 amount = 2
 amount_ratio = 0.75
-texture = SubResource("AtlasTexture_0qoo8")
+texture = SubResource("AtlasTexture_star")
 lifetime = 1.4
 preprocess = 1.0
 randomness = 0.55

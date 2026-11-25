@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://bnjkxhgyfy8mc" path="res://assets/scripts/rooms/safe.gd" id="1_qqynm"]
 [ext_resource type="Shader" uid="uid://dql88870gaqc8" path="res://assets/shaders/celestial_beam.gdshader" id="2_beam"]
 [ext_resource type="Shader" uid="uid://6p4fxek8qx0s" path="res://assets/shaders/celestial_pool.gdshader" id="3_pool"]
+[ext_resource type="PackedScene" uid="uid://cb5rvks5i5aea" path="res://assets/scenes/props/vigilia/interactive/doorVigilia.tscn" id="3_qqynm"]
 [ext_resource type="Texture2D" uid="uid://bofmusj07iwon" path="res://assets/scenary/tilesetsafezoneRed.png" id="5_qqynm"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_75ji7"]
@@ -67,12 +68,12 @@ shader_parameter/pulse_speed = 0.55
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_motes"]
 blend_mode = 1
 
-[sub_resource type="Gradient" id="Gradient_mote_sprite"]
+[sub_resource type="Gradient" id="Gradient_1t1fw"]
 offsets = PackedFloat32Array(0, 0.35, 1)
 colors = PackedColorArray(1, 1, 0.9, 1, 1, 0.95, 0.72, 0.8, 1, 0.9, 0.6, 0)
 
 [sub_resource type="GradientTexture2D" id="GradientTexture2D_mote"]
-gradient = SubResource("Gradient_mote_sprite")
+gradient = SubResource("Gradient_1t1fw")
 width = 16
 height = 16
 fill = 1
@@ -83,7 +84,7 @@ fill_to = Vector2(1, 0.5)
 offsets = PackedFloat32Array(0, 0.3, 1)
 colors = PackedColorArray(1, 0.98, 0.85, 0, 1, 0.95, 0.7, 0.9, 1, 0.9, 0.6, 0)
 
-[sub_resource type="GradientTexture1D" id="GradientTexture1D_mote"]
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_0mflr"]
 gradient = SubResource("Gradient_mote")
 
 [sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_motes"]
@@ -98,7 +99,7 @@ initial_velocity_max = 6.0
 gravity = Vector3(0, -1, 0)
 scale_min = 0.08
 scale_max = 0.22
-color_ramp = SubResource("GradientTexture1D_mote")
+color_ramp = SubResource("GradientTexture1D_0mflr")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_beam"]
 shader = ExtResource("2_beam")
@@ -142,6 +143,27 @@ position = Vector2(35, 6)
 scale = Vector2(0.3, 0.3)
 tile_map_data = PackedByteArray("AAABAP7/AAABAAEAAAABAP//AAABAAEAAAABAAAAAAABAAEAAAAAAP7/AAAHAAQAAAAAAP//AAAHAAUAAAAAAAAAAAAHAAYAAAD8//3/AAAAAAAAAAD8//7/AAAAAAEAAAD8////AAAAAAEAAAD8/wAAAAAAAAEAAAD8/wEAAAAAAAIAAAD9//3/AAABAAAAAAD9//7/AAABAAEAAAD9////AAABAAEAAAD9/wAAAAABAAEAAAD9/wEAAAABAAIAAAD+//3/AAABAAAAAAD+//7/AAAFAAQAAAD+////AAAFAAUAAAD+/wAAAAAFAAYAAAD+/wEAAAABAAIAAAD///3/AAABAAAAAAD///7/AAAGAAQAAAD/////AAAGAAUAAAD//wAAAAAGAAYAAAD//wEAAAABAAIAAAAAAP3/AAABAAAAAAAAAAEAAAABAAIAAAABAP3/AAABAAAAAAABAAEAAAABAAIAAAACAP3/AAACAAAAAAACAP7/AAACAAEAAAACAP//AAACAAEAAAACAAAAAAACAAEAAAACAAEAAAACAAIAAAA=")
 tile_set = SubResource("TileSet_om7lw")
+
+[node name="DoorOeste" parent="SafeRoom" unique_id=173168588 instance=ExtResource("3_qqynm")]
+process_mode = 3
+position = Vector2(-102, -18)
+disable_mode = 2
+collision_layer = 8
+door_id = &"3O"
+target_door_id = &"2E"
+starts_open = true
+orientation = 3
+
+[node name="DoorEste" parent="SafeRoom" unique_id=1350761671 instance=ExtResource("3_qqynm")]
+process_mode = 3
+position = Vector2(137, -15)
+disable_mode = 2
+collision_layer = 8
+door_id = &"3E"
+target_room = "uid://dsg86uppu8dpf"
+target_door_id = &"4O"
+starts_open = true
+orientation = 1
 
 [node name="Walls" type="StaticBody2D" parent="." unique_id=1872382948]
 

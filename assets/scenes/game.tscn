@@ -7,41 +7,44 @@
 [ext_resource type="AudioStream" uid="uid://dviqet6e1useg" path="res://assets/audio/music/NightmareMusic.ogg" id="4_fx2rd"]
 [ext_resource type="PackedScene" path="res://assets/scenes/HUD/map_overlay.tscn" id="16_map"]
 [ext_resource type="PackedScene" path="res://assets/scenes/HUD/health_bar.tscn" id="17_hp"]
-[ext_resource type="PackedScene" path="res://assets/scenes/HUD/pause_menu.tscn" id="21_pause"]
 [ext_resource type="Script" uid="uid://cubeh2wh4qdcc" path="res://assets/scripts/sfx/general_sfx.gd" id="18_sfx"]
 [ext_resource type="AudioStream" uid="uid://crbieoj4wi1fq" path="res://assets/audio/general/Shift.wav" id="19_shift"]
 [ext_resource type="Script" uid="uid://c1h4s6dj62gua" path="res://assets/scripts/game/room_manager.gd" id="20_room_mgr"]
+[ext_resource type="PackedScene" path="res://assets/scenes/HUD/pause_menu.tscn" id="21_pause"]
+[ext_resource type="Script" uid="uid://cv2v0ii8yxf88" path="res://assets/scripts/fx/mode_shift_fx.gd" id="22_fx"]
 
-[node name="Game" type="Node2D"]
+[node name="Game" type="Node2D" unique_id=1003574173]
 script = ExtResource("1_game")
 
-[node name="SfxGeneral" type="Node2D" parent="."]
+[node name="SfxGeneral" type="Node2D" parent="." unique_id=1190624796]
 script = ExtResource("18_sfx")
 music_vigil = ExtResource("3_pnywb")
 music_nightmare = ExtResource("4_fx2rd")
 switch_sfx = ExtResource("19_shift")
 
-[node name="RoomManager" type="Node" parent="."]
+[node name="RoomManager" type="Node" parent="." unique_id=633446856]
 script = ExtResource("20_room_mgr")
 
-[node name="RoomContainer" type="Node2D" parent="."]
+[node name="RoomContainer" type="Node2D" parent="." unique_id=1496096741]
 
-[node name="HealthBar" parent="." instance=ExtResource("17_hp")]
-bar_scale = 0.42
+[node name="HealthBar" parent="." unique_id=643845544 instance=ExtResource("17_hp")]
 
-[node name="MapOverlay" parent="." instance=ExtResource("16_map")]
+[node name="MapOverlay" parent="." unique_id=775752897 instance=ExtResource("16_map")]
 
-[node name="PauseMenu" parent="." instance=ExtResource("21_pause")]
+[node name="PauseMenu" parent="." unique_id=570488119 instance=ExtResource("21_pause")]
 
-[node name="Player" parent="." instance=ExtResource("1_cb66b")]
+[node name="Player" parent="." unique_id=485091313 instance=ExtResource("1_cb66b")]
 light_mask = 3
 visibility_layer = 3
 z_index = 2
-position = Vector2(0, 0)
 
-[node name="Camera2D" type="Camera2D" parent="Player"]
+[node name="Camera2D" type="Camera2D" parent="Player" unique_id=1973695649]
 zoom = Vector2(4, 4)
 limit_smoothed = true
 script = ExtResource("1_cam")
 follow_smoothing = 10.0
 dead_zone_half_extents = Vector2(28, 28)
+
+[node name="ModeShiftFX" type="CanvasLayer" parent="." unique_id=1925035664]
+layer = 50
+script = ExtResource("22_fx")
