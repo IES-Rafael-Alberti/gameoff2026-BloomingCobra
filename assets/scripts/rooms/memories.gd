@@ -31,4 +31,3 @@ func _set_memories_music(active: bool) -> void:
 		sfx.call("set_room_music", &"memories")
 	elif not active and sfx.has_method("clear_room_music"):
 		sfx.call("clear_room_music")
-

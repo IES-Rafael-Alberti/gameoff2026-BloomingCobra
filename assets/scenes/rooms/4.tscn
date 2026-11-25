@@ -6,7 +6,7 @@
 [ext_resource type="TileSet" uid="uid://bk7uacfb2knda" path="res://assets/resources/tilesets/tileset_vigilia_red.tres" id="4_1gwah"]
 [ext_resource type="PackedScene" uid="uid://b41468s5i5aea" path="res://assets/scenes/props/pesadilla/interactive/doorPesadilla.tscn" id="4_geaiu"]
 [ext_resource type="TileSet" uid="uid://cod5hqlj1hrki" path="res://assets/resources/tilesets/tileset_spikes_pesadilla.tres" id="4_mpfgx"]
-[ext_resource type="Script" path="res://assets/scripts/props/static/spikes_tile_layer.gd" id="4_spikes_scr"]
+[ext_resource type="Script" uid="uid://b5iyhww45wsuu" path="res://assets/scripts/props/static/spikes_tile_layer.gd" id="4_spikes_scr"]
 [ext_resource type="TileSet" uid="uid://ca112a4s4rpwe" path="res://assets/resources/tilesets/barreraPesadilla.tres" id="5_cd2y3"]
 [ext_resource type="PackedScene" uid="uid://cb5rvks5i5aea" path="res://assets/scenes/props/vigilia/interactive/doorVigilia.tscn" id="6_1gwah"]
 [ext_resource type="TileSet" uid="uid://rrdpge4ki82b" path="res://assets/resources/tilesets/barreraVigilia.tres" id="8_mpfgx"]

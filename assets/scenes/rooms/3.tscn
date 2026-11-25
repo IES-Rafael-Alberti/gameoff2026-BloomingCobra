@@ -131,6 +131,7 @@ shader_parameter/pulse_speed = 0.55
 script = ExtResource("1_qqynm")
 
 [node name="SafeRoom" type="Node2D" parent="." unique_id=122311486]
+script = ExtResource("1_qqynm")
 
 [node name="TileMapLayer" type="TileMapLayer" parent="SafeRoom" unique_id=823034349]
 position = Vector2(35, 6)
