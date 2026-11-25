@@ -6,6 +6,8 @@ extends Node2D
 @export var background_base_scale: float = 0.12
 ## Multiplicador sobre el viewport: deja margen para parallax antes de clampear.
 @export_range(1.0, 2.0, 0.01) var background_cover_margin: float = 1.2
+## Seconds before the player can shift again after a successful switch.
+@export_range(0.0, 10.0, 0.05) var shift_cooldown: float = 1.5
 
 const BOSS_ROOM_SCENE := "res://assets/scenes/rooms/boss/bossRoom.tscn"
 const ROOMS_DIR := "res://assets/scenes/rooms/"
@@ -33,6 +35,7 @@ func _ready() -> void:
 	add_child(_hitbox_debug)
 	_setup_debug_room_ui()
 	_setup_world_backgrounds()
+	_sync_shift_cooldown()
 	if room_manager != null and room_manager.has_signal("room_changed"):
 		if not room_manager.room_changed.is_connected(_on_room_changed_backgrounds):
 			room_manager.room_changed.connect(_on_room_changed_backgrounds)
@@ -40,6 +43,7 @@ func _ready() -> void:
 
 
 func _process(_delta: float) -> void:
+	_sync_shift_cooldown()
 	# Triggers are axes: poll just_pressed here (event.is_action_pressed is unreliable).
 	if Input.is_action_just_pressed("switch"):
 		if WorldMode.toggle():
@@ -212,6 +216,11 @@ func _debug_go_to_room(scene_path: String) -> void:
 
 func _debug_teleport_to_boss() -> void:
 	_debug_go_to_room(BOSS_ROOM_SCENE)
+
+
+func _sync_shift_cooldown() -> void:
+	if WorldMode != null and WorldMode.has_method("set_switch_cooldown"):
+		WorldMode.set_switch_cooldown(shift_cooldown)
 
 
 func _toggle_fullscreen() -> void:

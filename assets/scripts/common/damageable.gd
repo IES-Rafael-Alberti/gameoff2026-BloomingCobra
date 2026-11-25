@@ -27,11 +27,17 @@ func is_invulnerable() -> bool:
 	return _invuln_left > 0.0
 
 
-func take_damage(amount: int) -> void:
+## Arm / refresh hit invulnerability (player iframes).
+func arm_invulnerability(duration: float) -> void:
+	_invuln_left = maxf(_invuln_left, maxf(duration, 0.0))
+
+
+## Returns true when the hit was applied (false while invulnerable / invalid).
+func take_damage(amount: int) -> bool:
 	if amount <= 0 or _invuln_left > 0.0:
-		return
+		return false
 	if not immortal and health <= 0:
-		return
+		return false
 
 	if not immortal:
 		health = maxi(health - amount, 0)
@@ -43,6 +49,7 @@ func take_damage(amount: int) -> void:
 
 	if not immortal and health <= 0:
 		died.emit()
+	return true
 
 
 func heal(amount: int) -> void:

@@ -32,7 +32,7 @@ theme_override_constants/separation = -6
 
 [node name="TopRow" type="HBoxContainer" parent="Margin/Column"]
 layout_mode = 2
-theme_override_constants/separation = -10
+theme_override_constants/separation = 8
 alignment = 1
 
 [node name="ModeSwitch" type="TextureRect" parent="Margin/Column/TopRow"]

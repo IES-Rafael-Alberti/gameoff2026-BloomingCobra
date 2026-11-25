@@ -27,6 +27,11 @@ const IDLE_CONTENT_RECT := Rect2(245, 153, 509, 720)
 @onready var _audio_listener: AudioListener2D = get_node_or_null("AudioListener2D")
 
 @export var hurt_anim_time: float = 0.55
+## Invulnerability after a hit (Damageable + blink). Editable in the inspector.
+## Longer than hunter attack_cooldown (0.8) so a melee foe can't re-hit the instant iframes end.
+@export_range(0.0, 5.0, 0.05) var iframe_duration: float = 1.1
+## Half-period of the hurt blink while iframes are active.
+@export_range(0.02, 0.5, 0.01) var iframe_blink_interval: float = 0.08
 @export var charge_shake_amplitude: float = 1.2
 @export var charge_ready_flash_time: float = 0.28
 
@@ -49,6 +54,9 @@ var _flash_mat: ShaderMaterial
 var _dead: bool = false
 var _void_falling: bool = false
 var _void_fall_tween: Tween
+var _iframe_left: float = 0.0
+var _iframe_blink_t: float = 0.0
+var _iframe_blink_on: bool = true
 
 
 func _ready() -> void:
@@ -69,8 +77,7 @@ func _ready() -> void:
 		attack.setup(self)
 	# Prototype: hits are feedback only — no HP gate / death.
 	damageable.immortal = true
-	if float(damageable.invulnerability_time) <= 0.0:
-		damageable.invulnerability_time = maxf(hurt_anim_time, 0.55)
+	_sync_iframe_duration()
 	if damageable.has_signal("damaged"):
 		damageable.damaged.connect(_on_damaged)
 	if vitality != null and vitality.has_signal("depleted"):
@@ -83,6 +90,7 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	_sync_iframe_duration()
 	if _dead or _void_falling:
 		velocity = Vector2.ZERO
 		_stop_steps()
@@ -123,6 +131,8 @@ func _physics_process(delta: float) -> void:
 		_stop_steps()
 
 	_update_charge_feedback(delta)
+	# Apply blink after charge feedback — that path used to overwrite modulate every frame.
+	_tick_iframe_blink(delta)
 	if vitality != null and vitality.has_method("tick"):
 		vitality.call("tick", delta, _in_dream)
 	move_and_slide()
@@ -175,6 +185,7 @@ func finish_void_fall() -> void:
 	velocity = Vector2.ZERO
 	_knockback = Vector2.ZERO
 	_void_falling = false
+	_restore_iframe_blink()
 	if attack != null and attack.has_method("set_enabled"):
 		attack.set_enabled(not _in_dream)
 	if not _dead:
@@ -227,6 +238,63 @@ func _on_vitality_depleted() -> void:
 	get_tree().reload_current_scene()
 
 
+func _sync_iframe_duration() -> void:
+	if damageable == null:
+		return
+	damageable.invulnerability_time = maxf(iframe_duration, 0.0)
+
+
+func is_iframe_active() -> bool:
+	if _iframe_left > 0.0:
+		return true
+	if damageable != null and damageable.has_method("is_invulnerable"):
+		return bool(damageable.call("is_invulnerable"))
+	return false
+
+
+func _is_iframe_active() -> bool:
+	return is_iframe_active()
+
+
+func _start_iframes() -> void:
+	_iframe_left = maxf(iframe_duration, 0.0)
+	_iframe_blink_t = 0.0
+	_iframe_blink_on = true
+	_sync_iframe_duration()
+	if damageable != null and damageable.has_method("arm_invulnerability"):
+		damageable.call("arm_invulnerability", _iframe_left)
+
+
+func _tick_iframe_blink(delta: float) -> void:
+	if _iframe_left > 0.0:
+		_iframe_left = maxf(_iframe_left - delta, 0.0)
+	if not _is_iframe_active():
+		_restore_iframe_blink()
+		return
+	var interval := maxf(iframe_blink_interval, 0.02)
+	_iframe_blink_t += delta
+	if _iframe_blink_t >= interval:
+		_iframe_blink_t = 0.0
+		_iframe_blink_on = not _iframe_blink_on
+	_apply_iframe_blink_visual()
+
+
+func _apply_iframe_blink_visual() -> void:
+	# Visibility toggle — reliable even with canvas_item materials that ignore modulate.
+	if animated_sprite != null:
+		animated_sprite.visible = _iframe_blink_on
+
+
+func _restore_iframe_blink() -> void:
+	_iframe_blink_t = 0.0
+	_iframe_blink_on = true
+	if animated_sprite != null and not _void_falling:
+		animated_sprite.visible = true
+		var c := animated_sprite.modulate
+		c.a = 1.0
+		animated_sprite.modulate = c
+
+
 func _on_damaged(amount: int, _current_health: int) -> void:
 	if _dead or _void_falling:
 		return
@@ -237,6 +305,8 @@ func _on_damaged(amount: int, _current_health: int) -> void:
 		vitality.call("apply_hit_damage", amount)
 	if _dead:
 		return
+	_start_iframes()
+	_apply_iframe_blink_visual()
 	if _hurt_lock <= 0.0:
 		_anim_before_hurt = animated_sprite.animation
 		_flip_before_hurt = animated_sprite.flip_h
@@ -410,10 +480,12 @@ func _update_charge_feedback(delta: float) -> void:
 		_charge_flash = maxf(_charge_flash - delta, 0.0)
 		var t := _charge_flash / maxf(charge_ready_flash_time, 0.01)
 		_set_white_flash(t)
-		animated_sprite.modulate = Color(1.0, 1.0, 1.0, 1.0).lerp(Color(1.8, 1.8, 1.8, 1.0), t)
+		var flash_rgb := Color(1.0, 1.0, 1.0, 1.0).lerp(Color(1.8, 1.8, 1.8, 1.0), t)
+		animated_sprite.modulate = Color(flash_rgb.r, flash_rgb.g, flash_rgb.b, animated_sprite.modulate.a)
 	else:
 		_set_white_flash(0.0)
-		if animated_sprite.modulate != Color.WHITE:
+		# Don't stomp iframe blink alpha.
+		if not _is_iframe_active() and animated_sprite.modulate != Color.WHITE:
 			animated_sprite.modulate = Color.WHITE
 
 	if _charge_shake:
@@ -431,7 +503,10 @@ func _clear_charge_feedback() -> void:
 	_charge_shake = false
 	_charge_flash = 0.0
 	_set_white_flash(0.0)
-	animated_sprite.modulate = Color.WHITE
+	if not _is_iframe_active():
+		animated_sprite.modulate = Color.WHITE
+	else:
+		_apply_iframe_blink_visual()
 	animated_sprite.position = _sprite_base_pos
 
 

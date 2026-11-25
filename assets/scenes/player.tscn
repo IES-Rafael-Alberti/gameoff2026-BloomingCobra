@@ -1154,7 +1154,7 @@ item_pickup = ExtResource("20_anufl")
 
 [node name="Damageable" type="Node2D" parent="." unique_id=651315614]
 script = ExtResource("1_damage")
-invulnerability_time = 0.6
+invulnerability_time = 1.1
 immortal = true
 
 [node name="Vitality" type="Node" parent="."]

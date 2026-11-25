@@ -304,9 +304,16 @@ func deal_player_hit(player: Node2D, amount: int = -1, knockback_force: float = 
 	var dmg := player.get_node_or_null("Damageable")
 	if dmg == null or not dmg.has_method("take_damage"):
 		return false
+	# Respect player iframes — no damage and no knockback while invulnerable.
+	if player.has_method("is_iframe_active") and bool(player.call("is_iframe_active")):
+		return false
+	if dmg.has_method("is_invulnerable") and bool(dmg.call("is_invulnerable")):
+		return false
 
 	_contact_cd = contact_cooldown
-	dmg.take_damage(dmg_amount)
+	var landed: Variant = dmg.call("take_damage", dmg_amount)
+	if landed is bool and not bool(landed):
+		return false
 	if player.has_method("apply_knockback") and force > 0.0:
 		var away: Vector2 = player.global_position - global_position
 		if away == Vector2.ZERO:
