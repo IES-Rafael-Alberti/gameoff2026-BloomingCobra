@@ -87,7 +87,7 @@ radius = 6.0827627
 
 [node name="Roamer" type="CharacterBody2D" unique_id=632087891]
 script = ExtResource("1_85lem")
-move_speed = 35.0
+move_speed = 50.0
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1549397864]
 texture_filter = 2

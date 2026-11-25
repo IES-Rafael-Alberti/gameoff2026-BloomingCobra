@@ -282,6 +282,7 @@ animations = [{
 scale = Vector2(1.5, 1.5)
 script = ExtResource("1_kbpvo")
 attack_cooldown = 0.8
+detection_radius = 180.0
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=818412766]
 position = Vector2(-1, -2)

@@ -134,6 +134,7 @@ map_cell = Vector2i(5, 3)
 room_id = &"19"
 
 [node name="SafeRoom" type="Node2D" parent="." unique_id=985697552]
+script = ExtResource("1_usi51")
 
 [node name="TileMapLayer" type="TileMapLayer" parent="SafeRoom" unique_id=1557288879]
 position = Vector2(35, 6)
