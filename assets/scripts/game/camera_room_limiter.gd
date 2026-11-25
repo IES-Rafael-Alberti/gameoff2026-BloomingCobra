@@ -13,7 +13,7 @@ enum Mode {
 
 const MODE_COUNT := 3
 
-@export var mode: Mode = Mode.FIXED:
+@export var mode: Mode = Mode.FOLLOW:
 	set(value):
 		if mode == value:
 			return
@@ -52,6 +52,15 @@ var _playable_bounds: Rect2 = Rect2()
 ## Desired world-space view center for DEAD_ZONE (and while easing into FOLLOW).
 var _look_at: Vector2 = Vector2.ZERO
 var _has_look_at: bool = false
+## Temporary lock used by arenas (e.g. boss room) to show the whole space.
+var _world_lock_active: bool = false
+var _world_lock_center: Vector2 = Vector2.ZERO
+var _stored_zoom: Vector2 = Vector2.ONE
+var _has_stored_zoom: bool = false
+var _shake_time: float = 0.0
+var _shake_duration: float = 0.0
+var _shake_amplitude: float = 0.0
+var _shake_offset: Vector2 = Vector2.ZERO
 
 
 func _ready() -> void:
@@ -80,13 +89,82 @@ func _physics_process(delta: float) -> void:
 	if player == null:
 		return
 
+	_update_shake(delta)
+
+	if _world_lock_active:
+		_apply_look_at(_world_lock_center, player)
+		return
+
 	match mode:
 		Mode.FIXED:
 			_update_fixed()
+			position += _shake_offset
 		Mode.FOLLOW:
 			_update_follow(player, delta)
 		Mode.DEAD_ZONE:
 			_update_dead_zone(player)
+
+
+## Pin the camera to a world point and optionally zoom to fit `fit_size`.
+func lock_to_world_point(center: Vector2, fit_size: Vector2 = Vector2.ZERO, padding: float = 1.1) -> void:
+	_world_lock_active = true
+	_world_lock_center = center
+	if not _has_stored_zoom:
+		_stored_zoom = zoom
+		_has_stored_zoom = true
+	if fit_size.x > 1.0 and fit_size.y > 1.0:
+		var vp := get_viewport_rect().size
+		var zx := vp.x / (fit_size.x * padding)
+		var zy := vp.y / (fit_size.y * padding)
+		var z := minf(zx, zy)
+		# Prefer fitting the room; never zoom in past the stored play zoom.
+		z = minf(z, _stored_zoom.x)
+		zoom = Vector2(z, z)
+	var player := get_parent() as Node2D
+	if player != null:
+		_set_look_at(center, player)
+	_snap_now()
+
+
+func unlock_world_point() -> void:
+	if not _world_lock_active and not _has_stored_zoom:
+		return
+	_world_lock_active = false
+	if _has_stored_zoom:
+		zoom = _stored_zoom
+		_has_stored_zoom = false
+	var player := get_parent() as Node2D
+	if player != null:
+		_look_at = player.global_position
+		_has_look_at = true
+		_apply_mode(true)
+	_snap_now()
+
+
+func is_world_locked() -> bool:
+	return _world_lock_active
+
+
+## Screen shake in world pixels. Stronger amplitude / longer duration = heavier hit.
+func shake(amplitude: float = 4.0, duration: float = 0.25) -> void:
+	_shake_amplitude = maxf(amplitude, 0.0)
+	_shake_duration = maxf(duration, 0.0)
+	_shake_time = _shake_duration
+	if _shake_duration <= 0.0 or _shake_amplitude <= 0.0:
+		_shake_offset = Vector2.ZERO
+
+
+func _update_shake(delta: float) -> void:
+	if _shake_time <= 0.0:
+		_shake_offset = Vector2.ZERO
+		return
+	_shake_time = maxf(_shake_time - delta, 0.0)
+	var falloff := _shake_time / maxf(_shake_duration, 0.001)
+	var strength := _shake_amplitude * falloff
+	_shake_offset = Vector2(
+		randf_range(-strength, strength),
+		randf_range(-strength, strength) * 0.85
+	)
 
 
 func _draw() -> void:
@@ -152,10 +230,10 @@ func _apply_bounds(room: Room) -> void:
 	var half_view := _half_view_extents()
 	var cam_limits := bounds.grow_individual(half_view.x, half_view.y, half_view.x, half_view.y)
 	limit_enabled = true
-	limit_left = int(floor(cam_limits.position.x))
-	limit_top = int(floor(cam_limits.position.y))
-	limit_right = int(ceil(cam_limits.end.x))
-	limit_bottom = int(ceil(cam_limits.end.y))
+	limit_left = floori(cam_limits.position.x)
+	limit_top = floori(cam_limits.position.y)
+	limit_right = ceili(cam_limits.end.x)
+	limit_bottom = ceili(cam_limits.end.y)
 
 
 func _half_view_extents() -> Vector2:
@@ -242,8 +320,12 @@ func _update_dead_zone(player: Node2D) -> void:
 func _set_look_at(world_center: Vector2, player: Node2D) -> void:
 	_look_at = world_center
 	_has_look_at = true
+	_apply_look_at(world_center, player)
+
+
+func _apply_look_at(world_center: Vector2, player: Node2D) -> void:
 	# Camera is a child of the player: local offset places the view at world_center.
-	position = world_center - player.global_position
+	position = world_center + _shake_offset - player.global_position
 
 
 func _clamp_look_at(center: Vector2) -> Vector2:

@@ -1166,10 +1166,8 @@ cat_heal_amount = 40.0
 
 [node name="Buffs" type="Node" parent="."]
 script = ExtResource("1_buffs")
-default_attack_duration = 12.0
-default_projectile_duration = 12.0
-default_attack_bonus = 1
-default_projectile_bonus = 1
+default_attack_stacks = 1
+default_projectile_stacks = 1
 default_shield_hits = 3
 
 [node name="Attack" type="Node2D" parent="." unique_id=1728842701]

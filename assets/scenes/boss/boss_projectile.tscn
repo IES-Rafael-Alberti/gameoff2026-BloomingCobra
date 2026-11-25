@@ -7,8 +7,9 @@
 radius = 4.0
 
 [node name="BossProjectile" type="Area2D"]
+z_index = 12
 collision_layer = 0
-collision_mask = 11
+collision_mask = 2
 monitoring = false
 monitorable = false
 script = ExtResource("1_proj")
@@ -16,8 +17,10 @@ speed = 130.0
 lifetime = 3.0
 damage = 1
 knockback_force = 80.0
+collide_with_world = false
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
+z_index = 1
 texture = ExtResource("2_tex")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]

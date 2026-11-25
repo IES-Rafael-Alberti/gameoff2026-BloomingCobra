@@ -30,15 +30,21 @@ tile_map_data = PackedByteArray("AAD//wMAAAAAAAIAAAAAAAMAAAACAAIAAAD///r/AAAAAAA
 tile_set = ExtResource("4_bph3e")
 
 [node name="DoorSur" parent="Switchable/Sueño" unique_id=173168588 instance=ExtResource("5_k6ovj")]
+process_mode = 3
 position = Vector2(35, 122)
-orientation = 2
+disable_mode = 2
+collision_layer = 8
 door_id = &"10S"
 target_room = "uid://fk1jgyrqkm7r"
 target_door_id = &"16N"
 starts_open = true
+orientation = 2
 
 [node name="DoorNorte" parent="Switchable/Sueño" unique_id=2034880328 instance=ExtResource("5_k6ovj")]
+process_mode = 3
 position = Vector2(35, -181)
+disable_mode = 2
+collision_layer = 8
 door_id = &"10N"
 target_door_id = &"6S"
 starts_open = true

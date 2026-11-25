@@ -28,29 +28,33 @@ tile_set = ExtResource("3_g4ahy")
 
 [node name="DoorOeste" parent="Switchable/Pesadilla" unique_id=1194469230 instance=ExtResource("4_g4ahy")]
 position = Vector2(-162.745, -18)
-orientation = 3
+collision_layer = 8
 door_id = &"7O"
 target_room = "uid://mpsapmarxum7"
 target_door_id = &"1E"
 starts_open = true
+orientation = 3
 
 [node name="DoorEste" parent="Switchable/Pesadilla" unique_id=1175675948 instance=ExtResource("4_g4ahy")]
 position = Vector2(198.415, -18)
-orientation = 1
+collision_layer = 8
 door_id = &"7E"
 target_room = "uid://bwkaa8ycbdfuy"
 target_door_id = &"8O"
 starts_open = true
+orientation = 1
 
 [node name="DoorSur" parent="Switchable/Pesadilla" unique_id=774170389 instance=ExtResource("4_g4ahy")]
 position = Vector2(21, 136)
-orientation = 2
+collision_layer = 8
 door_id = &"7S"
 target_room = "uid://bc6vlosc3usda"
 target_door_id = &"12N"
 starts_open = true
+orientation = 2
 
 [node name="Sueño" type="Node2D" parent="Switchable" unique_id=1018947006]
+visible = false
 
 [node name="Tiles" type="TileMapLayer" parent="Switchable/Sueño" unique_id=1715976387]
 position = Vector2(35.6, 6)
@@ -59,28 +63,37 @@ tile_map_data = PackedByteArray("AAD6//v/AAAAAAAAAAD7//v/AAACAAAAAAADAPv/AAAAAAA
 tile_set = ExtResource("4_d871s")
 
 [node name="DoorOeste" parent="Switchable/Sueño" unique_id=1536784231 instance=ExtResource("5_d871s")]
+process_mode = 3
 position = Vector2(-163, -18)
-orientation = 3
+disable_mode = 2
+collision_layer = 8
 door_id = &"7O"
 target_room = "uid://mpsapmarxum7"
 target_door_id = &"1E"
 starts_open = true
+orientation = 3
 
 [node name="DoorEste" parent="Switchable/Sueño" unique_id=1957605886 instance=ExtResource("5_d871s")]
+process_mode = 3
 position = Vector2(199, -18)
-orientation = 1
+disable_mode = 2
+collision_layer = 8
 door_id = &"7E"
 target_room = "uid://bwkaa8ycbdfuy"
 target_door_id = &"8O"
 starts_open = true
+orientation = 1
 
 [node name="DoorSur" parent="Switchable/Sueño" unique_id=1772431761 instance=ExtResource("5_d871s")]
+process_mode = 3
 position = Vector2(21, 136)
-orientation = 2
+disable_mode = 2
+collision_layer = 8
 door_id = &"7S"
 target_room = "uid://bc6vlosc3usda"
 target_door_id = &"12N"
 starts_open = true
+orientation = 2
 
 [node name="Walls" type="StaticBody2D" parent="." unique_id=1872382948]
 visible = false

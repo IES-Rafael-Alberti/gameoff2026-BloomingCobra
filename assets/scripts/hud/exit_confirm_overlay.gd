@@ -203,12 +203,12 @@ func _make_selector(tex: Texture2D, flip: bool) -> TextureRect:
 	return selector
 
 
-func _apply_font(label: Label, size: int) -> void:
+func _apply_font(label: Label, point_size: int) -> void:
 	if label == null:
 		return
 	if _menu_font != null:
 		label.add_theme_font_override("font", _menu_font)
-	label.add_theme_font_size_override("font_size", size)
+	label.add_theme_font_size_override("font_size", point_size)
 	label.add_theme_color_override("font_color", text_color)
 	label.modulate = Color.WHITE
 

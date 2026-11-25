@@ -28,8 +28,7 @@ func setup(brain: Node, shield_area: Area2D) -> void:
 
 func set_shield_active(active: bool) -> void:
 	_active = active
-	if _active and _brain != null:
-		_brain.play_defense_anim()
+	# Defending clip is reserved for blocked hits; walking/resting own the pose.
 	if _shield_area != null:
 		_shield_area.visible = _active
 

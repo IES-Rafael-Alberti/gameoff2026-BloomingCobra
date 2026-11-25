@@ -5,9 +5,9 @@ extends PropDefinition
 ## `amount` meaning depends on pickup_type:
 ## - heal / cat_heal: vitality restored
 ## - max_health: max vitality gained (also heals that much)
-## - attack_boost / projectile_boost: flat damage bonus while active
+## - attack_boost / projectile_boost: damage stacks added (permanent)
 ## - shield: number of hits absorbed
-## `duration` is used by timed buffs (attack / projectile).
+## `duration` is unused (kept for older .tres files).
 
 @export var pickup_type: StringName = &"heal"
 @export var amount: int = 25

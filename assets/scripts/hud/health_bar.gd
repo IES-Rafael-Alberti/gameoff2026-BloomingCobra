@@ -39,7 +39,6 @@ const RED_RIGHT := [
 @onready var _under: TextureRect = $Margin/Column/TopRow/Root/Under
 @onready var _fill: TextureRect = $Margin/Column/TopRow/Root/Fill
 @onready var _buff_pad: MarginContainer = $Margin/Column/BuffPad
-@onready var _buff_row: HBoxContainer = $Margin/Column/BuffPad/BuffRow
 @onready var _buff_attack: VBoxContainer = $Margin/Column/BuffPad/BuffRow/Attack
 @onready var _buff_projectile: VBoxContainer = $Margin/Column/BuffPad/BuffRow/Projectile
 @onready var _buff_shield: VBoxContainer = $Margin/Column/BuffPad/BuffRow/Shield
@@ -179,7 +178,7 @@ func _configure_nodes() -> void:
 				top_sep = _top_row.get_theme_constant("separation")
 			_buff_pad.add_theme_constant_override(
 				"margin_left",
-				maxi(0, int(round(switch_size.x + float(top_sep))))
+				maxi(0, roundi(switch_size.x + float(top_sep)))
 			)
 	if _root != null:
 		_root.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -205,16 +204,16 @@ func _configure_buff_slot(slot: VBoxContainer, icon_index: int) -> void:
 	icon.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	var size := Vector2(BUFF_CELL) * buff_icon_scale
-	icon.custom_minimum_size = size
-	icon.size = size
+	var icon_size := Vector2(BUFF_CELL) * buff_icon_scale
+	icon.custom_minimum_size = icon_size
+	icon.size = icon_size
 	if icon_index >= 0 and icon_index < _buff_icons.size():
 		icon.texture = _buff_icons[icon_index]
 
 
 func _size_tier(max_vitality: float) -> int:
 	var gained := maxf(max_vitality - base_max_vitality, 0.0)
-	return clampi(int(floor(gained / maxf(vitality_per_size_tier, 0.001))), 0, ROWS - 1)
+	return clampi(floori(gained / maxf(vitality_per_size_tier, 0.001)), 0, ROWS - 1)
 
 
 func _fill_ratio_for_col(row: int, col: int) -> float:

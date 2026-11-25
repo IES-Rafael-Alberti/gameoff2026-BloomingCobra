@@ -3,7 +3,8 @@ extends Node
 ## Elite enemy brain: idle → aggressive → resting (after charge).
 
 @export var max_health: int = 8
-@export var hurt_anim_time: float = 0.4
+## Held defending pose when the frontal shield blocks a hit (walk/rest only; never cancels charge/spin).
+@export var defend_anim_time: float = 0.6
 
 ## Pushed from Enemy Stats; used by Idle / Aggressive for aggro and deaggro.
 var detection_radius: float = 110.0
@@ -14,7 +15,8 @@ var _active: bool = true
 var _facing: Vector2 = Vector2.DOWN
 var _state_name: StringName = &""
 var _states: Dictionary = {}
-var _hurt_lock: float = 0.0
+var _defend_lock: float = 0.0
+var _resting_overlay: AnimatedSprite2D = null
 
 var shield: Node
 var charge: Node
@@ -31,9 +33,8 @@ func setup(enemy: CharacterBody2D) -> void:
 	if dmg != null and "max_health" in dmg:
 		dmg.max_health = max_health
 		dmg.health = max_health
-	if dmg != null and dmg.has_signal("damaged") and not dmg.damaged.is_connected(_on_damaged):
-		dmg.damaged.connect(_on_damaged)
 
+	_ensure_resting_overlay()
 	_setup_modules()
 	_setup_states()
 	change_state(&"idle")
@@ -42,8 +43,9 @@ func setup(enemy: CharacterBody2D) -> void:
 func set_active(active: bool) -> void:
 	_active = active
 	if not _active:
-		_hurt_lock = 0.0
+		_defend_lock = 0.0
 		_enemy.velocity = Vector2.ZERO
+		_hide_resting_overlay()
 		if charge != null:
 			charge.reset()
 		if circular != null:
@@ -53,12 +55,11 @@ func set_active(active: bool) -> void:
 func physics_update(delta: float) -> void:
 	if not _active or _enemy == null:
 		return
-	# Keep hurt animation visible; don't let states overwrite it immediately.
-	if _hurt_lock > 0.0:
-		_hurt_lock = maxf(_hurt_lock - delta, 0.0)
-		_enemy.velocity = Vector2.ZERO
-		play_hurt_anim(_facing)
-		return
+	if _defend_lock > 0.0:
+		_defend_lock = maxf(_defend_lock - delta, 0.0)
+		# Keep the pose only while attacks aren't owning the sprite.
+		if not _attack_owns_sprite():
+			play_defense_anim()
 	var state: EliteState = _states.get(_state_name) as EliteState
 	if state != null:
 		state.physics_update(delta)
@@ -122,73 +123,195 @@ func try_receive_hit(amount: int, hit_origin: Vector2) -> bool:
 		var player := get_player()
 		if shield.has_method("apply_block_to_player"):
 			shield.apply_block_to_player(player)
-		play_defense_anim()
+		_trigger_defend_anim()
 		return false
 
 	var dmg := _enemy.get_node_or_null("Damageable")
 	if dmg != null and dmg.has_method("take_damage"):
-		# Face the attacker so the correct directional hurt plays.
 		var to_hit: Vector2 = hit_origin - _enemy.global_position
 		if to_hit != Vector2.ZERO:
 			set_facing(to_hit)
 		dmg.take_damage(amount)
-		_trigger_hurt_anim()
+		# No hurt clip — definitive art only has defending for shield blocks.
 		return true
 	return false
 
 
-func _on_damaged(_amount: int, _current_health: int) -> void:
-	# Backup path if damage bypasses try_receive_hit.
-	if _hurt_lock <= 0.0:
-		_trigger_hurt_anim()
-
-
-func _trigger_hurt_anim() -> void:
-	_hurt_lock = hurt_anim_time
-	play_hurt_anim(_facing)
+func _trigger_defend_anim() -> void:
+	# Charge / spin keep ownership of the sprite; only flash defend otherwise.
+	if _attack_owns_sprite():
+		return
+	_defend_lock = defend_anim_time
+	play_defense_anim()
 
 
 func play_walk_anim(dir: Vector2) -> void:
+	if _defend_lock > 0.0:
+		return
+	_hide_resting_overlay()
 	_enemy.call("set_attacking", false)
 	_enemy.call("play_directional_animation", "walking", dir)
 
 
-func play_charge_anim(dir: Vector2) -> void:
+## Windup frames only (everything except the last). Last frame is the dash pose.
+func play_charge_windup(dir: Vector2) -> void:
+	_defend_lock = 0.0
+	_hide_resting_overlay()
 	_enemy.call("set_attacking", true)
 	_enemy.call("play_directional_animation", "charge", dir)
+	_clamp_charge_to_windup()
+
+
+## Hold the final charge frame while dashing.
+func play_charge_dash(dir: Vector2) -> void:
+	_defend_lock = 0.0
+	_hide_resting_overlay()
+	_enemy.call("set_attacking", true)
+	_enemy.call("play_directional_animation", "charge", dir)
+	var sprite := _main_sprite()
+	if sprite == null or sprite.sprite_frames == null:
+		return
+	var anim := sprite.animation
+	var count := sprite.sprite_frames.get_frame_count(anim)
+	if count <= 0:
+		return
+	sprite.frame = count - 1
+	sprite.pause()
+
+
+func play_charge_anim(dir: Vector2) -> void:
+	## Legacy entry — treat as windup.
+	play_charge_windup(dir)
 
 
 func play_defense_anim() -> void:
-	# Idle/defend uses resting frames as guarded stance when defense_* is absent.
+	if _attack_owns_sprite():
+		return
+	_hide_resting_overlay()
 	_enemy.call("set_attacking", true)
-	var sprite := _enemy.get_node_or_null("AnimatedSprite2D") as AnimatedSprite2D
-	if sprite != null and sprite.sprite_frames != null and sprite.sprite_frames.has_animation("resting_down"):
-		_enemy.call("play_directional_animation", "resting", _facing)
+	var sprite := _main_sprite()
+	if sprite != null and sprite.sprite_frames != null and sprite.sprite_frames.has_animation("defending_down"):
+		_enemy.call("play_directional_animation", "defending", _facing)
 	elif sprite != null and sprite.sprite_frames != null and sprite.sprite_frames.has_animation("defense_down"):
 		_enemy.call("play_directional_animation", "defense", _facing)
+	elif sprite != null and sprite.sprite_frames != null and sprite.sprite_frames.has_animation("resting_down"):
+		_enemy.call("play_directional_animation", "resting", _facing)
 	else:
 		_enemy.call("play_directional_animation", "walking", Vector2.ZERO)
-
-
-func play_hurt_anim(dir: Vector2) -> void:
-	_enemy.call("set_attacking", true)
-	var hurt_dir := dir if dir != Vector2.ZERO else _facing
-	_enemy.call("play_directional_animation", "hurt", hurt_dir)
+	# Single-frame clips: hold the pose instead of letting another anim resume.
+	if sprite != null and String(sprite.animation).begins_with("defending"):
+		sprite.pause()
 
 
 func play_resting_anim(dir: Vector2) -> void:
+	if _defend_lock > 0.0:
+		return
+	_hide_resting_overlay()
 	_enemy.call("set_attacking", true)
 	_enemy.call("play_directional_animation", "resting", dir)
 
 
 func play_rotate_attack() -> void:
+	_defend_lock = 0.0
 	_enemy.call("set_attacking", true)
-	var sprite := _enemy.get_node_or_null("AnimatedSprite2D") as AnimatedSprite2D
+	var sprite := _main_sprite()
 	if sprite == null:
 		return
 	# Only start once — calling play() every frame restarts the anim at frame 0.
 	if sprite.animation != &"rotate_attack" or not sprite.is_playing():
 		sprite.play("rotate_attack")
+	_show_resting_overlay(_facing)
+
+
+func _attack_owns_sprite() -> bool:
+	if charge != null and charge.has_method("is_busy") and charge.is_busy():
+		return true
+	if circular != null and circular.has_method("is_busy") and circular.is_busy():
+		return true
+	return false
+
+
+func clear_rotate_attack_overlay() -> void:
+	_hide_resting_overlay()
+
+
+func _clamp_charge_to_windup() -> void:
+	var sprite := _main_sprite()
+	if sprite == null or sprite.sprite_frames == null:
+		return
+	var anim := sprite.animation
+	var count := sprite.sprite_frames.get_frame_count(anim)
+	if count < 2:
+		return
+	# Loop windup frames only; never hold on the dash (last) frame.
+	if count == 2:
+		sprite.frame = 0
+		sprite.pause()
+		return
+	if sprite.frame >= count - 1:
+		sprite.frame = 0
+
+
+func _main_sprite() -> AnimatedSprite2D:
+	if _enemy == null:
+		return null
+	return _enemy.get_node_or_null("AnimatedSprite2D") as AnimatedSprite2D
+
+
+func _ensure_resting_overlay() -> void:
+	if _enemy == null:
+		return
+	_resting_overlay = _enemy.get_node_or_null("RestingOverlay") as AnimatedSprite2D
+	if _resting_overlay != null:
+		_resting_overlay.visible = false
+		return
+	var main := _main_sprite()
+	_resting_overlay = AnimatedSprite2D.new()
+	_resting_overlay.name = "RestingOverlay"
+	_resting_overlay.visible = false
+	_resting_overlay.z_index = 1
+	if main != null:
+		_resting_overlay.position = main.position
+		_resting_overlay.scale = main.scale
+		_resting_overlay.sprite_frames = main.sprite_frames
+		_resting_overlay.texture_filter = main.texture_filter
+	_enemy.add_child(_resting_overlay)
+
+
+func _show_resting_overlay(dir: Vector2) -> void:
+	_ensure_resting_overlay()
+	if _resting_overlay == null or _resting_overlay.sprite_frames == null:
+		return
+	var facing := dir if dir != Vector2.ZERO else _facing
+	var anim := _resting_anim_name(facing)
+	if not _resting_overlay.sprite_frames.has_animation(anim):
+		return
+	var main := _main_sprite()
+	if main != null:
+		_resting_overlay.position = main.position
+		_resting_overlay.scale = main.scale
+		_resting_overlay.flip_h = main.flip_h
+	_resting_overlay.visible = true
+	if _resting_overlay.animation != anim or not _resting_overlay.is_playing():
+		_resting_overlay.play(anim)
+
+
+func _hide_resting_overlay() -> void:
+	if _resting_overlay == null:
+		return
+	_resting_overlay.visible = false
+	_resting_overlay.stop()
+
+
+func _resting_anim_name(dir: Vector2) -> StringName:
+	var facing := cardinal_from(dir)
+	if facing == Vector2.LEFT:
+		return &"resting_left"
+	if facing == Vector2.RIGHT:
+		return &"resting_right"
+	if facing == Vector2.UP:
+		return &"resting_up"
+	return &"resting_down"
 
 
 func _setup_modules() -> void:

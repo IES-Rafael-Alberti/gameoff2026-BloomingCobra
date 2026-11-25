@@ -233,10 +233,10 @@ func _build_ui() -> void:
 		_controls.closed.connect(_on_controls_closed)
 
 
-func _apply_font(label: Label, size: int) -> void:
+func _apply_font(label: Label, point_size: int) -> void:
 	if _menu_font != null:
 		label.add_theme_font_override("font", _menu_font)
-	label.add_theme_font_size_override("font_size", size)
+	label.add_theme_font_size_override("font_size", point_size)
 	label.add_theme_color_override("font_color", text_color)
 
 
@@ -254,7 +254,7 @@ func _fit_panel() -> void:
 
 	# Shrink type on short screens so all rows fit without scrolling.
 	var scale := clampf(available_h / 520.0, 0.65, 1.0)
-	font_size = maxi(int(round(float(_base_font_size) * scale)), 16)
+	font_size = maxi(roundi(float(_base_font_size) * scale), 16)
 	_apply_responsive_fonts()
 
 	# Width first so wrapped description measures correctly.
@@ -354,7 +354,7 @@ func _refresh_values(sync_slider: bool = true) -> void:
 	if _volume_slider != null and sync_slider:
 		_volume_slider.set_value_no_signal(GameSettings.master_volume)
 	if _value_labels.size() > 0 and _value_labels[0] != null:
-		_value_labels[0].text = "%d%%" % int(round(GameSettings.master_volume * 100.0))
+		_value_labels[0].text = "%d%%" % roundi(GameSettings.master_volume * 100.0)
 	if _value_labels.size() > 1 and _value_labels[1] != null:
 		_value_labels[1].text = GameSettings.display_mode_label()
 	if _value_labels.size() > 2 and _value_labels[2] != null:
