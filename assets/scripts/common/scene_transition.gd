@@ -5,6 +5,7 @@ extends CanvasLayer
 const FONT_PATH := "res://assets/fonts/MagicalNeverlandRegular-JpRZ7.ttf"
 const FADE_SECONDS := 0.4
 const MIN_LOADING_SECONDS := 0.55
+const READY_TIMEOUT_SECONDS := 8.0
 const LOADING_BASE := "Loading"
 const OVERLAY_COLOR := Color(0.02, 0.02, 0.05, 1.0)
 const TEXT_COLOR := Color(0.96, 0.92, 0.86, 1.0)
@@ -34,9 +35,9 @@ func change_to(scene_path: String) -> void:
 	if scene_path.is_empty():
 		push_warning("SceneTransition.change_to: empty scene path")
 		return
+	# Keep the coroutine owned by this autoload (survives change_scene).
 	_busy = true
-	await _run_transition(scene_path)
-	_busy = false
+	_run_transition(scene_path)
 
 
 func _build_ui() -> void:
@@ -83,29 +84,29 @@ func _run_transition(scene_path: String) -> void:
 	set_process(true)
 
 	await _fade_overlay(1.0)
+	if not is_inside_tree():
+		_busy = false
+		return
 	_label.modulate.a = 1.0
 
 	var load_started_msec := Time.get_ticks_msec()
 	var packed := await _load_packed(scene_path)
 	if packed == null:
 		push_error("SceneTransition: failed to load %s" % scene_path)
-		_label.modulate.a = 0.0
-		await _fade_overlay(0.0)
-		visible = false
-		set_process(false)
+		await _abort_overlay()
 		return
 
-	var err := get_tree().change_scene_to_packed(packed)
-	if err != OK:
-		push_error("SceneTransition: change_scene failed (%s) for %s" % [error_string(err), scene_path])
-		_label.modulate.a = 0.0
-		await _fade_overlay(0.0)
-		visible = false
-		set_process(false)
-		return
+	# Defer the swap so this autoload coroutine is not interrupted mid-call.
+	get_tree().change_scene_to_packed(packed)
+	await get_tree().process_frame
+	await get_tree().process_frame
 
 	await _wait_until_game_ready()
 	await _wait_min_loading(load_started_msec)
+
+	if not is_inside_tree():
+		_busy = false
+		return
 
 	var fade_out := create_tween()
 	fade_out.set_parallel(true)
@@ -118,6 +119,15 @@ func _run_transition(scene_path: String) -> void:
 	_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	visible = false
 	set_process(false)
+	_busy = false
+
+
+func _abort_overlay() -> void:
+	_label.modulate.a = 0.0
+	await _fade_overlay(0.0)
+	visible = false
+	set_process(false)
+	_busy = false
 
 
 func _fade_overlay(target_alpha: float) -> void:
@@ -129,52 +139,65 @@ func _fade_overlay(target_alpha: float) -> void:
 
 func _load_packed(path: String) -> PackedScene:
 	if ResourceLoader.has_cached(path):
-		return load(path) as PackedScene
+		return ResourceLoader.load(path) as PackedScene
 
 	var status := ResourceLoader.load_threaded_get_status(path)
 	if status == ResourceLoader.THREAD_LOAD_INVALID_RESOURCE:
 		var req_err := ResourceLoader.load_threaded_request(path)
 		if req_err != OK:
-			return load(path) as PackedScene
+			# Last resort: may hitch, but keeps the transition moving.
+			return ResourceLoader.load(path) as PackedScene
 
+	var wait_start := Time.get_ticks_msec()
 	while true:
 		var progress: Array = []
 		status = ResourceLoader.load_threaded_get_status(path, progress)
 		match status:
 			ResourceLoader.THREAD_LOAD_LOADED:
 				return ResourceLoader.load_threaded_get(path) as PackedScene
-			ResourceLoader.THREAD_LOAD_FAILED, ResourceLoader.THREAD_LOAD_INVALID_RESOURCE:
-				return load(path) as PackedScene
+			ResourceLoader.THREAD_LOAD_FAILED:
+				push_error("SceneTransition: threaded load failed for %s" % path)
+				return ResourceLoader.load(path) as PackedScene
+			ResourceLoader.THREAD_LOAD_INVALID_RESOURCE:
+				return ResourceLoader.load(path) as PackedScene
 			_:
+				if Time.get_ticks_msec() - wait_start > 20000:
+					push_error("SceneTransition: timed out loading %s" % path)
+					return ResourceLoader.load(path) as PackedScene
 				await get_tree().process_frame
-	return load(path) as PackedScene
+	return null
 
 
 func _wait_until_game_ready() -> void:
 	# Let the new scene run _ready / deferred bootstrap.
+	if get_tree() == null:
+		return
 	await get_tree().process_frame
 	await get_tree().process_frame
 
 	var room_manager := get_tree().get_first_node_in_group("room_manager")
 	if room_manager == null:
-		await get_tree().create_timer(0.2).timeout
+		await get_tree().create_timer(0.25).timeout
 		return
 
-	# Bootstrap is deferred; wait until the first room transition starts.
 	var wait_start := Time.get_ticks_msec()
-	while not bool(room_manager.call("is_transitioning")):
+	var timeout_msec := int(READY_TIMEOUT_SECONDS * 1000.0)
+
+	# Bootstrap is deferred; wait until the first room transition starts.
+	while is_instance_valid(room_manager) and not bool(room_manager.call("is_transitioning")):
 		if Time.get_ticks_msec() - wait_start > 1500:
 			break
 		await get_tree().process_frame
-		if not is_instance_valid(room_manager):
-			return
 
 	while is_instance_valid(room_manager) and bool(room_manager.call("is_transitioning")):
+		if Time.get_ticks_msec() - wait_start > timeout_msec:
+			push_warning("SceneTransition: room ready wait timed out")
+			break
 		await get_tree().process_frame
 
 
 func _wait_min_loading(started_msec: int) -> void:
 	var elapsed := float(Time.get_ticks_msec() - started_msec) / 1000.0
 	var remaining := MIN_LOADING_SECONDS - elapsed
-	if remaining > 0.0:
+	if remaining > 0.0 and get_tree() != null:
 		await get_tree().create_timer(remaining).timeout

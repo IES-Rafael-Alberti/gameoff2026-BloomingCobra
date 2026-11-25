@@ -38,7 +38,7 @@ script = ExtResource("5_sw")
 
 [node name="Spikes" type="TileMapLayer" parent="Switchable/Sueño"]
 z_index = 1
-tile_map_data = PackedByteArray("AAD0//z/AAAAAAAAAAD0/wAAAAAAAAAAAAD0/wQAAAAAAAAAAAAGAPz/AAAAAAAAAAAGAAAAAAAAAAAAAAAGAAQAAAAAAAAAAAD7/wYAAAAAAAAAAAD//wYAAAAAAAAAAAA=")
+tile_map_data = PackedByteArray(0, 0, 254, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 254, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 tile_set = ExtResource("7_spikes_ts")
 script = ExtResource("7_spikes_scr")
 
