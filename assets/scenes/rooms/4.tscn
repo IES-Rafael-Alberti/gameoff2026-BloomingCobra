@@ -5,8 +5,6 @@
 [ext_resource type="TileSet" uid="uid://mo5sa42ii37l" path="res://assets/resources/tilesets/tileset_pesadilla_red.tres" id="3_geaiu"]
 [ext_resource type="TileSet" uid="uid://bk7uacfb2knda" path="res://assets/resources/tilesets/tileset_vigilia_red.tres" id="4_1gwah"]
 [ext_resource type="PackedScene" uid="uid://b41468s5i5aea" path="res://assets/scenes/props/pesadilla/interactive/doorPesadilla.tscn" id="4_geaiu"]
-[ext_resource type="TileSet" uid="uid://cod5hqlj1hrki" path="res://assets/resources/tilesets/tileset_spikes_pesadilla.tres" id="4_mpfgx"]
-[ext_resource type="Script" uid="uid://b5iyhww45wsuu" path="res://assets/scripts/props/static/spikes_tile_layer.gd" id="4_spikes_scr"]
 [ext_resource type="TileSet" uid="uid://ca112a4s4rpwe" path="res://assets/resources/tilesets/barreraPesadilla.tres" id="5_cd2y3"]
 [ext_resource type="PackedScene" uid="uid://cb5rvks5i5aea" path="res://assets/scenes/props/vigilia/interactive/doorVigilia.tscn" id="6_1gwah"]
 [ext_resource type="TileSet" uid="uid://rrdpge4ki82b" path="res://assets/resources/tilesets/barreraVigilia.tres" id="8_mpfgx"]
@@ -19,7 +17,6 @@ size = Vector2(12.5, 167.5)
 
 [node name="4" type="Node2D" unique_id=1556955998]
 script = ExtResource("1_52kir")
-map_shape = 0
 room_id = &"4"
 map_cell = Vector2i(3, 0)
 
@@ -32,13 +29,6 @@ script = ExtResource("2_bmff8")
 scale = Vector2(0.3, 0.3)
 tile_map_data = PackedByteArray("AAD7//v/AAAAAAAAAAD8//v/AAABAAAAAAD9//v/AAABAAAAAAD+//v/AAACAAAAAAAEAPv/AAAAAAAAAAAFAPv/AAACAAAAAAAFAPz/AAACAAEAAAAFAP3/AAACAAEAAAAFAP7/AAACAAEAAAAFAP//AAACAAQAAAAFAAAAAAACAAQAAAAFAAEAAAACAAQAAAAFAAIAAAACAAEAAAAFAAMAAAACAAIAAAD8/wMAAAABAAIAAAD9/wMAAAABAAIAAAD+/wMAAAABAAIAAAD//wMAAAABAAIAAAAAAAMAAAABAAIAAAABAAMAAAABAAUAAAACAAMAAAABAAUAAAADAAMAAAABAAUAAAAEAAMAAAABAAIAAAD7/wMAAAAAAAIAAAD7//z/AAAAAAEAAAD7//3/AAAAAAEAAAD7//7/AAAAAAEAAAD7////AAAAAAQAAAD7/wAAAAAAAAQAAAD7/wEAAAAAAAQAAAD7/wIAAAAAAAEAAAD9////AAAAAAcAAAD9//7/AAABAAEAAAD9//3/AAABAAEAAAD9//z/AAABAAEAAAD8//z/AAABAAEAAAD8//3/AAABAAEAAAD8//7/AAABAAEAAAD8////AAAAAAcAAAD8/wAAAAABAAQAAGD8/wEAAAAAAAcAAAD8/wIAAAABAAEAAAD9/wIAAAABAAEAAAD9/wEAAAAAAAcAAAD9/wAAAAABAAQAAGD+/wAAAAABAAQAAGD+////AAAAAAcAAAD+//7/AAABAAEAAAD+//3/AAABAAEAAAD+//z/AQAEAAIAAAD///z/AAABAAAAAAD///3/AAABAAEAAAD///7/AAABAAEAAAD/////AAAAAAcAAAD//wAAAAABAAQAAGD//wEAAAAAAAcAAAD+/wEAAAAAAAcAAAD+/wIAAAABAAEAAAD//wIAAAABAAEAAAAAAAIAAAABAAEAAAAAAAEAAAAAAAcAAAAAAAAAAAABAAQAAGAAAP//AAAAAAcAAAAAAP7/AAABAAEAAAAAAP3/AQAEAAIAAAABAP3/AAABAAMAAAABAP7/AAAAAAcAAAABAP//AAAAAAcAAAABAAAAAAABAAQAAGABAAEAAAAAAAcAAAABAAIAAAAAAAcAAAACAAIAAAABAAQAAAACAAEAAAABAAQAAAACAAAAAAABAAQAAAACAP//AAABAAQAAAACAP7/AAABAAQAAAACAP3/AAABAAMAAAADAP3/AAABAAMAAAADAP7/AAAAAAcAAAADAP//AAAAAAcAAAADAAAAAAABAAQAAGADAAEAAAAAAAcAAAADAAIAAAAAAAcAAAAEAAIAAAABAAEAAAAEAAEAAAAAAAcAAAAEAAAAAAABAAQAAGAEAP//AAAAAAcAAAAEAP7/AAABAAEAAAAEAP3/AQAGAAIAAAAEAPz/AAAAAAEAAAAAAPz/AAACAAAAAAA=")
 tile_set = ExtResource("3_geaiu")
-
-[node name="TileMapLayer" type="TileMapLayer" parent="Switchable/Pesadilla" unique_id=453891149]
-z_index = 1
-scale = Vector2(0.3, 0.3)
-tile_map_data = PackedByteArray("AAD///7/AAAAAAAAAAD+//7/AAAAAAAAAAAAAP7/AAAAAAAAAAD9//7/AAAAAAAAAAD8//7/AAAAAAAAAAA=")
-tile_set = ExtResource("4_mpfgx")
-script = ExtResource("4_spikes_scr")
 
 [node name="DoorOeste" parent="Switchable/Pesadilla" unique_id=268869019 instance=ExtResource("4_geaiu")]
 position = Vector2(-162.745, -18)
