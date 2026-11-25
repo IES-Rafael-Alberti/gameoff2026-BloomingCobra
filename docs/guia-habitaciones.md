@@ -85,6 +85,18 @@ Todo lo que cuelgue de un modo (tiles + props) **aparece/desaparece** al cambiar
 
 Tiles definitivos: **`TileMapLayer`**. Los `TileMap` monolíticos actuales son de debug.
 
+### Spikes (pinchos)
+
+Ya no se colocan como escenas sueltas. Usa un `TileMapLayer` con:
+
+- Vigilia / Sueño: `res://assets/resources/tilesets/tileset_spikes_vigilia.tres`
+- Pesadilla: `res://assets/resources/tilesets/tileset_spikes_pesadilla.tres`
+- Script: `spikes_tile_layer.gd` (daño al jugador + tileset con colisión para enemigos)
+
+Celda = **14×14**. Prefabs vacíos listos para pintar: `spikesVigilia.tscn` / `spikesPesadillla.tscn`.
+
+Pon la capa bajo `Switchable/Sueño` o `Switchable/Pesadilla` según el modo.
+
 ---
 
 ## Checklist mínimo para que “funcione”

@@ -50,7 +50,6 @@ signal weakpoint_damaged(amount: int, current_health: int)
 
 @onready var weakpoint: Area2D = get_node_or_null("Weakpoint") as Area2D
 @onready var weakpoint_shape: CollisionShape2D = get_node_or_null("Weakpoint/CollisionShape2D") as CollisionShape2D
-@onready var weakpoint_visual: CanvasItem = get_node_or_null("Weakpoint/Visual") as CanvasItem
 @onready var laser_line: Line2D = get_node_or_null("LaserLine") as Line2D
 @onready var laser_ray: RayCast2D = get_node_or_null("LaserLine/RayCast2D") as RayCast2D
 @onready var beam_template: AnimatedSprite2D = get_node_or_null("LaserLine/Beam") as AnimatedSprite2D
@@ -182,8 +181,6 @@ func _set_weakpoint_active(active: bool) -> void:
 		weakpoint.set_deferred("monitorable", active)
 	if weakpoint_shape != null:
 		weakpoint_shape.set_deferred("disabled", not active)
-	if weakpoint_visual != null:
-		weakpoint_visual.visible = active
 
 
 func _arena_drop_position() -> Vector2:

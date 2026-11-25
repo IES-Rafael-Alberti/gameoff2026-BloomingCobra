@@ -185,10 +185,6 @@ monitorable = false
 shape = SubResource("CircleShape2D_weak")
 disabled = true
 
-[node name="Visual" type="Polygon2D" parent="Weakpoint" unique_id=1462253601]
-color = Color(1, 0.25, 0.35, 0.85)
-polygon = PackedVector2Array(-6, -6, 6, -6, 6, 6, -6, 6)
-
 [node name="LaserLine" type="Line2D" parent="." unique_id=984344726]
 visible = false
 z_index = 20

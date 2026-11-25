@@ -1,28 +1,9 @@
-[gd_scene format=3 uid="uid://ck7etjlladivy"]
+[gd_scene format=3]
 
-[ext_resource type="Script" uid="uid://bnfjiqrlbkdtf" path="res://assets/scripts/props/static/spikes.gd" id="1_spikes"]
-[ext_resource type="Texture2D" uid="uid://bfmcufim7vn4s" path="res://assets/sprittesheets/props/placeholders/static/spikes.png" id="2_tex"]
+[ext_resource type="TileSet" path="res://assets/resources/tilesets/tileset_spikes_pesadilla.tres" id="1_wpuv0"]
+[ext_resource type="Script" path="res://assets/scripts/props/static/spikes_tile_layer.gd" id="2_nictn"]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_spikes"]
-size = Vector2(14, 14)
-
-[node name="Spikes" type="Area2D" unique_id=355519195]
+[node name="SpikesPesadilla" type="TileMapLayer" unique_id=1967443981]
 z_index = 1
-collision_layer = 0
-collision_mask = 2
-monitorable = false
-script = ExtResource("1_spikes")
-
-[node name="Sprite2D" type="Sprite2D" parent="." unique_id=459052350]
-texture_filter = 1
-texture = ExtResource("2_tex")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=2031790946]
-shape = SubResource("RectangleShape2D_spikes")
-
-[node name="EnemyBlocker" type="StaticBody2D" parent="." unique_id=1900812622]
-collision_layer = 32
-collision_mask = 0
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="EnemyBlocker" unique_id=1933114452]
-shape = SubResource("RectangleShape2D_spikes")
+tile_set = ExtResource("1_wpuv0")
+script = ExtResource("2_nictn")
