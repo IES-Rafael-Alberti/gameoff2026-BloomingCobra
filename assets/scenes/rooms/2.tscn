@@ -92,6 +92,7 @@ script = ExtResource("2_ll5gr")
 
 [node name="DoorEste" parent="Memoria" unique_id=1585883758 instance=ExtResource("3_ll5gr")]
 process_mode = 3
+visible = false
 position = Vector2(137, -15)
 disable_mode = 2
 collision_layer = 8

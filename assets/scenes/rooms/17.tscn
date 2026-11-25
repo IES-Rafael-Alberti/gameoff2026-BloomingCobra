@@ -14,7 +14,7 @@
 [ext_resource type="PackedScene" uid="uid://cbt3w2furilt1" path="res://assets/scenes/enemies/hunter.tscn" id="12_yyn4g"]
 [ext_resource type="PackedScene" uid="uid://biqe6ous6m14k" path="res://assets/scenes/enemies/roamer.tscn" id="13_oxyln"]
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_td1ih"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_uge44"]
 texture = ExtResource("9_6si2c")
 texture_region_size = Vector2i(675, 675)
 0:1/0 = 0
@@ -36,13 +36,12 @@ texture_region_size = Vector2i(675, 675)
 tile_size = Vector2i(675, 675)
 physics_layer_0/collision_layer = 1
 physics_layer_0/collision_mask = 0
-sources/0 = SubResource("TileSetAtlasSource_td1ih")
+sources/0 = SubResource("TileSetAtlasSource_uge44")
 
 [node name="17" type="Node2D" unique_id=1556955998]
 script = ExtResource("1_lb8lx")
-map_shape = 0
-map_cell = Vector2i(0, 3)
 room_id = &"17"
+map_cell = Vector2i(0, 3)
 
 [node name="Switchable" type="Node2D" parent="." unique_id=884800511]
 script = ExtResource("1_pd5op")
@@ -76,7 +75,7 @@ scale = Vector2(0.05, 0.05)
 tile_map_data = PackedByteArray("AAD7////AAAAAAIAAAD7//7/AAAAAAEAAAD8//3/AAAAAAEAAAD9//z/AAAAAAEAAAD+//v/AAAAAAEAAAACAPv/AAACAAEAAAADAPz/AAACAAEAAAAEAP3/AAACAAEAAAAEAAEAAAACAAMAAAADAAIAAAACAAMAAAACAAMAAAACAAMAAAD+/wMAAAAAAAMAAAD9/wIAAAAAAAMAAAD8/wEAAAAAAAMAAAD7/wAAAAAAAAMAAAD8//7/AAACAAMAAAD9//3/AAACAAMAAAD+//z/AAACAAMAAAD8/wAAAAACAAEAAAD9/wEAAAACAAEAAAD+/wIAAAACAAEAAAACAAIAAAAAAAEAAAADAAEAAAAAAAEAAAADAP3/AAAAAAMAAAACAPz/AAAAAAMAAAD///v/AAABAAEAAAABAPv/AAABAAEAAAD//wMAAAABAAEAAAAAAAMAAAABAAEAAAABAAMAAAABAAEAAAAFAAAAAAACAAMAAAAEAAAAAAAAAAEAAAAFAP7/AAACAAEAAAAEAP7/AAAAAAMAAAA=")
 tile_set = ExtResource("5_p81wj")
 
-[node name="SpikeVigilia" type="TileMapLayer" parent="Switchable/Pesadilla" unique_id=327389255]
+[node name="Spike" type="TileMapLayer" parent="Switchable/Pesadilla" unique_id=327389255]
 scale = Vector2(0.3, 0.3)
 tile_map_data = PackedByteArray("AAAAAP7/AAAAAAAAAAAAAP3/AAAAAAAAAAAAAAAAAAAAAAAAAAA=")
 tile_set = ExtResource("6_7jrlm")
