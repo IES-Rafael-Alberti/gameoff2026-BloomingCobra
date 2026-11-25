@@ -75,10 +75,8 @@ side = 1
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=540850655]
 scale = Vector2(0.135, 0.135)
 sprite_frames = SubResource("SpriteFrames_hand")
-animation = &"Cargar"
+animation = &"Idle"
 autoplay = "Idle"
-frame_progress = 0.603861
-flip_h = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=2093025280]
 shape = SubResource("CircleShape2D_body")

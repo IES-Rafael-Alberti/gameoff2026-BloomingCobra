@@ -1,34 +1,9 @@
-[gd_scene format=3 uid="uid://ob7byidu0h0i"]
+[gd_scene format=3]
 
-[ext_resource type="Script" uid="uid://bnfjiqrlbkdtf" path="res://assets/scripts/props/static/spikes.gd" id="1_spikes"]
-[ext_resource type="Texture2D" uid="uid://c0x0c5ptiyqno" path="res://assets/sprittesheets/props/definitivo/Nightmare Props.png" id="2_sheet"]
+[ext_resource type="TileSet" path="res://assets/resources/tilesets/tileset_spikes_pesadilla.tres" id="1_m72e4"]
+[ext_resource type="Script" path="res://assets/scripts/props/static/spikes_tile_layer.gd" id="2_82lga"]
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_spikes"]
-atlas = ExtResource("2_sheet")
-region = Rect2(2063, 12, 636, 663)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_spikes"]
-size = Vector2(14, 14)
-
-[node name="Spikes" type="Area2D" unique_id=289141038]
+[node name="SpikesPesadilla" type="TileMapLayer" unique_id=1994930578]
 z_index = 1
-scale = Vector2(3, 3)
-collision_layer = 0
-collision_mask = 2
-monitorable = false
-script = ExtResource("1_spikes")
-
-[node name="Sprite2D" type="Sprite2D" parent="." unique_id=433170125]
-texture_filter = 1
-scale = Vector2(0.02, 0.02)
-texture = SubResource("AtlasTexture_spikes")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1586654004]
-shape = SubResource("RectangleShape2D_spikes")
-
-[node name="EnemyBlocker" type="StaticBody2D" parent="." unique_id=2017775642]
-collision_layer = 32
-collision_mask = 0
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="EnemyBlocker" unique_id=868097563]
-shape = SubResource("RectangleShape2D_spikes")
+tile_set = ExtResource("1_m72e4")
+script = ExtResource("2_82lga")

@@ -17,12 +17,25 @@ signal weakpoint_damaged(amount: int, current_health: int)
 @export var bounce_collisions: int = 3
 @export var bounce_travel_speed: float = 240.0
 @export var bounce_spread_deg: float = 28.0
-@export var aoe_grow_duration: float = 2.8
+@export var aoe_grow_duration: float = 4.8
 @export var aoe_max_radius: float = 160.0
-@export var aoe_warn_time: float = 0.55
+@export var aoe_warn_time: float = 0.9
+## Curve > 1 spends longer on early pulse stages, then ramps hard into the last ones.
+@export var aoe_pulse_exponent: float = 2.4
+## Visual size of the pulse ring relative to the AoE hit radius.
+@export var aoe_visual_scale: float = 0.45
+## Expanding fade copy that rings out from the main pulse sprite.
+@export var aoe_ripple_period: float = 0.75
+@export var aoe_ripple_expand: float = 1.85
+@export var aoe_ripple_peak_alpha: float = 0.55
 @export var shift_burst_count: int = 5
 @export var shift_burst_speed: float = 130.0
 @export var projectile_scene: PackedScene
+@export_group("Laser FX")
+@export var laser_charge_time: float = 0.42
+@export var laser_beam_width_scale: float = 0.085
+@export var laser_tip_scale: float = 0.16
+@export var laser_line_width: float = 18.0
 @export_group("Fall / Return")
 @export var fall_duration: float = 0.55
 @export var impact_hold_time: float = 0.08
@@ -37,9 +50,9 @@ signal weakpoint_damaged(amount: int, current_health: int)
 
 @onready var weakpoint: Area2D = get_node_or_null("Weakpoint") as Area2D
 @onready var weakpoint_shape: CollisionShape2D = get_node_or_null("Weakpoint/CollisionShape2D") as CollisionShape2D
-@onready var weakpoint_visual: CanvasItem = get_node_or_null("Weakpoint/Visual") as CanvasItem
 @onready var laser_line: Line2D = get_node_or_null("LaserLine") as Line2D
 @onready var laser_ray: RayCast2D = get_node_or_null("LaserLine/RayCast2D") as RayCast2D
+@onready var beam_template: AnimatedSprite2D = get_node_or_null("LaserLine/Beam") as AnimatedSprite2D
 @onready var aoe_area: Area2D = get_node_or_null("AoeArea") as Area2D
 @onready var aoe_shape: CollisionShape2D = get_node_or_null("AoeArea/CollisionShape2D") as CollisionShape2D
 @onready var aoe_visual: Node2D = get_node_or_null("AoeArea/Visual") as Node2D
@@ -60,6 +73,12 @@ var _aoe_base_modulate: Color = Color.WHITE
 var _fallen_in_arena: bool = false
 var _sprite_base_scale: Vector2 = Vector2.ONE
 var _sprite_base_pos: Vector2 = Vector2.ZERO
+var _aoe_pulse_frames: int = 4
+var _aoe_echo: AnimatedSprite2D = null
+var _charge_fx: AnimatedSprite2D = null
+var _beam_segs_a: Array[AnimatedSprite2D] = []
+var _beam_segs_b: Array[AnimatedSprite2D] = []
+var _beam_tips: Array[AnimatedSprite2D] = []
 
 
 func _ready() -> void:
@@ -81,6 +100,8 @@ func _ready() -> void:
 		aoe_shape.shape = aoe_shape.shape.duplicate()
 	if aoe_visual != null:
 		_aoe_base_modulate = aoe_visual.modulate
+	_setup_aoe_pulse_visual()
+	_ensure_beam_fx()
 	_ensure_second_laser_line()
 	if animated_sprite != null:
 		_sprite_base_scale = animated_sprite.scale
@@ -160,8 +181,6 @@ func _set_weakpoint_active(active: bool) -> void:
 		weakpoint.set_deferred("monitorable", active)
 	if weakpoint_shape != null:
 		weakpoint_shape.set_deferred("disabled", not active)
-	if weakpoint_visual != null:
-		weakpoint_visual.visible = active
 
 
 func _arena_drop_position() -> Vector2:
@@ -264,7 +283,7 @@ func attack_laser_sweep() -> void:
 	if not _begin_attack():
 		return
 	play_anim(&"Cargar", true)
-	if not await _wait(0.45):
+	if not await _play_laser_charge():
 		_end_attack()
 		return
 
@@ -304,7 +323,7 @@ func attack_laser_bounce() -> void:
 	if not _begin_attack():
 		return
 	play_anim(&"Cargar", true)
-	if not await _wait(0.4):
+	if not await _play_laser_charge():
 		_end_attack()
 		return
 
@@ -345,6 +364,7 @@ func attack_laser_bounce() -> void:
 		_set_laser_points(_polyline_until(paths[0], minf(traveled, path_lengths[0])), laser_line)
 		if paths.size() > 1:
 			_set_laser_points(_polyline_until(paths[1], minf(traveled, path_lengths[1])), _laser_line_b)
+		_sync_beam_visuals_from_lines()
 
 	await _wait(0.18)
 	_laser_active = false
@@ -373,10 +393,7 @@ func attack_aoe() -> void:
 			_abort_aoe()
 			return
 		warn_elapsed += get_physics_process_delta_time()
-		_set_aoe_radius_world(14.0 + 6.0 * sin(warn_elapsed * 18.0))
-		if aoe_visual != null:
-			var pulse := 0.55 + 0.45 * absf(sin(warn_elapsed * 14.0))
-			aoe_visual.modulate = Color(1.0, 0.35, 0.2, pulse)
+		_update_aoe_pulse_visual(0.0, warn_elapsed, 14.0 + 6.0 * sin(warn_elapsed * 18.0))
 
 	var max_r_world := aoe_max_radius
 	var arena := get_arena()
@@ -394,10 +411,8 @@ func attack_aoe() -> void:
 			return
 		elapsed += get_physics_process_delta_time()
 		var t := clampf(elapsed / maxf(aoe_grow_duration, 0.01), 0.0, 1.0)
-		_set_aoe_radius_world(lerpf(12.0, max_r_world, t))
-		if aoe_visual != null:
-			var pulse := 0.65 + 0.35 * absf(sin(elapsed * 10.0))
-			aoe_visual.modulate = Color(1.0, 0.25 + 0.35 * t, 0.15, pulse)
+		var radius := lerpf(12.0, max_r_world, t)
+		_update_aoe_pulse_visual(t, elapsed, radius)
 		if animated_sprite != null:
 			animated_sprite.modulate = Color(1.0, 1.0 - 0.25 * t, 1.0 - 0.35 * t)
 
@@ -565,14 +580,21 @@ func fire_shift_burst() -> void:
 		if base_dir == Vector2.ZERO:
 			base_dir = Vector2.DOWN
 
+	var origin := global_position + Vector2(0.0, 12.0)
 	var count := maxi(shift_burst_count, 1)
 	for i in count:
 		var spread := lerpf(-0.55, 0.55, float(i) / float(maxi(count - 1, 1)))
 		var dir := base_dir.rotated(spread)
 		var bolt := projectile_scene.instantiate()
+		if bolt == null:
+			continue
 		parent.add_child(bolt)
 		if bolt is Node2D:
-			(bolt as Node2D).global_position = global_position
+			var node := bolt as Node2D
+			node.z_as_relative = false
+			node.z_index = maxi(node.z_index, 25)
+			node.global_position = origin
+			node.visible = true
 		if bolt.has_method("launch"):
 			bolt.call("launch", dir, shift_burst_speed, self)
 
@@ -655,6 +677,10 @@ func _ensure_second_laser_line() -> void:
 	_laser_line_b.z_index = 20
 	_laser_line_b.z_as_relative = false
 	_laser_line_b.clear_points()
+	# Drop duplicated Beam child; visuals are pooled separately.
+	var dup_beam := _laser_line_b.get_node_or_null("Beam")
+	if dup_beam != null:
+		dup_beam.queue_free()
 	add_child(_laser_line_b)
 	_configure_laser_line(laser_line)
 	_configure_laser_line(_laser_line_b)
@@ -665,8 +691,67 @@ func _configure_laser_line(line: Line2D) -> void:
 		return
 	line.z_index = 20
 	line.z_as_relative = false
+	line.width = laser_line_width
+	line.default_color = Color(1.0, 0.35, 0.55, 0.92)
 	# Keep world-space drawing stable even while the head is scaled.
 	line.top_level = true
+
+
+func _fx_host() -> Node:
+	# Parent FX to the unscaled Boss root; head scale (1.85) breaks top_level sprites.
+	var host := get_parent()
+	return host if host != null else self
+
+
+func _ensure_beam_fx() -> void:
+	if beam_template == null:
+		return
+	beam_template.visible = false
+	beam_template.top_level = true
+	if _charge_fx == null:
+		_charge_fx = _make_beam_sprite("LaserChargeFx")
+		_charge_fx.z_index = 22
+	_hide_beam_visuals()
+
+
+func _make_beam_sprite(node_name: String) -> AnimatedSprite2D:
+	var spr := AnimatedSprite2D.new()
+	spr.name = node_name
+	spr.visible = false
+	spr.centered = true
+	spr.top_level = true
+	spr.z_as_relative = false
+	spr.z_index = 21
+	if beam_template != null:
+		spr.sprite_frames = beam_template.sprite_frames
+	_fx_host().add_child(spr)
+	return spr
+
+
+func _play_laser_charge() -> bool:
+	_ensure_beam_fx()
+	if _charge_fx == null:
+		return await _wait(laser_charge_time)
+	_charge_fx.visible = true
+	_charge_fx.global_position = global_position
+	_charge_fx.global_rotation = 0.0
+	_charge_fx.scale = Vector2.ONE * laser_tip_scale
+	_play_beam_anim(_charge_fx, &"charge", false)
+	var ok := await _wait(laser_charge_time)
+	if _charge_fx != null:
+		_charge_fx.visible = false
+		_charge_fx.stop()
+	return ok
+
+
+func _play_beam_anim(spr: AnimatedSprite2D, anim: StringName, loop: bool) -> void:
+	if spr == null or spr.sprite_frames == null:
+		return
+	if not spr.sprite_frames.has_animation(anim):
+		return
+	spr.sprite_frames.set_animation_loop(anim, loop)
+	if spr.animation != anim or not spr.is_playing():
+		spr.play(anim)
 
 
 func _show_laser() -> void:
@@ -678,6 +763,7 @@ func _show_laser() -> void:
 		_laser_line_b.clear_points()
 	if laser_ray != null:
 		laser_ray.enabled = true
+	_hide_beam_visuals()
 
 
 func _hide_laser() -> void:
@@ -690,6 +776,24 @@ func _hide_laser() -> void:
 		_laser_line_b.clear_points()
 	if laser_ray != null:
 		laser_ray.enabled = false
+	_hide_beam_visuals()
+	if _charge_fx != null:
+		_charge_fx.visible = false
+		_charge_fx.stop()
+
+
+func _hide_beam_visuals() -> void:
+	for spr in _beam_segs_a:
+		if spr != null:
+			spr.visible = false
+	for spr in _beam_segs_b:
+		if spr != null:
+			spr.visible = false
+	for tip in _beam_tips:
+		if tip != null:
+			tip.visible = false
+	if beam_template != null:
+		beam_template.visible = false
 
 
 func _update_laser_beam(dir: Vector2) -> void:
@@ -698,12 +802,19 @@ func _update_laser_beam(dir: Vector2) -> void:
 	var cast_from := _arena_cast_origin(visual_from, direction)
 	var end := cast_from + direction * laser_length
 	var hit := _ray_wall(cast_from, direction * laser_length)
-	if not hit.is_empty():
+	var hit_wall := not hit.is_empty()
+	if hit_wall:
 		end = hit.position
 	_set_laser_points(PackedVector2Array([visual_from, end]), laser_line)
 	if _laser_line_b != null:
 		_laser_line_b.visible = false
 		_laser_line_b.clear_points()
+	_beam_segs_a = _layout_beam_polyline(
+		PackedVector2Array([visual_from, end]),
+		_beam_segs_a,
+		&"BeamSegA",
+		hit_wall
+	)
 
 
 func _set_laser_points(points: PackedVector2Array, line: Line2D = null) -> void:
@@ -717,6 +828,122 @@ func _set_laser_points(points: PackedVector2Array, line: Line2D = null) -> void:
 	target.clear_points()
 	for p in points:
 		target.add_point(target.to_local(p))
+
+
+func _sync_beam_visuals_from_lines() -> void:
+	var points_a := _line_points_global(laser_line)
+	var points_b := _line_points_global(_laser_line_b)
+	_beam_segs_a = _layout_beam_polyline(points_a, _beam_segs_a, &"BeamSegA", false)
+	_beam_segs_b = _layout_beam_polyline(points_b, _beam_segs_b, &"BeamSegB", false)
+	_show_beam_tips_for_points([points_a, points_b])
+
+
+func _line_points_global(line: Line2D) -> PackedVector2Array:
+	var out := PackedVector2Array()
+	if line == null or not line.visible:
+		return out
+	for i in line.get_point_count():
+		out.append(line.to_global(line.get_point_position(i)))
+	return out
+
+
+func _layout_beam_polyline(
+	points: PackedVector2Array,
+	pool: Array[AnimatedSprite2D],
+	prefix: StringName,
+	show_tip: bool
+) -> Array[AnimatedSprite2D]:
+	var seg_count := maxi(points.size() - 1, 0)
+	pool = _ensure_beam_pool(pool, seg_count, String(prefix))
+	for i in pool.size():
+		var spr := pool[i]
+		if spr == null:
+			continue
+		if i >= seg_count:
+			spr.visible = false
+			continue
+		_layout_beam_segment(spr, points[i], points[i + 1])
+	if show_tip and points.size() >= 2:
+		_show_beam_tip(points[points.size() - 1])
+	return pool
+
+
+func _ensure_beam_pool(pool: Array[AnimatedSprite2D], count: int, prefix: String) -> Array[AnimatedSprite2D]:
+	while pool.size() < count:
+		var spr := _make_beam_sprite("%s_%d" % [prefix, pool.size()])
+		pool.append(spr)
+	return pool
+
+
+func _layout_beam_segment(spr: AnimatedSprite2D, from: Vector2, to: Vector2) -> void:
+	var delta := to - from
+	var length := delta.length()
+	if length < 2.0:
+		spr.visible = false
+		return
+	spr.visible = true
+	spr.modulate = Color.WHITE
+	spr.global_position = from.lerp(to, 0.5)
+	# Beam art points downward in the sheet.
+	spr.global_rotation = delta.angle() - PI * 0.5
+	_play_beam_anim(spr, &"beam", true)
+	var tex_h := _beam_frame_height(spr, &"beam")
+	var stretch := length / maxf(tex_h, 1.0)
+	# Bounce segments get extra elongation so long walls still read as a ray.
+	if length > 140.0:
+		stretch *= 1.2
+	spr.scale = Vector2(laser_beam_width_scale, maxf(stretch, 0.02))
+
+
+func _beam_frame_height(spr: AnimatedSprite2D, anim: StringName) -> float:
+	if spr == null or spr.sprite_frames == null or not spr.sprite_frames.has_animation(anim):
+		return 3307.0
+	var tex := spr.sprite_frames.get_frame_texture(anim, 0)
+	if tex == null:
+		return 3307.0
+	return float(tex.get_height())
+
+
+func _show_beam_tip(pos: Vector2) -> void:
+	_beam_tips = _ensure_beam_pool(_beam_tips, 1, "BeamTip")
+	# Keep one tip per active end; reuse first tip for sweep, grow for bounce ends.
+	var tip := _beam_tips[0]
+	if tip == null:
+		return
+	tip.visible = true
+	tip.modulate = Color.WHITE
+	tip.global_position = pos
+	tip.global_rotation = 0.0
+	tip.scale = Vector2.ONE * laser_tip_scale
+	_play_beam_anim(tip, &"colision", true)
+
+
+func _show_beam_tips_for_points(points_list: Array) -> void:
+	var tips_needed := 0
+	for points in points_list:
+		if points is PackedVector2Array and (points as PackedVector2Array).size() >= 2:
+			tips_needed += 1
+	_beam_tips = _ensure_beam_pool(_beam_tips, maxi(tips_needed, 1), "BeamTip")
+	var tip_i := 0
+	for points in points_list:
+		if not (points is PackedVector2Array):
+			continue
+		var poly := points as PackedVector2Array
+		if poly.size() < 2:
+			continue
+		var tip := _beam_tips[tip_i]
+		tip_i += 1
+		if tip == null:
+			continue
+		tip.visible = true
+		tip.modulate = Color.WHITE
+		tip.global_position = poly[poly.size() - 1]
+		tip.global_rotation = 0.0
+		tip.scale = Vector2.ONE * laser_tip_scale
+		_play_beam_anim(tip, &"colision", true)
+	for i in range(tip_i, _beam_tips.size()):
+		if _beam_tips[i] != null:
+			_beam_tips[i].visible = false
 
 
 func _prefix_points(points: PackedVector2Array, up_to: int, tip: Vector2) -> PackedVector2Array:
@@ -743,6 +970,7 @@ func _tick_laser_damage() -> void:
 			if _dist_point_to_segment(player.global_position, a, b) <= 8.0:
 				if deal_player_hit(player, laser_damage, contact_knockback * 1.2):
 					_laser_hit_cd = laser_hit_cooldown
+					_show_beam_tip(player.global_position)
 				return
 
 
@@ -823,10 +1051,97 @@ func _ray_wall(from: Vector2, cast_to: Vector2) -> Dictionary:
 	return space.intersect_ray(query)
 
 
+func _setup_aoe_pulse_visual() -> void:
+	var anim := aoe_visual as AnimatedSprite2D
+	if anim == null or anim.sprite_frames == null:
+		return
+	if anim.sprite_frames.has_animation(&"pulse"):
+		_aoe_pulse_frames = maxi(anim.sprite_frames.get_frame_count(&"pulse"), 1)
+		anim.animation = &"pulse"
+		anim.sprite_frames.set_animation_loop(&"pulse", false)
+		anim.stop()
+		anim.frame = 0
+	_ensure_aoe_echo()
+
+
+func _ensure_aoe_echo() -> void:
+	var src := aoe_visual as AnimatedSprite2D
+	if src == null or src.sprite_frames == null:
+		return
+	if _aoe_echo != null and is_instance_valid(_aoe_echo):
+		return
+	_aoe_echo = src.duplicate() as AnimatedSprite2D
+	if _aoe_echo == null:
+		return
+	_aoe_echo.name = "PulseEcho"
+	_aoe_echo.z_as_relative = true
+	_aoe_echo.z_index = src.z_index - 1
+	_aoe_echo.visible = false
+	_aoe_echo.modulate = Color(1.0, 1.0, 1.0, 0.0)
+	if aoe_area != null:
+		aoe_area.add_child(_aoe_echo)
+		# Keep the solid pulse drawn above the fading ring.
+		if src.get_parent() == aoe_area:
+			aoe_area.move_child(src, aoe_area.get_child_count() - 1)
+	else:
+		src.add_sibling(_aoe_echo)
+
+
+func _aoe_pulse_stage(t: float) -> int:
+	var frames := maxi(_aoe_pulse_frames, 1)
+	if frames <= 1:
+		return 0
+	var curved := pow(clampf(t, 0.0, 1.0), maxf(aoe_pulse_exponent, 0.01))
+	return mini(int(curved * float(frames)), frames - 1)
+
+
+func _update_aoe_pulse_visual(t: float, elapsed: float, radius_world: float) -> void:
+	_set_aoe_radius_world(radius_world)
+	var anim := aoe_visual as AnimatedSprite2D
+	if anim == null:
+		if aoe_visual != null:
+			var pulse := 0.65 + 0.35 * absf(sin(elapsed * 10.0))
+			aoe_visual.modulate = Color(1.0, 0.35 + 0.25 * t, 0.2, pulse)
+		return
+	var stage := _aoe_pulse_stage(t)
+	if anim.animation != &"pulse":
+		anim.animation = &"pulse"
+	if anim.frame != stage:
+		anim.frame = stage
+	anim.pause()
+	# Soft core throb; the expanding echo carries the main pulse read.
+	var beat := 4.5 + float(stage) * 2.2
+	var throb := 1.0 + (0.04 + 0.02 * float(stage)) * sin(elapsed * beat)
+	var base := anim.scale
+	anim.scale = base * throb
+	var alpha := 0.7 + 0.25 * absf(sin(elapsed * (beat * 0.8)))
+	anim.modulate = Color(1.0, 1.0, 1.0, alpha)
+	_update_aoe_ripple(stage, elapsed, base)
+
+
+func _update_aoe_ripple(stage: int, elapsed: float, base_scale: Vector2) -> void:
+	_ensure_aoe_echo()
+	if _aoe_echo == null:
+		return
+	# Faster rings as intensity climbs.
+	var period := maxf(aoe_ripple_period * (1.0 - 0.12 * float(stage)), 0.28)
+	var phase := fposmod(elapsed, period) / period
+	_aoe_echo.visible = true
+	if _aoe_echo.sprite_frames != null and _aoe_echo.sprite_frames.has_animation(&"pulse"):
+		_aoe_echo.animation = &"pulse"
+		_aoe_echo.frame = stage
+		_aoe_echo.pause()
+	var expand := lerpf(1.0, aoe_ripple_expand, phase)
+	_aoe_echo.scale = base_scale * expand
+	var fade := (1.0 - phase) * aoe_ripple_peak_alpha
+	_aoe_echo.modulate = Color(1.0, 1.0, 1.0, fade)
+
+
 func _show_aoe() -> void:
 	if aoe_area != null:
 		aoe_area.visible = true
 		aoe_area.monitoring = false
+	_setup_aoe_pulse_visual()
 	_set_aoe_radius_world(8.0)
 
 
@@ -835,6 +1150,9 @@ func _hide_aoe() -> void:
 		aoe_area.visible = false
 	if aoe_visual != null:
 		aoe_visual.modulate = _aoe_base_modulate
+	if _aoe_echo != null and is_instance_valid(_aoe_echo):
+		_aoe_echo.visible = false
+		_aoe_echo.modulate = Color(1.0, 1.0, 1.0, 0.0)
 	_set_aoe_radius_world(8.0)
 
 
@@ -848,10 +1166,20 @@ func _aoe_radius_world() -> float:
 	return 0.0
 
 
+func _aoe_frame_size() -> float:
+	var anim := aoe_visual as AnimatedSprite2D
+	if anim != null and anim.sprite_frames != null and anim.sprite_frames.has_animation(&"pulse"):
+		var tex := anim.sprite_frames.get_frame_texture(&"pulse", anim.frame)
+		if tex != null:
+			return float(maxi(tex.get_width(), tex.get_height()))
+	return 826.0
+
+
 func _set_aoe_radius_world(radius_world: float) -> void:
 	var local_r := radius_world / _part_scale()
 	if aoe_shape != null and aoe_shape.shape is CircleShape2D:
 		(aoe_shape.shape as CircleShape2D).radius = local_r
 	if aoe_visual != null:
-		var s := local_r / 32.0
+		# Fit the pulse sprite to a fraction of the hit diameter (art has soft glow padding).
+		var s := (local_r * 2.0 * aoe_visual_scale) / maxf(_aoe_frame_size(), 1.0)
 		aoe_visual.scale = Vector2(s, s)

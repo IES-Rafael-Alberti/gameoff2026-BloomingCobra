@@ -116,8 +116,9 @@ func return_home(duration: float = 0.35) -> void:
 	if not _can_await():
 		global_position = _home_position
 		return
+	# Slow lift-off, then accelerate as more of the path is covered.
 	var tween := create_tween()
-	tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	tween.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
 	tween.tween_property(self, "global_position", _home_position, duration)
 	await tween.finished
 

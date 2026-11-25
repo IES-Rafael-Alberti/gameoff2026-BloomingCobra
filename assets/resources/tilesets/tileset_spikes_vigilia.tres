@@ -1,0 +1,18 @@
+[gd_resource type="TileSet" format=3 uid="uid://cod5hqrnop0ki"]
+
+[ext_resource type="Texture2D" uid="uid://dj71ikqepki11" path="res://assets/sprittesheets/props/definitivo/spikes_vigilia_tile.png" id="1_tex"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_spikes"]
+texture = ExtResource("1_tex")
+texture_region_size = Vector2i(128, 128)
+0:0/0 = 0
+0:0/0/custom_data_0 = true
+0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-6, -6, 6, -6, 6, 6, -6, 6)
+
+[resource]
+tile_size = Vector2i(14, 14)
+custom_data_layer_0/name = "spikes"
+custom_data_layer_0/type = 1
+physics_layer_0/collision_layer = 32
+physics_layer_0/collision_mask = 0
+sources/0 = SubResource("TileSetAtlasSource_spikes")

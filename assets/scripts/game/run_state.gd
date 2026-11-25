@@ -2,7 +2,7 @@ extends Node
 
 ## Persistent run data across single-room scene loads.
 
-const DEFAULT_START_ROOM := "res://assets/scenes/rooms/habitacion_start.tscn"
+const DEFAULT_START_ROOM := "res://assets/scenes/rooms/14.tscn"
 
 ## room_id -> { discovered, cleared, buttons_committed, collected_pickups, dead_residents }
 var rooms: Dictionary = {}
