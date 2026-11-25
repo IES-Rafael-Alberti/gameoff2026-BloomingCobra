@@ -1,6 +1,7 @@
 [gd_scene format=4 uid="uid://kv7i6kto1a57"]
 
 [ext_resource type="Script" uid="uid://bnjkxhgyfy8mc" path="res://assets/scripts/rooms/safe.gd" id="1_fvtu3"]
+[ext_resource type="PackedScene" uid="uid://cb5rvks5i5aea" path="res://assets/scenes/props/vigilia/interactive/doorVigilia.tscn" id="3_fvtu3"]
 [ext_resource type="Shader" uid="uid://6p4fxek8qx0s" path="res://assets/shaders/celestial_pool.gdshader" id="3_kohoq"]
 [ext_resource type="Shader" uid="uid://dql88870gaqc8" path="res://assets/shaders/celestial_beam.gdshader" id="4_fvtu3"]
 [ext_resource type="Texture2D" uid="uid://bofmusj07iwon" path="res://assets/scenary/tilesetsafezoneRed.png" id="5_n43g8"]
@@ -143,6 +144,49 @@ scale = Vector2(0.3, 0.3)
 tile_map_data = PackedByteArray("AAD6//v/AAAAAAAAAAD7//v/AAABAAAAAAD8//v/AAABAAAAAAD9//v/AAABAAAAAAD+//v/AAABAAAAAAD///v/AAABAAAAAAAAAPv/AAABAAAAAAABAPv/AAABAAAAAAACAPv/AAABAAAAAAADAPv/AAABAAAAAAAEAPv/AAACAAAAAAD6//z/AAAAAAEAAAD6//3/AAAAAAEAAAD6//7/AAAAAAEAAAD6////AAAAAAEAAAD6/wAAAAAAAAEAAAD6/wEAAAAAAAEAAAD6/wIAAAAAAAEAAAD6/wMAAAAAAAIAAAD7/wMAAAABAAIAAAD8/wMAAAABAAIAAAD9/wMAAAABAAIAAAD+/wMAAAABAAIAAAD//wMAAAABAAIAAAAAAAMAAAABAAIAAAABAAMAAAABAAIAAAACAAMAAAABAAIAAAADAAMAAAABAAIAAAAEAAMAAAACAAIAAAAEAPz/AAACAAEAAAAEAP3/AAACAAEAAAAEAP7/AAACAAEAAAAEAP//AAACAAEAAAAEAAAAAAACAAEAAAAEAAEAAAACAAEAAAAEAAIAAAACAAEAAAD7//z/AAABAAEAAAD7//3/AAABAAEAAAD7//7/AAABAAEAAAD7////AAABAAEAAAD7/wAAAAABAAEAAAD7/wEAAAABAAEAAAD7/wIAAAABAAEAAAD8//z/AAABAAEAAAD8//3/AAABAAEAAAD8//7/AAABAAEAAAD8////AAABAAEAAAD8/wAAAAABAAEAAAD8/wEAAAABAAEAAAD8/wIAAAABAAEAAAD9//z/AAABAAEAAAD9//3/AAAFAAQAAAD9//7/AAAFAAUAAAD9////AAAFAAUAAAD9/wAAAAAFAAUAAAD9/wEAAAAFAAYAAAD9/wIAAAABAAEAAAD+//z/AAABAAEAAAD+//3/AAAGAAQAAAD+//7/AAAGAAUAAAD+////AAAGAAUAAAD+/wAAAAAGAAUAAAD+/wEAAAAGAAYAAAD+/wIAAAABAAEAAAD///z/AAABAAEAAAD///3/AAAGAAQAAAD///7/AAAGAAUAAAD/////AAAGAAUAAAD//wAAAAAGAAUAAAD//wEAAAAGAAYAAAD//wIAAAABAAEAAAAAAPz/AAABAAEAAAAAAP3/AAAGAAQAAAAAAP//AAAGAAUAAAAAAAAAAAAGAAUAAAAAAAEAAAAGAAYAAAAAAAIAAAABAAEAAAABAPz/AAABAAEAAAABAP3/AAAHAAQAAAABAP7/AAAHAAQAAAABAP//AAAHAAQAAAABAAAAAAAHAAQAAAABAAEAAAAHAAYAAAABAAIAAAABAAEAAAACAPz/AAABAAEAAAACAP3/AAABAAEAAAACAP7/AAABAAEAAAACAP//AAABAAEAAAACAAAAAAABAAEAAAACAAEAAAABAAEAAAACAAIAAAABAAEAAAADAPz/AAABAAEAAAADAP3/AAABAAEAAAADAP7/AAABAAEAAAADAP//AAABAAEAAAADAAAAAAABAAEAAAADAAEAAAABAAEAAAADAAIAAAABAAEAAAAAAP7/AAAGAAUAAAA=")
 tile_set = SubResource("TileSet_om7lw")
 
+[node name="DoorOeste" parent="SafeRoom" unique_id=173168588 instance=ExtResource("3_fvtu3")]
+process_mode = 3
+position = Vector2(-165, -18)
+disable_mode = 2
+collision_layer = 8
+door_id = &"14O"
+target_room = "uid://ctawxi625peqa"
+target_door_id = &"13E"
+starts_open = true
+orientation = 3
+
+[node name="DoorEste" parent="SafeRoom" unique_id=1401919919 instance=ExtResource("3_fvtu3")]
+process_mode = 3
+position = Vector2(209, -15)
+disable_mode = 2
+collision_layer = 8
+door_id = &"14E"
+target_room = "uid://dqm5wmuukt5yb"
+target_door_id = &"15O"
+starts_open = true
+orientation = 1
+
+[node name="DoorSur" parent="SafeRoom" unique_id=676986410 instance=ExtResource("3_fvtu3")]
+process_mode = 3
+position = Vector2(14, 133)
+disable_mode = 2
+collision_layer = 8
+door_id = &"14S"
+target_room = "uid://db12j15slyj13"
+target_door_id = &"18N"
+starts_open = true
+orientation = 2
+
+[node name="DoorNorte" parent="SafeRoom" unique_id=1709970614 instance=ExtResource("3_fvtu3")]
+process_mode = 3
+position = Vector2(14, -165)
+disable_mode = 2
+collision_layer = 8
+door_id = &"14N "
+target_room = "uid://coibogjaxjonl"
+target_door_id = &"9S"
+starts_open = true
+
 [node name="Walls" type="StaticBody2D" parent="." unique_id=1872382948]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Walls" unique_id=1275960346]
@@ -178,7 +222,6 @@ position = Vector2(225, -95)
 shape = SubResource("RectangleShape2D_p81wj")
 
 [node name="CelestialSource" type="Polygon2D" parent="." unique_id=2021794940]
-visible = false
 z_index = 1
 material = SubResource("ShaderMaterial_kw4m3")
 position = Vector2(16, -184)

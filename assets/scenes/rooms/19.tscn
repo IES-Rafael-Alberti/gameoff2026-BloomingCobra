@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://bnjkxhgyfy8mc" path="res://assets/scripts/rooms/safe.gd" id="1_usi51"]
 [ext_resource type="Shader" uid="uid://6p4fxek8qx0s" path="res://assets/shaders/celestial_pool.gdshader" id="3_i4v0p"]
+[ext_resource type="PackedScene" uid="uid://cb5rvks5i5aea" path="res://assets/scenes/props/vigilia/interactive/doorVigilia.tscn" id="3_usi51"]
 [ext_resource type="Shader" uid="uid://dql88870gaqc8" path="res://assets/shaders/celestial_beam.gdshader" id="4_usi51"]
 [ext_resource type="Texture2D" uid="uid://bofmusj07iwon" path="res://assets/scenary/tilesetsafezoneRed.png" id="5_b6h2t"]
 
@@ -142,6 +143,28 @@ position = Vector2(35, 6)
 scale = Vector2(0.3, 0.3)
 tile_map_data = PackedByteArray("AAABAP7/AAABAAEAAAABAP//AAABAAEAAAABAAAAAAABAAEAAAAAAP7/AAAHAAQAAAAAAP//AAAHAAUAAAAAAAAAAAAHAAYAAAD8//3/AAAAAAAAAAD8//7/AAAAAAEAAAD8////AAAAAAEAAAD8/wAAAAAAAAEAAAD8/wEAAAAAAAIAAAD9//3/AAABAAAAAAD9//7/AAABAAEAAAD9////AAABAAEAAAD9/wAAAAABAAEAAAD9/wEAAAABAAIAAAD+//3/AAABAAAAAAD+//7/AAAFAAQAAAD+////AAAFAAUAAAD+/wAAAAAFAAYAAAD+/wEAAAABAAIAAAD///3/AAABAAAAAAD///7/AAAGAAQAAAD/////AAAGAAUAAAD//wAAAAAGAAYAAAD//wEAAAABAAIAAAAAAP3/AAABAAAAAAAAAAEAAAABAAIAAAABAP3/AAABAAAAAAABAAEAAAABAAIAAAACAP3/AAACAAAAAAACAP7/AAACAAEAAAACAP//AAACAAEAAAACAAAAAAACAAEAAAACAAEAAAACAAIAAAA=")
 tile_set = SubResource("TileSet_dt1j3")
+
+[node name="DoorEste" parent="SafeRoom" unique_id=1585883758 instance=ExtResource("3_usi51")]
+process_mode = 3
+position = Vector2(137, -15)
+disable_mode = 2
+collision_layer = 8
+door_id = &"19E"
+target_room = "uid://ds4ynlv44a257"
+target_door_id = &"20O"
+starts_open = true
+orientation = 1
+
+[node name="DoorSur" parent="SafeRoom" unique_id=1958421766 instance=ExtResource("3_usi51")]
+process_mode = 3
+position = Vector2(14, 62)
+disable_mode = 2
+collision_layer = 8
+door_id = &"19S"
+target_room = "uid://dxog6dluwsdaj"
+target_door_id = &"24N2"
+starts_open = true
+orientation = 2
 
 [node name="Walls" type="StaticBody2D" parent="." unique_id=1849972134]
 
