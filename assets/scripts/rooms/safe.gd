@@ -6,8 +6,8 @@ extends Room
 ## Continuously regenerates PlayerVitality while the player stays inside
 ## (same style as vigilia drain, but recovering).
 
-## Vitality restored per second while inside (mirrors drain_per_second default).
-@export var regen_per_second: float = 2.5
+## Vitality restored per second while inside (~5s for a full bar at 100 max).
+@export var regen_per_second: float = 20.0
 
 var _player: Node2D = null
 
@@ -16,6 +16,8 @@ func on_player_entered(player: Node2D) -> void:
 	_player = player
 	_force_pesadilla_and_lock()
 	_set_safe_music(true)
+	# Mode listeners may refresh beds in the same frame; re-assert after.
+	call_deferred("_set_safe_music", true)
 
 
 func on_player_exited(_exiting: Node2D) -> void:
@@ -26,8 +28,10 @@ func on_player_exited(_exiting: Node2D) -> void:
 
 func sync_mode() -> void:
 	# No Switchable tile variants — keep the player on nightmare movement.
+	# Re-assert safe music here so WorldMode refreshes cannot leave nightmare bed up.
 	if is_active():
 		_force_pesadilla_and_lock()
+		_set_safe_music(true)
 	call_deferred("_sync_all_enemies_mode")
 
 
@@ -41,13 +45,27 @@ func _unlock_switch() -> void:
 
 
 func _set_safe_music(active: bool) -> void:
-	var sfx := get_tree().get_first_node_in_group("sfx_general")
+	var sfx := _get_general_sfx()
 	if sfx == null:
 		return
 	if active and sfx.has_method("set_room_music"):
 		sfx.call("set_room_music", &"safe_zone")
 	elif not active and sfx.has_method("clear_room_music"):
 		sfx.call("clear_room_music")
+
+
+func _get_general_sfx() -> Node:
+	var tree := get_tree()
+	if tree == null:
+		return null
+	var from_group := tree.get_first_node_in_group("sfx_general")
+	if from_group != null:
+		return from_group
+	# Fallback when group is not registered yet (early enter).
+	var root := tree.current_scene
+	if root != null:
+		return root.get_node_or_null("SfxGeneral")
+	return null
 
 
 func _process(delta: float) -> void:

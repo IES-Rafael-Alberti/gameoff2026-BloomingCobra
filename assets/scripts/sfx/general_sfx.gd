@@ -150,6 +150,11 @@ func _apply_volumes(vigil_db: float, night_db: float, safe_db: float, mem_db: fl
 
 
 func _tween_voice(voice: AudioStreamPlayer, target_db: float, fade: float) -> void:
-	if voice == null or voice.stream == null:
+	if voice == null:
 		return
+	if voice.stream == null:
+		# Bed not ready yet (export missing / bind race) — nothing to fade.
+		return
+	if not voice.playing and target_db > -40.0:
+		voice.play()
 	_fade_tween.tween_property(voice, "volume_db", target_db, fade)
