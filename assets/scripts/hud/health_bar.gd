@@ -13,7 +13,10 @@ const CELL := Vector2i(395, 395)
 const LAYOUT_HEIGHT := 210
 const BUFF_CELL := Vector2i(95, 95)
 ## Sheet: left = vigilia / sueño, right = pesadilla.
-const MODE_SWITCH_CELL := Vector2i(321, 321)
+## Full stride per frame on the sheet (includes empty padding on the right).
+const MODE_SWITCH_STRIDE := 321
+## Opaque art bounds inside each stride — pie must center on this, not the padding.
+const MODE_SWITCH_CELL := Vector2i(212, 321)
 const MODE_SWITCH_FRAME_VIGILIA := 0
 const MODE_SWITCH_FRAME_PESADILLA := 1
 ## Right edge of the red fill per frame (measured from the sheet).
@@ -29,6 +32,8 @@ const RED_RIGHT := [
 @export var bar_scale: float = 0.42
 @export var buff_icon_scale: float = 0.42
 @export var mode_switch_scale: float = 0.3
+## Gap between the switch icon and the vitality bar (was negative when the atlas had empty padding).
+@export var switch_bar_separation: int = 8
 @export var base_max_vitality: float = 100.0
 @export var vitality_per_size_tier: float = 20.0
 ## Visible bar eases down to real HP during vigilia drain (ratio / sec).
@@ -60,6 +65,9 @@ var _display_ratio: float = 1.0
 var _target_max: float = 100.0
 ## Remaining ratio that must close at hit speed (queued per hit chunk).
 var _hit_catchup: float = 0.0
+var _switch_cd_pie: Control = null
+var _switch_cd_ratio: float = 0.0
+const _SWITCH_CD_PIE_SCRIPT: GDScript = preload("res://assets/scripts/hud/switch_cooldown_pie.gd")
 
 
 func _ready() -> void:
@@ -78,6 +86,7 @@ func _process(delta: float) -> void:
 	_tick_display_ratio(delta)
 	_set_visual(_display_ratio, _target_max)
 	_update_buff_icons()
+	_update_switch_cooldown_visual()
 
 
 func _tick_display_ratio(delta: float) -> void:
@@ -129,7 +138,8 @@ func _build_mode_switch_frames() -> void:
 	for i in 2:
 		var atlas := AtlasTexture.new()
 		atlas.atlas = mode_switch_sheet
-		atlas.region = Rect2(i * MODE_SWITCH_CELL.x, 0, MODE_SWITCH_CELL.x, MODE_SWITCH_CELL.y)
+		# Crop empty right padding so the ornate circle is centered in the TextureRect.
+		atlas.region = Rect2(i * MODE_SWITCH_STRIDE, 0, MODE_SWITCH_CELL.x, MODE_SWITCH_CELL.y)
 		_mode_switch_frames.append(atlas)
 
 
@@ -144,6 +154,13 @@ func _bind_world_mode() -> void:
 		_on_world_mode_changed(WorldMode.get_mode())
 	else:
 		_apply_mode_switch_frame(MODE_SWITCH_FRAME_PESADILLA)
+	if WorldMode != null and WorldMode.has_signal("switch_cooldown_changed"):
+		if not WorldMode.switch_cooldown_changed.is_connected(_on_switch_cooldown_changed):
+			WorldMode.switch_cooldown_changed.connect(_on_switch_cooldown_changed)
+		_on_switch_cooldown_changed(
+			WorldMode.get_switch_cooldown_remaining(),
+			WorldMode.get_switch_cooldown_duration()
+		)
 
 
 func _on_world_mode_changed(mode: int) -> void:
@@ -154,6 +171,14 @@ func _on_world_mode_changed(mode: int) -> void:
 		else MODE_SWITCH_FRAME_VIGILIA
 	)
 	_apply_mode_switch_frame(frame)
+
+
+func _on_switch_cooldown_changed(remaining: float, duration: float) -> void:
+	if duration <= 0.0:
+		_switch_cd_ratio = 0.0
+	else:
+		_switch_cd_ratio = clampf(remaining / duration, 0.0, 1.0)
+	_update_switch_cooldown_visual()
 
 
 func _apply_mode_switch_frame(frame: int) -> void:
@@ -181,10 +206,11 @@ func _configure_nodes() -> void:
 		_mode_switch.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		_mode_switch.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		_mode_switch.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
-		_mode_switch.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		_mode_switch.clip_contents = false
+		_mode_switch.material = null
+		_mode_switch.modulate = Color.WHITE
 		var switch_size := Vector2(MODE_SWITCH_CELL) * mode_switch_scale
-		_mode_switch.custom_minimum_size = switch_size
-		_mode_switch.size = switch_size
+		_ensure_switch_cooldown_overlay(switch_size)
 		if _buff_pad != null:
 			var top_sep := -10
 			if _top_row != null:
@@ -197,6 +223,7 @@ func _configure_nodes() -> void:
 		_root.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	if _top_row != null:
 		_top_row.alignment = BoxContainer.ALIGNMENT_CENTER
+		_top_row.add_theme_constant_override("separation", switch_bar_separation)
 	_configure_buff_slot(_buff_attack, 0)
 	_configure_buff_slot(_buff_projectile, 1)
 	_configure_buff_slot(_buff_shield, 2)
@@ -394,3 +421,97 @@ func _on_vitality_hit(lost: float, _current: float, max_vitality: float) -> void
 	## Queue a visual chunk matching the hit (1 dmg → vitality_per_damage_point / max).
 	_hit_catchup += lost / cap
 	_sync_target_from_vitality()
+
+
+func _switch_icon_size() -> Vector2:
+	return Vector2(MODE_SWITCH_CELL) * mode_switch_scale
+
+
+func _layout_top_left(ctrl: Control, rect_size: Vector2) -> void:
+	if ctrl == null:
+		return
+	# Explicit pixel layout — no anchors (avoids HBox stretch / TextureRect quirks).
+	ctrl.anchor_left = 0.0
+	ctrl.anchor_top = 0.0
+	ctrl.anchor_right = 0.0
+	ctrl.anchor_bottom = 0.0
+	ctrl.offset_left = 0.0
+	ctrl.offset_top = 0.0
+	ctrl.offset_right = 0.0
+	ctrl.offset_bottom = 0.0
+	ctrl.position = Vector2.ZERO
+	ctrl.size = rect_size
+
+
+func _ensure_switch_cooldown_overlay(switch_size: Vector2) -> void:
+	if _mode_switch == null or _top_row == null:
+		return
+
+	var slot := _mode_switch.get_parent() as Control
+	if slot == null or slot.name != "SwitchSlot":
+		var row := _mode_switch.get_parent()
+		if row == null:
+			return
+		var index := _mode_switch.get_index()
+		slot = Control.new()
+		slot.name = "SwitchSlot"
+		row.add_child(slot)
+		row.move_child(slot, index)
+		_mode_switch.reparent(slot)
+
+	# Fixed square in the HBox — never expand, or the pie center drifts right.
+	slot.custom_minimum_size = switch_size
+	slot.size = switch_size
+	slot.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	slot.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	slot.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	slot.clip_contents = true
+
+	_layout_top_left(_mode_switch, switch_size)
+	_mode_switch.custom_minimum_size = switch_size
+	_mode_switch.size_flags_horizontal = 0
+	_mode_switch.size_flags_vertical = 0
+
+	for legacy_name in ["CooldownShade", "CooldownOverlay", "CooldownPie"]:
+		var under_icon := _mode_switch.get_node_or_null(legacy_name)
+		if under_icon != null:
+			under_icon.queue_free()
+		var under_slot := slot.get_node_or_null(legacy_name)
+		if under_slot != null and legacy_name != "CooldownPie":
+			under_slot.queue_free()
+
+	_switch_cd_pie = slot.get_node_or_null("CooldownPie") as Control
+	if _switch_cd_pie == null:
+		_switch_cd_pie = Control.new()
+		_switch_cd_pie.name = "CooldownPie"
+		_switch_cd_pie.set_script(_SWITCH_CD_PIE_SCRIPT)
+		slot.add_child(_switch_cd_pie)
+
+	_switch_cd_pie.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_switch_cd_pie.z_index = 4
+	_layout_top_left(_switch_cd_pie, switch_size)
+	_switch_cd_pie.set("ratio", 0.0)
+
+
+func _update_switch_cooldown_visual() -> void:
+	var switch_size := _switch_icon_size()
+	if _switch_cd_pie == null and _mode_switch != null:
+		_ensure_switch_cooldown_overlay(switch_size)
+	if _switch_cd_pie == null:
+		return
+
+	# Keep slot / icon / pie locked to the same square every frame.
+	var slot := _switch_cd_pie.get_parent() as Control
+	if slot != null and slot.name == "SwitchSlot":
+		slot.custom_minimum_size = switch_size
+		slot.size = switch_size
+		slot.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		slot.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	_layout_top_left(_mode_switch, switch_size)
+	_layout_top_left(_switch_cd_pie, switch_size)
+
+	var ratio := 0.0
+	if WorldMode != null and WorldMode.has_method("get_switch_cooldown_ratio"):
+		ratio = float(WorldMode.call("get_switch_cooldown_ratio"))
+	_switch_cd_ratio = clampf(ratio, 0.0, 1.0)
+	_switch_cd_pie.set("ratio", _switch_cd_ratio)

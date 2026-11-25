@@ -62,6 +62,7 @@ func physics_update(delta: float) -> void:
 		if _cooldown_left <= 0.0:
 			_cooldown_left = attack_cooldown
 			_play_claw_fx(direction)
+			# Always swing for feedback; deal_player_hit no-ops while iframes are up.
 			if enemy.has_method("deal_player_hit"):
 				enemy.call("deal_player_hit", player)
 	else:
