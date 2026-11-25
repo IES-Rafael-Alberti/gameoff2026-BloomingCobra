@@ -1,7 +1,8 @@
 class_name BossHand
 extends BossPart
 
-## Left/right boss hand. `side` = -1 left, +1 right (mirrors swipe direction / flip).
+## Left/right boss hand. `side` = -1 left, +1 right.
+## Idle home is beside the boss head (not on the arena) so contact reads clear.
 
 @export var side: int = -1
 @export var swipe_damage: int = 1
@@ -30,7 +31,7 @@ var _slam_shadow_target: Vector2 = Vector2.ZERO
 func _ready() -> void:
 	super._ready()
 	if animated_sprite != null:
-		animated_sprite.flip_h = side > 0
+		animated_sprite.flip_h = false
 	if shadow != null:
 		shadow.visible = false
 		shadow.top_level = true
@@ -102,11 +103,11 @@ func attack_swipe() -> void:
 	await tween_swipe.finished
 	set_hazard_active(false)
 	if _should_abort():
-		await return_home(0.35)
+		await return_home(_recovery_duration(0.45))
 		_end_attack()
 		return
 
-	await return_home(0.45)
+	await return_home(_recovery_duration(0.6))
 	play_anim(&"Idle")
 	_end_attack()
 
@@ -176,7 +177,7 @@ func attack_slam() -> void:
 	if _should_abort():
 		_stop_shadow()
 		set_hazard_active(false)
-		await return_home(0.35)
+		await return_home(_recovery_duration(0.45))
 		_end_attack()
 		return
 
@@ -187,9 +188,15 @@ func attack_slam() -> void:
 	_stop_shadow()
 	set_hazard_active(false)
 	await _wait(0.25)
-	await return_home(0.5)
+	await return_home(_recovery_duration(0.65))
 	play_anim(&"Idle")
 	_end_attack()
+
+
+func _recovery_duration(base: float) -> float:
+	# Longer trips keep the slow start readable before the acceleration kicks in.
+	var dist := global_position.distance_to(_home_position)
+	return maxf(base, dist / 280.0)
 
 
 func _tremble(duration: float) -> bool:

@@ -6,6 +6,8 @@ extends Area2D
 @export var knockback_force: float = 90.0
 ## Sprite art points down by default; rotation = direction.angle() + this offset.
 @export var facing_angle_offset: float = -PI / 2.0
+## When false, keeps upright (better for circular/star bolts whose hitbox must stay centered).
+@export var align_to_direction: bool = true
 @export var float_amplitude: float = 1.6
 @export var float_speed: float = 7.0
 @export var impact_anim: StringName = &"impact"
@@ -46,9 +48,13 @@ func launch(dir: Vector2, launch_speed: float = -1.0, _owner_enemy: Node = null)
 	_impacting = false
 	_float_t = randf() * TAU
 	visible = true
+	show()
 	monitoring = true
 	monitorable = false
 	set_physics_process(true)
+	if _sprite != null:
+		_sprite.visible = true
+		_sprite.modulate = Color.WHITE
 	_orient_to_direction()
 	_play_fly()
 
@@ -59,6 +65,7 @@ func _cache_sprite() -> void:
 		_sprite = get_node_or_null("Sprite2D") as Node2D
 	if _sprite != null:
 		_base_sprite_pos = _sprite.position
+		_sprite.z_as_relative = false
 
 
 func _apply_collision() -> void:
@@ -70,7 +77,10 @@ func _apply_collision() -> void:
 
 
 func _orient_to_direction() -> void:
-	rotation = direction.angle() + facing_angle_offset
+	if align_to_direction:
+		rotation = direction.angle() + facing_angle_offset
+	else:
+		rotation = 0.0
 
 
 func _play_fly() -> void:
@@ -79,6 +89,7 @@ func _play_fly() -> void:
 		return
 	if anim.sprite_frames.has_animation(fly_anim):
 		anim.sprite_frames.set_animation_loop(fly_anim, true)
+		anim.visible = true
 		anim.play(fly_anim)
 
 
