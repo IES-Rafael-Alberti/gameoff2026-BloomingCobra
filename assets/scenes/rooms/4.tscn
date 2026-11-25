@@ -56,11 +56,11 @@ starts_open = true
 orientation = 2
 
 [node name="BarreraPesadilla" type="TileMapLayer" parent="Switchable/Pesadilla" unique_id=1043736227]
-scale = Vector2(0.3, 0.3)
+scale = Vector2(0.05, 0.05)
+tile_map_data = PackedByteArray("AAD8//v/AAABAAEAAAD9//v/AAACAAEAAAD9//z/AAAAAAIAAAD9//3/AAAAAAIAAAD9//7/AAAAAAMAAAD9/wIAAAAAAAIAAAD9/wMAAAACAAMAAAD7//v/AAABAAEAAAD8/wMAAAABAAEAAAD7/wMAAAABAAEAAAD9/wEAAAAAAAEAAAD+/wEAAAACAAMAAAD+//7/AAACAAEAAAD+/wAAAAAAAAIAAAD+////AAAAAAIAAAA=")
 tile_set = ExtResource("5_cd2y3")
 
 [node name="Sueño" type="Node2D" parent="Switchable" unique_id=1018947006]
-visible = false
 
 [node name="Tiles" type="TileMapLayer" parent="Switchable/Sueño" unique_id=1715976387]
 position = Vector2(35.6, 6)
@@ -102,6 +102,7 @@ starts_open = true
 orientation = 2
 
 [node name="BarreraVigila" type="TileMapLayer" parent="Switchable/Sueño" unique_id=500641600]
+scale = Vector2(0.05, 0.05)
 tile_set = ExtResource("8_mpfgx")
 
 [node name="Walls" type="StaticBody2D" parent="." unique_id=1872382948]

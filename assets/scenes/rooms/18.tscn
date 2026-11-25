@@ -6,6 +6,10 @@
 [ext_resource type="PackedScene" uid="uid://b41468s5i5aea" path="res://assets/scenes/props/pesadilla/interactive/doorPesadilla.tscn" id="4_n53mt"]
 [ext_resource type="TileSet" uid="uid://bk7uacfb2knda" path="res://assets/resources/tilesets/tileset_vigilia_red.tres" id="4_quejo"]
 [ext_resource type="PackedScene" uid="uid://cb5rvks5i5aea" path="res://assets/scenes/props/vigilia/interactive/doorVigilia.tscn" id="6_quejo"]
+[ext_resource type="Script" uid="uid://cgr461snah57y" path="res://assets/scripts/rooms/enemy_spawn_point.gd" id="7_sxj83"]
+[ext_resource type="PackedScene" uid="uid://bxk5iodhcl1y1" path="res://assets/scenes/enemies/bouncer.tscn" id="8_sgh7n"]
+[ext_resource type="PackedScene" uid="uid://cbt3w2furilt1" path="res://assets/scenes/enemies/hunter.tscn" id="9_8j2pq"]
+[ext_resource type="PackedScene" uid="uid://dsapw6jvuy0uq" path="res://assets/scenes/enemies/divider_1.tscn" id="10_atjvn"]
 
 [node name="18" type="Node2D" unique_id=1556955998]
 script = ExtResource("1_p6c2f")
@@ -24,14 +28,16 @@ tile_set = ExtResource("3_n53mt")
 
 [node name="DoorOeste" parent="Switchable/Pesadilla" unique_id=268869019 instance=ExtResource("4_n53mt")]
 position = Vector2(-155, 339)
-orientation = 3
+collision_layer = 8
 door_id = &"18O"
 target_room = "uid://c2ee6wvop3dtf"
 target_door_id = &"23E"
 starts_open = true
+orientation = 3
 
 [node name="DoorNorte" parent="Switchable/Pesadilla" unique_id=1637411828 instance=ExtResource("4_n53mt")]
 position = Vector2(21, -167.115)
+collision_layer = 8
 door_id = &"18N"
 target_room = "uid://kv7i6kto1a57"
 target_door_id = &"14S"
@@ -46,15 +52,21 @@ tile_map_data = PackedByteArray("AAD+//v/AAAAAAAAAAD///v/AAABAAAAAAAAAPv/AAABAAA
 tile_set = ExtResource("4_quejo")
 
 [node name="DoorOeste" parent="Switchable/Sueño" unique_id=173168588 instance=ExtResource("6_quejo")]
+process_mode = 3
 position = Vector2(-155, 339)
-orientation = 3
+disable_mode = 2
+collision_layer = 8
 door_id = &"18O"
 target_room = "uid://c2ee6wvop3dtf"
 target_door_id = &"23E"
 starts_open = true
+orientation = 3
 
 [node name="DoorNorte" parent="Switchable/Sueño" unique_id=1257637161 instance=ExtResource("6_quejo")]
+process_mode = 3
 position = Vector2(21, -167)
+disable_mode = 2
+collision_layer = 8
 door_id = &"18N"
 target_room = "uid://kv7i6kto1a57"
 target_door_id = &"14S"
@@ -68,3 +80,33 @@ polygon = PackedVector2Array(20, -173, -32, -173, -32, -142, -71, -140, -72, -96
 [node name="CollisionPolygon2D2" type="CollisionPolygon2D" parent="Walls" unique_id=1364228726]
 position = Vector2(136.1714, 251.19476)
 polygon = PackedVector2Array(-110.1714, -424.19476, -110.1714, -467.19476, 119.8286, -467.19476, 119.8286, 260.80524, -64.1714, 260.80524, -64.1714, 204.80524, -40.171402, 204.80524, -40.171402, 156.80524, -0.17140198, 156.80524, -0.17140198, 124.80524, 39.828598, 124.80524, 39.828598, 84.80524, 79.8286, 84.80524, 79.8286, -427.19476)
+
+[node name="EnemySpawnpoint" type="Marker2D" parent="." unique_id=994928993]
+position = Vector2(-87, 443)
+script = ExtResource("7_sxj83")
+enemy_scene = ExtResource("8_sgh7n")
+
+[node name="EnemySpawnpoint2" type="Marker2D" parent="." unique_id=552846621]
+position = Vector2(-151, 177)
+script = ExtResource("7_sxj83")
+enemy_scene = ExtResource("8_sgh7n")
+
+[node name="EnemySpawnpoint3" type="Marker2D" parent="." unique_id=596431132]
+position = Vector2(159, -1)
+script = ExtResource("7_sxj83")
+enemy_scene = ExtResource("8_sgh7n")
+
+[node name="EnemySpawnpoint4" type="Marker2D" parent="." unique_id=392644096]
+position = Vector2(10, 175)
+script = ExtResource("7_sxj83")
+enemy_scene = ExtResource("9_8j2pq")
+
+[node name="EnemySpawnpoint5" type="Marker2D" parent="." unique_id=1396960178]
+position = Vector2(-60, 54)
+script = ExtResource("7_sxj83")
+enemy_scene = ExtResource("10_atjvn")
+
+[node name="EnemySpawnpoint6" type="Marker2D" parent="." unique_id=405439041]
+position = Vector2(73, 355)
+script = ExtResource("7_sxj83")
+enemy_scene = ExtResource("10_atjvn")

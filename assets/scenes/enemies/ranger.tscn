@@ -271,6 +271,7 @@ radius = 4.0
 script = ExtResource("1_enemy")
 move_speed = 45.0
 attack_cooldown = 1.2
+detection_radius = 200.0
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=381239052]
 scale = Vector2(0.048, 0.048)

@@ -6,6 +6,9 @@
 [ext_resource type="PackedScene" uid="uid://b41468s5i5aea" path="res://assets/scenes/props/pesadilla/interactive/doorPesadilla.tscn" id="4_hrwun"]
 [ext_resource type="TileSet" uid="uid://bk7uacfb2knda" path="res://assets/resources/tilesets/tileset_vigilia_red.tres" id="4_nd3df"]
 [ext_resource type="PackedScene" uid="uid://cb5rvks5i5aea" path="res://assets/scenes/props/vigilia/interactive/doorVigilia.tscn" id="6_nd3df"]
+[ext_resource type="Script" uid="uid://cgr461snah57y" path="res://assets/scripts/rooms/enemy_spawn_point.gd" id="7_frht8"]
+[ext_resource type="PackedScene" uid="uid://cbt3w2furilt1" path="res://assets/scenes/enemies/hunter.tscn" id="8_4ka5l"]
+[ext_resource type="PackedScene" uid="uid://cn6xfss6h7s7b" path="res://assets/scenes/enemies/ranger.tscn" id="9_31lqu"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_rihe3"]
 size = Vector2(208, 16)
@@ -163,3 +166,33 @@ shape = SubResource("RectangleShape2D_rihe3")
 [node name="CollisionShape2D12" type="CollisionShape2D" parent="Walls" unique_id=2006500925]
 position = Vector2(345, -182)
 shape = SubResource("RectangleShape2D_rihe3")
+
+[node name="EnemySpawnpoint" type="Marker2D" parent="." unique_id=1223360433]
+position = Vector2(541, -9)
+script = ExtResource("7_frht8")
+enemy_scene = ExtResource("9_31lqu")
+
+[node name="EnemySpawnpoint4" type="Marker2D" parent="." unique_id=1747187703]
+position = Vector2(541, 99)
+script = ExtResource("7_frht8")
+enemy_scene = ExtResource("9_31lqu")
+
+[node name="EnemySpawnpoint6" type="Marker2D" parent="." unique_id=171746254]
+position = Vector2(393, -9)
+script = ExtResource("7_frht8")
+enemy_scene = ExtResource("8_4ka5l")
+
+[node name="EnemySpawnpoint2" type="Marker2D" parent="." unique_id=159359277]
+position = Vector2(541, -127)
+script = ExtResource("7_frht8")
+enemy_scene = ExtResource("9_31lqu")
+
+[node name="EnemySpawnpoint3" type="Marker2D" parent="." unique_id=1498073645]
+position = Vector2(-148, 115)
+script = ExtResource("7_frht8")
+enemy_scene = ExtResource("8_4ka5l")
+
+[node name="EnemySpawnpoint5" type="Marker2D" parent="." unique_id=1968489339]
+position = Vector2(-143, -144)
+script = ExtResource("7_frht8")
+enemy_scene = ExtResource("8_4ka5l")
