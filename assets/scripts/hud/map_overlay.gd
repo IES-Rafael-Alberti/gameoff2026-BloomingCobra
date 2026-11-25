@@ -11,25 +11,27 @@ extends CanvasLayer
 ## Extra pixels around the room grid for the adaptive panel.
 @export var panel_padding: float = 20.0
 @export var marker_scale: float = 3.0
-## Thin axis for tall/wide/L arms (fraction of normal cell width).
-@export var elongated_thin_factor: float = 0.5
-## 9-slice border thickness for rectangular room icons.
-@export var room_icon_slice: int = 1
-## Stroke width for polygon L-room outlines (screen px).
-@export var room_poly_border_width: float = 2.0
 @export var rooms_modulate: Color = Color(1, 1, 1, 1)
 @export var current_modulate: Color = Color(1.0, 1.0, 0.55, 1.0)
-@export var room_fill_color: Color = Color(1, 1, 1, 1)
-@export var room_border_color: Color = Color(0, 0, 0, 1)
 
-@export var discovered_texture: Texture2D
-@export var undiscovered_texture: Texture2D
+## Type 1 — normal (square). Type 2 — elongated horizontal. Type 3 — L.
+@export var discovered_cell: Texture2D
+@export var undiscovered_cell: Texture2D
+@export var discovered_wide: Texture2D
+@export var undiscovered_wide: Texture2D
+@export var discovered_l: Texture2D
+@export var undiscovered_l: Texture2D
 @export var panel_texture: Texture2D
 @export var player_marker_texture: Texture2D
 @export var connector_texture: Texture2D
 
+## Kept for older scenes that still assign the generic discovered slot.
+@export var discovered_texture: Texture2D
+@export var undiscovered_texture: Texture2D
+
 const ROOMS_DIR := "res://assets/scenes/rooms/"
 const PANEL_SLICE := 6
+const MAP_DIR := "res://assets/sprittesheets/HUD/definitivo/map/"
 
 var _root: Control
 var _dim: ColorRect
@@ -45,6 +47,8 @@ var _shapes_by_id: Dictionary = {} # room_id -> Room.MapShape as int
 var _scene_by_id: Dictionary = {} # room_id -> scene path
 var _links_by_id: Dictionary = {} # room_id -> Array of link dicts
 var _icons: Dictionary = {} # room_id -> Array[Control]
+## Debug: show every catalogued room on the map (undiscovered style if not found).
+var debug_reveal_all: bool = false
 
 
 func _ready() -> void:
@@ -74,8 +78,24 @@ func refresh() -> void:
 	_rebuild_icons()
 
 
+func set_debug_reveal_all(enabled: bool) -> void:
+	debug_reveal_all = enabled
+	if _open:
+		_rebuild_icons()
+	print("[Debug] Map reveal all: ", enabled)
+
+
+func toggle_debug_reveal_all() -> bool:
+	set_debug_reveal_all(not debug_reveal_all)
+	return debug_reveal_all
+
+
 func close_overlay() -> void:
 	_set_open(false)
+
+
+func open_overlay() -> void:
+	_set_open(true)
 
 
 func is_open() -> bool:
@@ -90,10 +110,27 @@ func _set_open(open: bool) -> void:
 
 
 func _ensure_textures() -> void:
+	if discovered_cell == null:
+		discovered_cell = load(MAP_DIR + "discoveredRoom1.png") as Texture2D
+	if undiscovered_cell == null:
+		undiscovered_cell = load(MAP_DIR + "undiscoveredRoom1.png") as Texture2D
+	if discovered_wide == null:
+		discovered_wide = load(MAP_DIR + "discoveredRoom2.png") as Texture2D
+	if undiscovered_wide == null:
+		undiscovered_wide = load(MAP_DIR + "unDiscoveredRoom2.png") as Texture2D
+	if discovered_l == null:
+		discovered_l = load(MAP_DIR + "discoveredRoom3.png") as Texture2D
+	if undiscovered_l == null:
+		undiscovered_l = load(MAP_DIR + "undiscoveredRoom3.png") as Texture2D
+	# Legacy fallbacks used by older map_overlay.tscn assignments.
 	if discovered_texture == null:
-		discovered_texture = load("res://assets/sprittesheets/HUD/placeholders/roomDiscovered.png") as Texture2D
+		discovered_texture = discovered_cell
 	if undiscovered_texture == null:
-		undiscovered_texture = load("res://assets/sprittesheets/HUD/placeholders/roomUndiscovered.png") as Texture2D
+		undiscovered_texture = undiscovered_cell
+	if discovered_cell == null:
+		discovered_cell = discovered_texture
+	if undiscovered_cell == null:
+		undiscovered_cell = undiscovered_texture
 	if panel_texture == null:
 		panel_texture = load("res://assets/sprittesheets/HUD/placeholders/mapPanel.png") as Texture2D
 	if player_marker_texture == null:
@@ -381,14 +418,15 @@ func _rebuild_icons() -> void:
 			max_g.x = maxi(max_g.x, cell.x)
 			max_g.y = maxi(max_g.y, cell.y)
 
-	var base_tex_size := Vector2(16, 8)
-	if discovered_texture != null:
-		base_tex_size = Vector2(discovered_texture.get_width(), discovered_texture.get_height())
+	var cell_tex := discovered_cell if discovered_cell != null else discovered_texture
+	var base_tex_size := Vector2(16, 16)
+	if cell_tex != null:
+		base_tex_size = Vector2(cell_tex.get_width(), cell_tex.get_height())
 	var icon_size := base_tex_size * icon_scale
 	var step := icon_size + Vector2(cell_gap, cell_gap)
 
 	# Local visuals per room, then center content.
-	var local_visuals: Dictionary = {} # room_id -> { bounds, rects?, polygon?, marker }
+	var local_visuals: Dictionary = {} # room_id -> { bounds, marker, display_size, rotation_deg, kind }
 	var content := Rect2()
 	var has_content := false
 	for id in visible_ids:
@@ -417,27 +455,19 @@ func _rebuild_icons() -> void:
 	for id in visible_ids:
 		var visual: Dictionary = local_visuals[id]
 		var is_current := id == current_id
-		var tex := discovered_texture
-		if not RunState.is_discovered(StringName(id)) and not is_current:
-			tex = undiscovered_texture
+		var discovered := RunState.is_discovered(StringName(id)) or is_current
+		var tex := _texture_for_kind(int(visual.get("kind", 1)), discovered)
 		var icons: Array[Control] = []
-		if visual.has("polygon"):
-			var poly: PackedVector2Array = visual["polygon"]
-			var shifted := PackedVector2Array()
-			for p in poly:
-				shifted.append(p + map_offset)
-			var icon := _make_polygon_room_icon(shifted, is_current)
-			_rooms_layer.add_child(icon)
-			icons.append(icon)
-		else:
-			var parts: Array = visual.get("rects", [])
-			for part in parts:
-				var rect: Rect2 = part
-				var icon := _make_room_icon(rect.position + map_offset, rect.size, tex, is_current)
-				_rooms_layer.add_child(icon)
-				icons.append(icon)
+		var display_size: Vector2 = visual.get("display_size", icon_size)
+		var rot: float = float(visual.get("rotation_deg", 0.0))
+		var bounds: Rect2 = visual["bounds"]
+		# Icon is anchored to the footprint bounds; marker can sit on the L elbow.
+		var icon_center: Vector2 = bounds.get_center()
+		var marker_local: Vector2 = visual.get("marker", icon_center)
+		var icon := _make_room_icon(icon_center + map_offset, display_size, tex, rot, is_current)
+		_rooms_layer.add_child(icon)
+		icons.append(icon)
 		_icons[id] = icons
-		var marker_local: Vector2 = visual.get("marker", (visual["bounds"] as Rect2).get_center())
 		marker_points[id] = marker_local + map_offset
 
 	_place_player_marker(current_id, marker_points)
@@ -456,75 +486,107 @@ func _local_room_visual(
 	icon_size: Vector2,
 	step: Vector2
 ) -> Dictionary:
-	## Returns { bounds: Rect2, marker: Vector2, rects?: Array[Rect2], polygon?: PackedVector2Array }
+	## Returns { bounds, marker, display_size, rotation_deg, kind }
+	## kind: 1=cell, 2=wide/tall, 3=L. rotation_deg is CCW-negative Godot degrees.
 	var origin: Vector2i = _grid.get(room_key, Vector2i.ZERO)
 	var shape := int(_shapes_by_id.get(room_key, 0)) as Room.MapShape
-	# Square cell basis on the SHORT side of the 16x8 tile so elongated arms stay compact.
-	var cell := minf(icon_size.x, icon_size.y)
-	var thin := cell * elongated_thin_factor
-	var long := cell * 2.0 + cell_gap
 	var bbox := _cell_local_pos(origin, min_g, step)
-	# Center elongated shapes inside the (possibly non-square) grid cell span.
-	var span := Vector2(
+	var span2 := Vector2(
 		icon_size.x * 2.0 + cell_gap,
 		icon_size.y * 2.0 + cell_gap
 	)
 
 	match shape:
 		Room.MapShape.TALL:
-			var x := bbox.x + (icon_size.x - thin) * 0.5
-			var y := bbox.y + (span.y - long) * 0.5
-			var rect := Rect2(Vector2(x, y), Vector2(thin, long))
-			var tall_rects: Array[Rect2] = [rect]
-			return {"bounds": rect, "rects": tall_rects, "marker": rect.get_center()}
+			# Type 2 is horizontal art — rotate 90° CCW for vertical rooms.
+			var display := _scaled_tex_size(discovered_wide, icon_size)
+			var bounds := Rect2(
+				bbox.x + (icon_size.x - display.y) * 0.5,
+				bbox.y + (span2.y - display.x) * 0.5,
+				display.y,
+				display.x
+			)
+			return {
+				"bounds": bounds,
+				"marker": bounds.get_center(),
+				"display_size": display,
+				"rotation_deg": -90.0,
+				"kind": 2,
+			}
 		Room.MapShape.WIDE:
-			var x := bbox.x + (span.x - long) * 0.5
-			var y := bbox.y + (icon_size.y - thin) * 0.5
-			var rect := Rect2(Vector2(x, y), Vector2(long, thin))
-			var wide_rects: Array[Rect2] = [rect]
-			return {"bounds": rect, "rects": wide_rects, "marker": rect.get_center()}
+			var display := _scaled_tex_size(discovered_wide, icon_size)
+			var bounds := Rect2(
+				bbox.x + (span2.x - display.x) * 0.5,
+				bbox.y + (icon_size.y - display.y) * 0.5,
+				display.x,
+				display.y
+			)
+			return {
+				"bounds": bounds,
+				"marker": bounds.get_center(),
+				"display_size": display,
+				"rotation_deg": 0.0,
+				"kind": 2,
+			}
 		Room.MapShape.L_NO_TL:
-			# 2x2 square missing top-left quadrant (full cell thickness, short side).
-			var s := cell
-			var side := s * 2.0
-			var origin_px := Vector2(
-				bbox.x + (span.x - side) * 0.5,
-				bbox.y + (span.y - side) * 0.5
-			)
-			var poly := PackedVector2Array([
-				Vector2(origin_px.x + s, origin_px.y),
-				Vector2(origin_px.x + side, origin_px.y),
-				Vector2(origin_px.x + side, origin_px.y + side),
-				Vector2(origin_px.x, origin_px.y + side),
-				Vector2(origin_px.x, origin_px.y + s),
-				Vector2(origin_px.x + s, origin_px.y + s),
-			])
-			var bounds := Rect2(origin_px, Vector2(side, side))
-			var elbow := Vector2(origin_px.x + s * 1.5, origin_px.y + s * 1.5)
-			return {"bounds": bounds, "polygon": poly, "marker": elbow}
+			# Room 13 — type 3 as authored. Elbow in the filled bottom-right corner.
+			return _l_visual(bbox, span2, icon_size, 0.0, Vector2(1.5, 1.5))
+		Room.MapShape.L_NO_BL:
+			# Room 5 — type 3 rotated 90° CCW. Elbow in the filled top-right corner.
+			return _l_visual(bbox, span2, icon_size, -90.0, Vector2(1.5, 0.5))
 		Room.MapShape.L_NO_BR:
-			# 2x2 square missing bottom-right quadrant.
-			var s := cell
-			var side := s * 2.0
-			var origin_px := Vector2(
-				bbox.x + (span.x - side) * 0.5,
-				bbox.y + (span.y - side) * 0.5
-			)
-			var poly := PackedVector2Array([
-				Vector2(origin_px.x, origin_px.y),
-				Vector2(origin_px.x + side, origin_px.y),
-				Vector2(origin_px.x + side, origin_px.y + s),
-				Vector2(origin_px.x + s, origin_px.y + s),
-				Vector2(origin_px.x + s, origin_px.y + side),
-				Vector2(origin_px.x, origin_px.y + side),
-			])
-			var bounds := Rect2(origin_px, Vector2(side, side))
-			var elbow := Vector2(origin_px.x + s * 0.5, origin_px.y + s * 0.5)
-			return {"bounds": bounds, "polygon": poly, "marker": elbow}
+			# Room 15 — type 3 rotated 180° CCW. Elbow in the filled top-left corner.
+			return _l_visual(bbox, span2, icon_size, 180.0, Vector2(0.5, 0.5))
 		_:
 			var rect := Rect2(bbox, icon_size)
-			var cell_rects: Array[Rect2] = [rect]
-			return {"bounds": rect, "rects": cell_rects, "marker": rect.get_center()}
+			return {
+				"bounds": rect,
+				"marker": rect.get_center(),
+				"display_size": icon_size,
+				"rotation_deg": 0.0,
+				"kind": 1,
+			}
+
+
+func _l_visual(
+	bbox: Vector2,
+	span2: Vector2,
+	icon_size: Vector2,
+	rotation_deg: float,
+	elbow_cells: Vector2
+) -> Dictionary:
+	## Icon is 2×cell (no gap inside), centered in the 2×2 footprint span.
+	## elbow_cells: marker position in cell units (0..2) within that icon.
+	var side := Vector2(icon_size.x * 2.0, icon_size.y * 2.0)
+	var origin_px := Vector2(
+		bbox.x + (span2.x - side.x) * 0.5,
+		bbox.y + (span2.y - side.y) * 0.5
+	)
+	var bounds := Rect2(origin_px, side)
+	var marker := origin_px + Vector2(elbow_cells.x * icon_size.x, elbow_cells.y * icon_size.y)
+	return {
+		"bounds": bounds,
+		"marker": marker,
+		"display_size": side,
+		"rotation_deg": rotation_deg,
+		"kind": 3,
+	}
+
+
+func _scaled_tex_size(tex: Texture2D, fallback: Vector2) -> Vector2:
+	if tex == null:
+		return fallback
+	return Vector2(tex.get_width(), tex.get_height()) * icon_scale
+
+
+func _texture_for_kind(kind: int, discovered: bool) -> Texture2D:
+	match kind:
+		2:
+			return discovered_wide if discovered else undiscovered_wide
+		3:
+			return discovered_l if discovered else undiscovered_l
+		_:
+			return discovered_cell if discovered else undiscovered_cell
 
 
 func _scale_visual_around_center(visual: Dictionary, scale_factor: float) -> Dictionary:
@@ -537,79 +599,38 @@ func _scale_visual_around_center(visual: Dictionary, scale_factor: float) -> Dic
 		center + (bounds.position - center) * scale_factor,
 		bounds.size * scale_factor
 	)
-	if visual.has("rects"):
-		var scaled_rects: Array[Rect2] = []
-		for item in visual["rects"]:
-			var rect: Rect2 = item
-			var new_size := rect.size * scale_factor
-			var new_center := center + (rect.get_center() - center) * scale_factor
-			scaled_rects.append(Rect2(new_center - new_size * 0.5, new_size))
-		out["rects"] = scaled_rects
-	if visual.has("polygon"):
-		var scaled_poly := PackedVector2Array()
-		for p in visual["polygon"]:
-			scaled_poly.append(center + (p - center) * scale_factor)
-		out["polygon"] = scaled_poly
+	if visual.has("display_size"):
+		out["display_size"] = (visual["display_size"] as Vector2) * scale_factor
 	if visual.has("marker"):
 		var marker: Vector2 = visual["marker"]
 		out["marker"] = center + (marker - center) * scale_factor
 	return out
 
 
-func _make_room_icon(pos: Vector2, icon_size: Vector2, tex: Texture2D, is_current: bool) -> Control:
-	# NinePatch keeps the 1px art border from scaling into thick slabs on tall/wide icons.
-	var icon := NinePatchRect.new()
+func _make_room_icon(
+	center: Vector2,
+	display_size: Vector2,
+	tex: Texture2D,
+	rotation_deg: float,
+	is_current: bool
+) -> Control:
+	var icon := TextureRect.new()
 	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	icon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	icon.stretch_mode = TextureRect.STRETCH_SCALE
 	icon.texture = tex
-	var slice := maxi(room_icon_slice, 1)
-	icon.patch_margin_left = slice
-	icon.patch_margin_top = slice
-	icon.patch_margin_right = slice
-	icon.patch_margin_bottom = slice
-	icon.custom_minimum_size = icon_size
-	icon.size = icon_size
-	icon.position = Vector2(roundf(pos.x), roundf(pos.y))
+	icon.custom_minimum_size = display_size
+	icon.size = display_size
+	icon.pivot_offset = display_size * 0.5
+	icon.rotation_degrees = rotation_deg
+	icon.position = Vector2(
+		roundf(center.x - display_size.x * 0.5),
+		roundf(center.y - display_size.y * 0.5)
+	)
 	if is_current:
 		icon.modulate = current_modulate
 	return icon
-
-
-func _make_polygon_room_icon(points: PackedVector2Array, is_current: bool) -> Control:
-	var bounds := Rect2(points[0], Vector2.ZERO)
-	for p in points:
-		bounds = bounds.expand(p)
-	# Pad for stroke so the border isn't clipped.
-	var pad := room_poly_border_width
-	bounds = bounds.grow(pad)
-
-	var icon := _MapPolyIcon.new()
-	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	icon.position = Vector2(roundf(bounds.position.x), roundf(bounds.position.y))
-	icon.size = bounds.size
-	icon.fill = room_fill_color
-	icon.border = room_border_color
-	icon.border_width = room_poly_border_width
-	for p in points:
-		icon.points.append(p - bounds.position)
-	if is_current:
-		icon.modulate = current_modulate
-	return icon
-
-
-class _MapPolyIcon extends Control:
-	var points: PackedVector2Array = PackedVector2Array()
-	var fill: Color = Color.WHITE
-	var border: Color = Color.BLACK
-	var border_width: float = 2.0
-
-	func _draw() -> void:
-		if points.size() < 3:
-			return
-		draw_colored_polygon(points, fill)
-		var closed := points.duplicate()
-		closed.append(points[0])
-		draw_polyline(closed, border, border_width, true)
 
 
 func _draw_connectors(
@@ -729,12 +750,30 @@ func _resolve_link_target_id(link: Dictionary) -> String:
 	return target_id
 
 
+func _is_main_map_room(room_key: String) -> bool:
+	## Numbered campaign rooms only — skip habitacion_* test scenes / boss for the grid.
+	if room_key.is_valid_int():
+		return true
+	var scene: String = String(_scene_by_id.get(room_key, ""))
+	var base := scene.get_file().get_basename()
+	return base.is_valid_int()
+
+
 func _collect_visible_room_ids() -> Array[String]:
 	var result: Array[String] = []
 	var discovered: Array[String] = []
 
+	if debug_reveal_all:
+		for id in _grid.keys():
+			var key := String(id)
+			if _is_main_map_room(key):
+				result.append(key)
+		return result
+
 	for id in _grid.keys():
 		var key := String(id)
+		if not _is_main_map_room(key):
+			continue
 		if RunState.is_discovered(StringName(key)):
 			discovered.append(key)
 			result.append(key)
@@ -742,6 +781,8 @@ func _collect_visible_room_ids() -> Array[String]:
 	# Reveal undiscovered rooms linked from a discovered room.
 	for id in _grid.keys():
 		var key := String(id)
+		if not _is_main_map_room(key):
+			continue
 		if RunState.is_discovered(StringName(key)):
 			continue
 		for d in discovered:

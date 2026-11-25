@@ -9,6 +9,7 @@
 
 [node name="15" type="Node2D" unique_id=1556955998]
 script = ExtResource("1_jyjjv")
+map_cell = Vector2i(4, 2)
 room_id = &"15"
 map_shape = 4
 

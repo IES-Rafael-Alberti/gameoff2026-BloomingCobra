@@ -8,6 +8,7 @@
 
 [node name="24" type="Node2D" unique_id=1556955998]
 script = ExtResource("1_cmo6r")
+map_cell = Vector2i(4, 4)
 room_id = &"24"
 map_shape = 2
 

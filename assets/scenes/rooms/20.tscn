@@ -7,8 +7,11 @@
 [ext_resource type="TileSet" uid="uid://bk7uacfb2knda" path="res://assets/resources/tilesets/tileset_vigilia_red.tres" id="4_yl8s8"]
 [ext_resource type="PackedScene" uid="uid://cb5rvks5i5aea" path="res://assets/scenes/props/vigilia/interactive/doorVigilia.tscn" id="6_yl8s8"]
 
-[node name="17" type="Node2D" unique_id=1556955998]
+[node name="20" type="Node2D" unique_id=1556955998]
 script = ExtResource("1_usnps")
+map_shape = 0
+map_cell = Vector2i(6, 3)
+room_id = &"20"
 
 [node name="Switchable" type="Node2D" parent="." unique_id=884800511]
 script = ExtResource("2_m6w41")

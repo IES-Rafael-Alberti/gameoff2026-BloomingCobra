@@ -1,17 +1,27 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=11 format=3]
 
 [ext_resource type="Script" path="res://assets/scripts/hud/map_overlay.gd" id="1_map"]
-[ext_resource uid="uid://0glvd6vnm8op" type="Texture2D" path="res://assets/sprittesheets/HUD/placeholders/roomDiscovered.png" id="2_disc"]
-[ext_resource uid="uid://ded6717sy7jm2" type="Texture2D" path="res://assets/sprittesheets/HUD/placeholders/roomUndiscovered.png" id="3_und"]
-[ext_resource uid="uid://cmappanel00001" type="Texture2D" path="res://assets/sprittesheets/HUD/placeholders/mapPanel.png" id="4_panel"]
-[ext_resource uid="uid://cmapplayer0001" type="Texture2D" path="res://assets/sprittesheets/HUD/placeholders/mapPlayer.png" id="5_marker"]
-[ext_resource uid="uid://cmapconnect001" type="Texture2D" path="res://assets/sprittesheets/HUD/placeholders/mapConnector.png" id="6_conn"]
+[ext_resource type="Texture2D" path="res://assets/sprittesheets/HUD/definitivo/map/discoveredRoom1.png" id="2_disc1"]
+[ext_resource type="Texture2D" path="res://assets/sprittesheets/HUD/definitivo/map/undiscoveredRoom1.png" id="3_und1"]
+[ext_resource type="Texture2D" path="res://assets/sprittesheets/HUD/definitivo/map/discoveredRoom2.png" id="4_disc2"]
+[ext_resource type="Texture2D" path="res://assets/sprittesheets/HUD/definitivo/map/unDiscoveredRoom2.png" id="5_und2"]
+[ext_resource type="Texture2D" path="res://assets/sprittesheets/HUD/definitivo/map/discoveredRoom3.png" id="6_disc3"]
+[ext_resource type="Texture2D" path="res://assets/sprittesheets/HUD/definitivo/map/undiscoveredRoom3.png" id="7_und3"]
+[ext_resource type="Texture2D" path="res://assets/sprittesheets/HUD/placeholders/mapPanel.png" id="8_panel"]
+[ext_resource type="Texture2D" path="res://assets/sprittesheets/HUD/placeholders/mapPlayer.png" id="9_marker"]
+[ext_resource type="Texture2D" path="res://assets/sprittesheets/HUD/placeholders/mapConnector.png" id="10_conn"]
 
 [node name="MapOverlay" type="CanvasLayer"]
 layer = 80
 script = ExtResource("1_map")
-discovered_texture = ExtResource("2_disc")
-undiscovered_texture = ExtResource("3_und")
-panel_texture = ExtResource("4_panel")
-player_marker_texture = ExtResource("5_marker")
-connector_texture = ExtResource("6_conn")
+discovered_cell = ExtResource("2_disc1")
+undiscovered_cell = ExtResource("3_und1")
+discovered_wide = ExtResource("4_disc2")
+undiscovered_wide = ExtResource("5_und2")
+discovered_l = ExtResource("6_disc3")
+undiscovered_l = ExtResource("7_und3")
+discovered_texture = ExtResource("2_disc1")
+undiscovered_texture = ExtResource("3_und1")
+panel_texture = ExtResource("8_panel")
+player_marker_texture = ExtResource("9_marker")
+connector_texture = ExtResource("10_conn")

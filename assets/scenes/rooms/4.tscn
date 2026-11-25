@@ -6,7 +6,7 @@
 [ext_resource type="TileSet" uid="uid://bk7uacfb2knda" path="res://assets/resources/tilesets/tileset_vigilia_red.tres" id="4_1gwah"]
 [ext_resource type="PackedScene" uid="uid://b41468s5i5aea" path="res://assets/scenes/props/pesadilla/interactive/doorPesadilla.tscn" id="4_geaiu"]
 [ext_resource type="TileSet" uid="uid://cod5hqlj1hrki" path="res://assets/resources/tilesets/tileset_spikes_pesadilla.tres" id="4_mpfgx"]
-[ext_resource type="Script" path="res://assets/scripts/props/static/spikes_tile_layer.gd" id="4_spikes_scr"]
+[ext_resource type="Script" uid="uid://b5iyhww45wsuu" path="res://assets/scripts/props/static/spikes_tile_layer.gd" id="4_spikes_scr"]
 [ext_resource type="TileSet" uid="uid://ca112a4s4rpwe" path="res://assets/resources/tilesets/barreraPesadilla.tres" id="5_cd2y3"]
 [ext_resource type="PackedScene" uid="uid://cb5rvks5i5aea" path="res://assets/scenes/props/vigilia/interactive/doorVigilia.tscn" id="6_1gwah"]
 [ext_resource type="TileSet" uid="uid://rrdpge4ki82b" path="res://assets/resources/tilesets/barreraVigilia.tres" id="8_mpfgx"]
@@ -17,8 +17,11 @@ size = Vector2(208, 16)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_p81wj"]
 size = Vector2(12.5, 167.5)
 
-[node name="17" type="Node2D" unique_id=1556955998]
+[node name="4" type="Node2D" unique_id=1556955998]
 script = ExtResource("1_52kir")
+map_shape = 0
+room_id = &"4"
+map_cell = Vector2i(3, 0)
 
 [node name="Switchable" type="Node2D" parent="." unique_id=884800511]
 script = ExtResource("2_bmff8")
@@ -69,7 +72,6 @@ scale = Vector2(0.3, 0.3)
 tile_set = ExtResource("5_cd2y3")
 
 [node name="Sueño" type="Node2D" parent="Switchable" unique_id=1018947006]
-visible = false
 
 [node name="Tiles" type="TileMapLayer" parent="Switchable/Sueño" unique_id=1715976387]
 position = Vector2(35.6, 6)

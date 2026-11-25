@@ -3,26 +3,23 @@ extends Room
 
 ## Rest zone: safezone tiles only (no switchable variants).
 ## Forces nightmare movement and locks world switching while inside.
+## Continuously regenerates PlayerVitality while the player stays inside
+## (same style as vigilia drain, but recovering).
 
-@export var heal_on_enter: bool = true
-@export var heal_per_second: float = 1.0
+## Vitality restored per second while inside (mirrors drain_per_second default).
+@export var regen_per_second: float = 2.5
 
-var _heal_accumulator: float = 0.0
 var _player: Node2D = null
 
 
 func on_player_entered(player: Node2D) -> void:
 	_player = player
-	_heal_accumulator = 0.0
 	_force_pesadilla_and_lock()
 	_set_safe_music(true)
-	if heal_on_enter:
-		_heal_player(true)
 
 
 func on_player_exited(_exiting: Node2D) -> void:
 	_player = null
-	_heal_accumulator = 0.0
 	_set_safe_music(false)
 	_unlock_switch()
 
@@ -54,32 +51,17 @@ func _set_safe_music(active: bool) -> void:
 
 
 func _process(delta: float) -> void:
-	if not is_active() or _player == null or heal_per_second <= 0.0:
+	if not is_active() or _player == null or regen_per_second <= 0.0:
 		return
-	_heal_accumulator += heal_per_second * delta
-	if _heal_accumulator >= 1.0:
-		var amount := floori(_heal_accumulator)
-		_heal_accumulator -= float(amount)
-		_apply_heal(amount)
+	_regen_vitality(regen_per_second * delta)
 
 
-func _heal_player(full: bool) -> void:
-	var dmg := _get_player_damageable()
-	if dmg == null:
+func _regen_vitality(amount: float) -> void:
+	if _player == null or amount <= 0.0:
 		return
-	if full and dmg.has_method("heal_full"):
-		dmg.heal_full()
-	elif dmg.has_method("heal"):
-		dmg.heal(1)
-
-
-func _apply_heal(amount: int) -> void:
-	var dmg := _get_player_damageable()
-	if dmg != null and dmg.has_method("heal"):
-		dmg.heal(amount)
-
-
-func _get_player_damageable() -> Node:
-	if _player == null:
-		return null
-	return _player.get_node_or_null("Damageable")
+	if _player.has_method("heal_vitality"):
+		_player.call("heal_vitality", amount)
+		return
+	var vit: Node = _player.get_node_or_null("Vitality")
+	if vit != null and vit.has_method("heal"):
+		vit.call("heal", amount)

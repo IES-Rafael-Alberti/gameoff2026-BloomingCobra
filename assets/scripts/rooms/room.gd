@@ -16,7 +16,8 @@ const GAME_SCENE := "res://assets/scenes/game.tscn"
 @export var map_cell: Vector2i = Vector2i.ZERO
 ## Minimap footprint. CELL=1x1, TALL=1x2, WIDE=2x1,
 ## L_NO_TL=2x2 missing top-left, L_NO_BR=2x2 missing bottom-right.
-enum MapShape { CELL, TALL, WIDE, L_NO_TL, L_NO_BR }
+## CELL=square, TALL/WIDE=elongated, L_*=L rooms (icon rotations differ).
+enum MapShape { CELL, TALL, WIDE, L_NO_TL, L_NO_BR, L_NO_BL }
 @export var map_shape: MapShape = MapShape.CELL
 
 ## Optional: drag Door StaticBodies here. If empty, auto-detects Door nodes
@@ -146,6 +147,11 @@ static func map_footprint_for(origin: Vector2i, shape: MapShape) -> Array[Vector
 			cells.append(origin)
 			cells.append(origin + Vector2i(1, 0))
 			cells.append(origin + Vector2i(0, 1))
+		MapShape.L_NO_BL:
+			# 2x2 bbox; missing bottom-left (type-3 icon rotated 90° CCW).
+			cells.append(origin)
+			cells.append(origin + Vector2i(1, 0))
+			cells.append(origin + Vector2i(1, 1))
 		_:
 			cells.append(origin)
 	return cells

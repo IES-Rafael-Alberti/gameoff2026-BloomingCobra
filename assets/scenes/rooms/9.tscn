@@ -15,6 +15,7 @@ size = Vector2(12.5, 167.5)
 
 [node name="9" type="Node2D" unique_id=1556955998]
 script = ExtResource("1_fr1tw")
+map_cell = Vector2i(3, 1)
 room_id = &"9"
 map_shape = 2
 

@@ -31,8 +31,10 @@ const RED_RIGHT := [
 @export var mode_switch_scale: float = 0.3
 @export var base_max_vitality: float = 100.0
 @export var vitality_per_size_tier: float = 20.0
-## Visible bar eases down to real HP (ratio / sec).
+## Visible bar eases down to real HP during vigilia drain (ratio / sec).
 @export var visual_drain_per_second: float = 0.12
+## Hit damage (enemies / spikes) catches up at this rate (ratio / sec).
+@export var hit_drain_per_second: float = 3.0
 @export var visual_rise_per_second: float = 0.55
 
 @onready var _root: Control = $Margin/Column/TopRow/Root
@@ -56,6 +58,8 @@ var _pair_index: int = -1
 var _target_ratio: float = 1.0
 var _display_ratio: float = 1.0
 var _target_max: float = 100.0
+## Remaining ratio that must close at hit speed (queued per hit chunk).
+var _hit_catchup: float = 0.0
 
 
 func _ready() -> void:
@@ -79,10 +83,19 @@ func _process(delta: float) -> void:
 func _tick_display_ratio(delta: float) -> void:
 	if is_equal_approx(_display_ratio, _target_ratio):
 		_display_ratio = _target_ratio
+		_hit_catchup = 0.0
 		return
 	if _display_ratio > _target_ratio:
-		_display_ratio = maxf(_target_ratio, _display_ratio - visual_drain_per_second * delta)
+		var gap := _display_ratio - _target_ratio
+		if _hit_catchup > 0.0:
+			var rate := maxf(hit_drain_per_second, visual_drain_per_second)
+			var step := minf(minf(_hit_catchup, gap), rate * delta)
+			_display_ratio = maxf(_target_ratio, _display_ratio - step)
+			_hit_catchup = maxf(_hit_catchup - step, 0.0)
+		else:
+			_display_ratio = maxf(_target_ratio, _display_ratio - visual_drain_per_second * delta)
 	else:
+		_hit_catchup = 0.0
 		_display_ratio = minf(_target_ratio, _display_ratio + visual_rise_per_second * delta)
 
 
@@ -346,12 +359,38 @@ func _bind_player() -> void:
 	var vit: Node = player.get_node_or_null("Vitality")
 	if vit == null and player.has_method("get_vitality"):
 		vit = player.call("get_vitality") as Node
+	_unbind_vitality_signals()
 	_vitality = vit
 	_buffs = player.get_node_or_null("Buffs")
 	if _buffs == null and player.has_method("get_buffs"):
 		_buffs = player.call("get_buffs") as Node
+	_bind_vitality_signals()
 	if _vitality != null:
 		_sync_target_from_vitality()
 		_display_ratio = _target_ratio
+		_hit_catchup = 0.0
 		_set_visual(_display_ratio, _target_max, true)
 	_update_buff_icons()
+
+
+func _bind_vitality_signals() -> void:
+	if _vitality == null:
+		return
+	if _vitality.has_signal("hit_applied") and not _vitality.hit_applied.is_connected(_on_vitality_hit):
+		_vitality.hit_applied.connect(_on_vitality_hit)
+
+
+func _unbind_vitality_signals() -> void:
+	if _vitality == null:
+		return
+	if _vitality.has_signal("hit_applied") and _vitality.hit_applied.is_connected(_on_vitality_hit):
+		_vitality.hit_applied.disconnect(_on_vitality_hit)
+
+
+func _on_vitality_hit(lost: float, _current: float, max_vitality: float) -> void:
+	if lost <= 0.0:
+		return
+	var cap := maxf(max_vitality, 0.001)
+	## Queue a visual chunk matching the hit (1 dmg → vitality_per_damage_point / max).
+	_hit_catchup += lost / cap
+	_sync_target_from_vitality()

@@ -129,6 +129,9 @@ shader_parameter/pulse_speed = 0.55
 
 [node name="3" type="Node2D" unique_id=1556955998]
 script = ExtResource("1_qqynm")
+map_shape = 0
+map_cell = Vector2i(2, 0)
+room_id = &"3"
 
 [node name="SafeRoom" type="Node2D" parent="." unique_id=122311486]
 

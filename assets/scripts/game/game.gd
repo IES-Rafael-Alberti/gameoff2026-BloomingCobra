@@ -88,6 +88,27 @@ func _unhandled_input(event: InputEvent) -> void:
 			_toggle_debug_room_menu()
 			get_viewport().set_input_as_handled()
 			return
+		if key.keycode == KEY_F5:
+			_debug_toggle_reveal_map()
+			get_viewport().set_input_as_handled()
+			return
+
+
+func _debug_toggle_reveal_map() -> void:
+	var map := get_tree().get_first_node_in_group("map_overlay")
+	if map == null:
+		return
+	var enabled := false
+	if map.has_method("toggle_debug_reveal_all"):
+		enabled = bool(map.call("toggle_debug_reveal_all"))
+	elif map.has_method("set_debug_reveal_all"):
+		enabled = not bool(map.get("debug_reveal_all"))
+		map.call("set_debug_reveal_all", enabled)
+	# Open the map so the reveal is visible immediately.
+	if enabled and map.has_method("open_overlay"):
+		map.call("open_overlay")
+	elif enabled and map.has_method("refresh"):
+		map.call("refresh")
 
 
 func _setup_debug_room_ui() -> void:
@@ -113,6 +134,15 @@ func _setup_debug_room_ui() -> void:
 	rooms_button.focus_mode = Control.FOCUS_NONE
 	rooms_button.pressed.connect(_toggle_debug_room_menu)
 	layer.add_child(rooms_button)
+
+	var map_button := Button.new()
+	map_button.name = "DebugRevealMap"
+	map_button.text = "Reveal Map (F5)"
+	map_button.position = Vector2(288, 12)
+	map_button.custom_minimum_size = Vector2(140, 28)
+	map_button.focus_mode = Control.FOCUS_NONE
+	map_button.pressed.connect(_debug_toggle_reveal_map)
+	layer.add_child(map_button)
 
 	_debug_room_panel = VBoxContainer.new()
 	_debug_room_panel.name = "DebugRoomList"

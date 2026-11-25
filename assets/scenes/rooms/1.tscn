@@ -9,6 +9,7 @@
 
 [node name="1" type="Node2D" unique_id=1556955998 node_paths=PackedStringArray("respawn_point")]
 script = ExtResource("1_ecge7")
+map_cell = Vector2i(0, 0)
 respawn_point = NodePath("Respawn")
 room_id = &"1"
 map_shape = 1
