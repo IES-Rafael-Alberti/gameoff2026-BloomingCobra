@@ -21,8 +21,8 @@ size = Vector2(12.5, 167.5)
 
 [node name="9" type="Node2D" unique_id=1556955998]
 script = ExtResource("1_fr1tw")
-map_cell = Vector2i(3, 1)
 room_id = &"9"
+map_cell = Vector2i(3, 1)
 map_shape = 2
 
 [node name="Switchable" type="Node2D" parent="." unique_id=884800511]
@@ -189,6 +189,9 @@ shape = SubResource("RectangleShape2D_rihe3")
 position = Vector2(345, -182)
 shape = SubResource("RectangleShape2D_rihe3")
 
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Walls" unique_id=374832952]
+polygon = PackedVector2Array(104, 13, 104, -49, 141, -50, 142, -88, 319, -87, 318, -49, 357, -48, 357, 13, 319, 13, 319, 51, 141, 52, 141, 14)
+
 [node name="EnemySpawnpoint" type="Marker2D" parent="." unique_id=1223360433]
 position = Vector2(541, -9)
 script = ExtResource("7_frht8")
@@ -215,6 +218,6 @@ script = ExtResource("7_frht8")
 enemy_scene = ExtResource("8_4ka5l")
 
 [node name="EnemySpawnpoint5" type="Marker2D" parent="." unique_id=1968489339]
-position = Vector2(-143, -144)
+position = Vector2(-117, -117)
 script = ExtResource("7_frht8")
 enemy_scene = ExtResource("8_4ka5l")

@@ -281,6 +281,7 @@ animations = [{
 [node name="Hunter" type="CharacterBody2D" unique_id=1191328024]
 scale = Vector2(1.5, 1.5)
 script = ExtResource("1_kbpvo")
+move_speed = 40.0
 attack_cooldown = 0.8
 detection_radius = 180.0
 
