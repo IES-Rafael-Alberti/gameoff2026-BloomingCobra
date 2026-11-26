@@ -267,7 +267,7 @@ func _place_selectors() -> void:
 		if selector_size.x <= 1.0 and _selector_left.texture != null:
 			selector_size = _selector_left.texture.get_size()
 
-	var gap := 18.0
+	var gap := 5.0
 	var center_y := item_rect.position.y + item_rect.size.y * 0.5 - selector_size.y * 0.5
 	_selector_left.global_position = Vector2(item_rect.position.x - selector_size.x - gap, center_y)
 	_selector_right.global_position = Vector2(item_rect.position.x + item_rect.size.x + gap, center_y)
@@ -327,7 +327,8 @@ func _fit_menu_row() -> void:
 
 
 func _fit_selectors() -> void:
-	var side := maxf(36.0, size.y * 0.045)
+	#var side := maxf(36.0, size.y * 0.045)
+	var side := 30.0
 	_selector_left.custom_minimum_size = Vector2(side, side)
 	_selector_right.custom_minimum_size = Vector2(side, side)
 	_selector_left.size = Vector2(side, side)
