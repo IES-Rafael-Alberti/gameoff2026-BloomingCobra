@@ -49,6 +49,7 @@ position = Vector2(17, -163)
 disable_mode = 2
 collision_layer = 8
 door_id = &"10N"
+target_room = "uid://bkfy8bmovgeq0"
 target_door_id = &"6S"
 starts_open = true
 

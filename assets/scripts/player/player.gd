@@ -54,6 +54,7 @@ var _flash_mat: ShaderMaterial
 var _dead: bool = false
 var _void_falling: bool = false
 var _void_fall_tween: Tween
+var _cutscene_locked: bool = false
 var _iframe_left: float = 0.0
 var _iframe_blink_t: float = 0.0
 var _iframe_blink_on: bool = true
@@ -89,9 +90,27 @@ func _ready() -> void:
 	_sync_sprite_visual()
 
 
+func set_cutscene_locked(locked: bool) -> void:
+	_cutscene_locked = locked
+	if locked:
+		velocity = Vector2.ZERO
+		_knockback = Vector2.ZERO
+		_stop_steps()
+		cancel_attack_charge()
+		if attack != null and attack.has_method("set_enabled"):
+			attack.set_enabled(false)
+	elif not _dead and not _void_falling:
+		if attack != null and attack.has_method("set_enabled"):
+			attack.set_enabled(not _in_dream)
+
+
+func is_cutscene_locked() -> bool:
+	return _cutscene_locked
+
+
 func _physics_process(delta: float) -> void:
 	_sync_iframe_duration()
-	if _dead or _void_falling:
+	if _dead or _void_falling or _cutscene_locked:
 		velocity = Vector2.ZERO
 		_stop_steps()
 		# No vitality drain during the void fall beat (vigilia / sueño).

@@ -8,11 +8,26 @@ extends CanvasLayer
 ## Extra pixels between normal room icons (after scale).
 @export var cell_gap: float = 8.0
 @export var dim_alpha: float = 0.55
+## Backdrop + current-room tint (normal rooms) by world mode. Alpha uses `dim_alpha` on backdrop.
+@export var dim_pesadilla: Color = Color(0.28, 0.08, 0.42, 1.0)
+@export var dim_vigilia: Color = Color(0.62, 0.22, 0.42, 1.0)
+## Backdrop while the player is inside a MemoriesRoom.
+@export var dim_memory: Color = Color(0.12, 0.18, 0.42, 1.0)
 ## Extra pixels around the room grid for the adaptive panel.
 @export var panel_padding: float = 20.0
-@export var marker_scale: float = 3.0
+## On-map height in pixels for the player marker (iconpj is large source art).
+@export var marker_display_height: float = 28.0
+@export var marker_scale: float = 1.0
 @export var rooms_modulate: Color = Color(1, 1, 1, 1)
-@export var current_modulate: Color = Color(1.0, 1.0, 0.55, 1.0)
+## Current-room tint in normal rooms (pesadilla / vigilia).
+@export var current_pesadilla_modulate: Color = Color(0.72, 0.42, 1.0, 1.0)
+@export var current_vigilia_modulate: Color = Color(1.0, 0.55, 0.78, 1.0)
+## Kept for older scenes; unused — prefer current_pesadilla/vigilia.
+@export var current_modulate: Color = Color(0.72, 0.42, 1.0, 1.0)
+## Current-room tint while inside a SafeRoom.
+@export var current_safe_modulate: Color = Color(0.45, 1.0, 0.55, 1.0)
+## Current-room tint while inside a MemoriesRoom.
+@export var current_memory_modulate: Color = Color(0.2, 0.32, 0.7, 1.0)
 
 ## Type 1 — normal (square). Type 2 — elongated horizontal. Type 3 — L.
 @export var discovered_cell: Texture2D
@@ -35,6 +50,7 @@ extends CanvasLayer
 const ROOMS_DIR := "res://assets/scenes/rooms/"
 const PANEL_SLICE := 6
 const MAP_DIR := "res://assets/sprittesheets/HUD/definitivo/map/"
+const PLAYER_MARKER_PATH := "res://assets/sprittesheets/player/definitivo/iconpj.PNG"
 
 var _root: Control
 var _dim: ColorRect
@@ -51,8 +67,13 @@ var _scene_by_id: Dictionary = {} # room_id -> scene path
 var _id_by_scene_ref: Dictionary = {} # res:// path or uid:// -> room_id
 var _links_by_id: Dictionary = {} # room_id -> Array of link dicts
 var _icons: Dictionary = {} # room_id -> Array[Control]
+## Authored cells/shapes from the one-time scene scan (wins over stale saves).
+var _catalog_grid: Dictionary = {}
+var _catalog_shapes: Dictionary = {}
+var _catalog_ready: bool = false
 ## Debug: show every catalogued room on the map (undiscovered style if not found).
 var debug_reveal_all: bool = false
+var _rebuild_queued: bool = false
 
 
 func _ready() -> void:
@@ -63,6 +84,9 @@ func _ready() -> void:
 	_build_ui()
 	visible = false
 	_open = false
+	if not WorldMode.mode_changed.is_connected(_on_world_mode_changed):
+		WorldMode.mode_changed.connect(_on_world_mode_changed)
+	_apply_dim_backdrop()
 	call_deferred("_setup_rooms")
 
 
@@ -79,13 +103,14 @@ func _unhandled_input(event: InputEvent) -> void:
 func refresh() -> void:
 	if not _wired:
 		_setup_rooms()
+	# Immediate rebuild on open/refresh so Tab feels snappy; signals stay deferred.
 	_rebuild_icons()
 
 
 func set_debug_reveal_all(enabled: bool) -> void:
 	debug_reveal_all = enabled
 	if _open:
-		_rebuild_icons()
+		_request_rebuild_icons()
 	print("[Debug] Map reveal all: ", enabled)
 
 
@@ -110,7 +135,30 @@ func _set_open(open: bool) -> void:
 	_open = open
 	visible = open
 	if open:
+		_apply_dim_backdrop()
 		refresh()
+
+
+func _on_world_mode_changed(_mode_index: int) -> void:
+	_apply_dim_backdrop()
+	if _open:
+		_request_rebuild_icons()
+
+
+func _apply_dim_backdrop() -> void:
+	if _dim == null:
+		return
+	var base := _backdrop_color_for_context()
+	_dim.color = Color(base.r, base.g, base.b, dim_alpha)
+
+
+func _backdrop_color_for_context() -> Color:
+	var room := _get_current_room()
+	if room is MemoriesRoom:
+		return dim_memory
+	if WorldMode.mode == WorldMode.MODE_PESADILLA:
+		return dim_pesadilla
+	return dim_vigilia
 
 
 func _ensure_textures() -> void:
@@ -137,7 +185,12 @@ func _ensure_textures() -> void:
 		undiscovered_cell = undiscovered_texture
 	if panel_texture == null:
 		panel_texture = load("res://assets/sprittesheets/HUD/placeholders/mapPanel.png") as Texture2D
-	if player_marker_texture == null:
+	# Prefer the definitive player icon; keep any inspector override if already set
+	# to iconpj, otherwise replace the old 8×8 placeholder.
+	var iconpj := load(PLAYER_MARKER_PATH) as Texture2D
+	if iconpj != null:
+		player_marker_texture = iconpj
+	elif player_marker_texture == null:
 		player_marker_texture = load("res://assets/sprittesheets/HUD/placeholders/mapPlayer.png") as Texture2D
 	if connector_texture == null:
 		connector_texture = load("res://assets/sprittesheets/HUD/placeholders/mapConnector.png") as Texture2D
@@ -176,9 +229,9 @@ func _build_ui() -> void:
 	_dim = ColorRect.new()
 	_dim.name = "Dim"
 	_dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	_dim.color = Color(0, 0, 0, dim_alpha)
 	_dim.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_root.add_child(_dim)
+	_apply_dim_backdrop()
 
 	_panel = NinePatchRect.new()
 	_panel.name = "Panel"
@@ -260,7 +313,13 @@ func _scan_room_catalog() -> void:
 	_scene_by_id.clear()
 	_id_by_scene_ref.clear()
 	_links_by_id.clear()
+	_catalog_grid.clear()
+	_catalog_shapes.clear()
+	_catalog_ready = false
 	_scan_dir(ROOMS_DIR)
+	_catalog_grid = _grid.duplicate()
+	_catalog_shapes = _shapes_by_id.duplicate()
+	_catalog_ready = true
 
 
 func _scan_dir(path: String) -> void:
@@ -397,30 +456,18 @@ func _merge_run_state() -> void:
 		_links_by_id[String(key)] = RunState.room_links[key]
 
 
-func _refresh_catalog_shapes() -> void:
-	## Re-read map_shape / map_cell from numbered room scenes so TALL/WIDE/L stay correct.
-	for key in _scene_by_id.keys():
-		var id := String(key)
-		if not _is_main_map_room(id):
-			continue
-		var scene_path := String(_scene_by_id[id])
-		if scene_path.is_empty():
-			continue
-		var packed := load(scene_path) as PackedScene
-		if packed == null:
-			continue
-		var state := packed.get_state()
-		if state == null or state.get_node_count() <= 0:
-			continue
-		for i in state.get_node_property_count(0):
-			var prop_name := String(state.get_node_property_name(0, i))
-			var value: Variant = state.get_node_property_value(0, i)
-			if prop_name == "map_shape":
-				_shapes_by_id[id] = int(value)
-				RunState.room_shapes[id] = int(value)
-			elif prop_name == "map_cell" and value is Vector2i:
-				_grid[id] = value
-				RunState.room_cells[id] = value
+func _apply_catalog_overrides() -> void:
+	## Authored scene cells/shapes win over stale save data — no disk reload.
+	if not _catalog_ready:
+		return
+	for id in _catalog_grid.keys():
+		var cell: Vector2i = _catalog_grid[id]
+		_grid[id] = cell
+		RunState.room_cells[id] = cell
+	for id in _catalog_shapes.keys():
+		var shape := int(_catalog_shapes[id])
+		_shapes_by_id[id] = shape
+		RunState.room_shapes[id] = shape
 
 
 func _register_scene_ref(room_key: String, scene_path: String) -> void:
@@ -430,8 +477,8 @@ func _register_scene_ref(room_key: String, scene_path: String) -> void:
 	var uid := ResourceLoader.get_resource_uid(scene_path)
 	if uid != ResourceUID.INVALID_ID:
 		_id_by_scene_ref[ResourceUID.id_to_text(uid)] = room_key
-	# Fallback: parse uid from the .tscn header so links resolve even if the
-	# ResourceUID cache is incomplete during a fresh scan.
+		return
+	# Fallback only when UID cache misses — avoid opening every .tscn on scan.
 	if scene_path.ends_with(".tscn"):
 		var file := FileAccess.open(scene_path, FileAccess.READ)
 		if file != null:
@@ -510,38 +557,61 @@ func _wire_one_room(room: Room) -> void:
 
 
 func _on_room_changed(_previous: Room, next: Room) -> void:
-	if next != null:
+	if next != null and is_instance_valid(next):
 		_wire_one_room(next)
 		_merge_run_state()
+	_apply_dim_backdrop()
 	if _open:
-		_rebuild_icons()
+		_request_rebuild_icons()
 
 
 func _on_room_discovered() -> void:
 	if _open:
-		_rebuild_icons()
+		_request_rebuild_icons()
 
 
 func _on_room_entered(_player: Node2D, _room: Room) -> void:
 	if _open:
-		_rebuild_icons()
+		_request_rebuild_icons()
+
+
+func _request_rebuild_icons() -> void:
+	## Coalesce rebuilds and run after physics/room frees settle (avoids RID spam).
+	if _rebuild_queued:
+		return
+	_rebuild_queued = true
+	call_deferred("_rebuild_icons_deferred")
+
+
+func _rebuild_icons_deferred() -> void:
+	_rebuild_queued = false
+	_rebuild_icons()
+
+
+func _clear_layer_children(layer: Node) -> void:
+	if layer == null:
+		return
+	var kids := layer.get_children()
+	for child in kids:
+		layer.remove_child(child)
+		child.free()
 
 
 func _rebuild_icons() -> void:
 	if _rooms_layer == null or _connectors_layer == null:
 		return
-	# Scene catalog is source of truth for cells/shapes (saves can stale CELL=0).
-	if _grid.is_empty() or _shapes_by_id.is_empty():
+	if not is_inside_tree():
+		return
+	if _open:
+		_apply_dim_backdrop()
+	# One-time scene scan; never reload PackedScenes on every Tab open.
+	if not _catalog_ready:
 		_scan_room_catalog()
-	else:
-		_refresh_catalog_shapes()
 	_merge_run_state()
-	_refresh_catalog_shapes()
+	_apply_catalog_overrides()
 
-	for child in _rooms_layer.get_children():
-		child.queue_free()
-	for child in _connectors_layer.get_children():
-		child.queue_free()
+	_clear_layer_children(_rooms_layer)
+	_clear_layer_children(_connectors_layer)
 	_icons.clear()
 
 	var visible_ids: Array[String] = _collect_visible_room_ids()
@@ -595,6 +665,7 @@ func _rebuild_icons() -> void:
 
 	_draw_connectors(visible_ids, map_offset, min_g, icon_size, step)
 
+	var current_tint := _modulate_for_current_room()
 	for id in visible_ids:
 		var visual: Dictionary = local_visuals[id]
 		var is_current := id == current_id
@@ -607,7 +678,8 @@ func _rebuild_icons() -> void:
 		# Icon is anchored to the footprint bounds; marker can sit on the L elbow.
 		var icon_center: Vector2 = bounds.get_center()
 		var marker_local: Vector2 = visual.get("marker", icon_center)
-		var icon := _make_room_icon(icon_center + map_offset, display_size, tex, rot, is_current)
+		var tint := current_tint if is_current else Color(1, 1, 1, 1)
+		var icon := _make_room_icon(icon_center + map_offset, display_size, tex, rot, tint)
 		_rooms_layer.add_child(icon)
 		icons.append(icon)
 		_icons[id] = icons
@@ -760,7 +832,7 @@ func _make_room_icon(
 	display_size: Vector2,
 	tex: Texture2D,
 	rotation_deg: float,
-	is_current: bool
+	tint: Color = Color(1, 1, 1, 1)
 ) -> Control:
 	var icon := TextureRect.new()
 	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -777,9 +849,32 @@ func _make_room_icon(
 		roundf(center.x - display_size.x * 0.5),
 		roundf(center.y - display_size.y * 0.5)
 	)
-	if is_current:
-		icon.modulate = current_modulate
+	icon.modulate = tint
 	return icon
+
+
+func _modulate_for_current_room() -> Color:
+	var room := _get_current_room()
+	if room is MemoriesRoom:
+		return current_memory_modulate
+	if room is SafeRoom:
+		return current_safe_modulate
+	if WorldMode.mode == WorldMode.MODE_PESADILLA:
+		return current_pesadilla_modulate
+	return current_vigilia_modulate
+
+
+func _get_current_room() -> Room:
+	var tree := get_tree()
+	if tree == null:
+		return null
+	var manager := tree.get_first_node_in_group("room_manager")
+	if manager == null or not ("current_room" in manager):
+		return null
+	var room: Variant = manager.current_room
+	if room is Room and is_instance_valid(room):
+		return room as Room
+	return null
 
 
 func _draw_connectors(
@@ -879,17 +974,28 @@ func _add_connector(from_center: Vector2, to_center: Vector2, delta: Vector2i) -
 
 
 func _place_player_marker(current_id: String, marker_points: Dictionary) -> void:
-	if _player_marker == null:
+	if _player_marker == null or not is_instance_valid(_player_marker):
 		return
-	if current_id.is_empty() or not marker_points.has(current_id) or player_marker_texture == null:
+	if (
+		current_id.is_empty()
+		or not marker_points.has(current_id)
+		or player_marker_texture == null
+		or not is_instance_valid(player_marker_texture)
+	):
 		_player_marker.visible = false
 		return
 
 	var center: Vector2 = marker_points[current_id]
-	var marker_size := Vector2(
-		player_marker_texture.get_width(),
-		player_marker_texture.get_height()
-	) * marker_scale
+	var tex_w := player_marker_texture.get_width()
+	var tex_h := player_marker_texture.get_height()
+	if tex_w <= 0 or tex_h <= 0:
+		_player_marker.visible = false
+		return
+	var native := Vector2(float(tex_w), float(tex_h))
+	var height := maxf(marker_display_height, 1.0) * maxf(marker_scale, 0.01)
+	var fit := height / maxf(native.y, 1.0)
+	var marker_size := native * fit
+	_player_marker.texture = player_marker_texture
 	_player_marker.custom_minimum_size = marker_size
 	_player_marker.size = marker_size
 	_player_marker.position = Vector2(
@@ -897,7 +1003,8 @@ func _place_player_marker(current_id: String, marker_points: Dictionary) -> void
 		roundf(center.y - marker_size.y * 0.5)
 	)
 	_player_marker.visible = true
-	_player_marker.move_to_front()
+	if _marker_layer != null and is_instance_valid(_marker_layer):
+		_marker_layer.move_child(_player_marker, -1)
 
 
 func _resolve_link_target_id(link: Dictionary) -> String:
@@ -964,8 +1071,7 @@ func _rooms_linked(a_id: String, b_id: String) -> bool:
 
 
 func _find_current_room_id() -> String:
-	var manager := get_tree().get_first_node_in_group("room_manager")
-	if manager != null and "current_room" in manager and manager.current_room is Room:
-		var room := manager.current_room as Room
+	var room := _get_current_room()
+	if room != null:
 		return String(room.room_id)
 	return ""

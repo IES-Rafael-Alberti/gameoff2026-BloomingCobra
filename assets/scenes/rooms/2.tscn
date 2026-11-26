@@ -91,7 +91,7 @@ colors = PackedColorArray(0, 0, 0, 0, 0, 0, 0, 0, 0.7579225, 0.70900553, 0.59109
 [sub_resource type="GradientTexture1D" id="GradientTexture1D_jyaov"]
 gradient = SubResource("Gradient_c4bcj")
 
-[node name="3" type="Node2D" unique_id=1650967006 node_paths=PackedStringArray("memory")]
+[node name="2" type="Node2D" unique_id=1650967006 node_paths=PackedStringArray("memory")]
 script = ExtResource("1_memories")
 memory = NodePath("Memory")
 room_id = &"2"
@@ -185,3 +185,4 @@ polygon = PackedVector2Array(70, -32, 69, 5, 138, -2, 138, 1, 140, 1, 140, -3, 1
 
 [node name="Memory" parent="." unique_id=630628638 instance=ExtResource("6_b6wbk")]
 position = Vector2(8, -22)
+memory_id = &"2"
