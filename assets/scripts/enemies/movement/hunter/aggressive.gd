@@ -5,7 +5,7 @@ extends Node
 @export var claw_fx_distance: float = 14.0
 @export var claw_fx_duration: float = 0.28
 ## Aligns the claw slash art with the attack facing.
-@export var claw_fx_angle_offset: float = deg_to_rad(-40.0)
+@export var claw_fx_angle_offset: float = deg_to_rad(50.0)
 
 var brain: Node = null
 var _cooldown_left: float = 0.0

@@ -1,12 +1,14 @@
 extends CanvasLayer
 
-## In-game pause (E). Transparent overlay: Resume / Options / Main Menu.
+## In-game pause (E). Transparent overlay: Resume / Restart / Options / Main Menu.
 ## Web-safe: never uses Esc. Options closes only via Back.
+## Restart reloads from the last SafeRoom checkpoint (or the default start).
 
 const MAIN_MENU_SCENE := "res://assets/scenes/HUD/main_menu.tscn"
+const GAME_SCENE := "res://assets/scenes/game.tscn"
 const FONT_PATH := "res://assets/fonts/MagicalNeverlandRegular-JpRZ7.ttf"
 const MenuNavGate := preload("res://assets/scripts/hud/menu_nav_gate.gd")
-const MENU_LABELS: PackedStringArray = ["Resume", "Options", "Main Menu"]
+const MENU_LABELS: PackedStringArray = ["Resume", "Restart", "Options", "Main Menu"]
 
 @export var menu_font_size: int = 48
 @export var menu_color: Color = Color(0.96, 0.92, 0.86, 1.0)
@@ -195,8 +197,10 @@ func _activate_selection() -> void:
 		0:
 			_set_open(false)
 		1:
-			_open_options()
+			_restart_from_checkpoint()
 		2:
+			_open_options()
+		3:
 			_go_main_menu()
 
 
@@ -208,6 +212,22 @@ func _open_options() -> void:
 
 func _on_options_closed() -> void:
 	_update_selection_visuals()
+
+
+func _restart_from_checkpoint() -> void:
+	get_tree().paused = false
+	_open = false
+	visible = false
+	if RunState != null and RunState.has_method("has_save") and bool(RunState.has_save()):
+		if not bool(RunState.load_save()):
+			if RunState.has_method("reset"):
+				RunState.reset()
+	elif RunState != null and RunState.has_method("reset"):
+		RunState.reset()
+	if SceneTransition != null and SceneTransition.has_method("change_to"):
+		SceneTransition.change_to(GAME_SCENE)
+	else:
+		get_tree().change_scene_to_file(GAME_SCENE)
 
 
 func _go_main_menu() -> void:
