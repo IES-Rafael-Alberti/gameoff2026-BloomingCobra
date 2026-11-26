@@ -24,6 +24,9 @@ extends CanvasLayer
 @export var panel_texture: Texture2D
 @export var player_marker_texture: Texture2D
 @export var connector_texture: Texture2D
+## Vertical (1x2) variants — generated from wide art if not assigned.
+@export var discovered_tall: Texture2D
+@export var undiscovered_tall: Texture2D
 
 ## Kept for older scenes that still assign the generic discovered slot.
 @export var discovered_texture: Texture2D
@@ -138,6 +141,28 @@ func _ensure_textures() -> void:
 		player_marker_texture = load("res://assets/sprittesheets/HUD/placeholders/mapPlayer.png") as Texture2D
 	if connector_texture == null:
 		connector_texture = load("res://assets/sprittesheets/HUD/placeholders/mapConnector.png") as Texture2D
+	# Same art as room 18 (discoveredRoom2), saved upright as 16×32.
+	if discovered_tall == null:
+		discovered_tall = load(MAP_DIR + "discoveredRoom2Tall.png") as Texture2D
+	if undiscovered_tall == null:
+		undiscovered_tall = load(MAP_DIR + "undiscoveredRoom2Tall.png") as Texture2D
+	if discovered_tall == null and discovered_wide != null:
+		discovered_tall = _rotate_texture_ccw(discovered_wide)
+	if undiscovered_tall == null and undiscovered_wide != null:
+		undiscovered_tall = _rotate_texture_ccw(undiscovered_wide)
+
+
+func _rotate_texture_ccw(src: Texture2D) -> Texture2D:
+	## Fallback: 32x16 wide → 16x32 tall.
+	if src == null:
+		return null
+	var img := src.get_image()
+	if img == null:
+		return src
+	if img.is_compressed():
+		img.decompress()
+	img.rotate_90(ClockDirection.COUNTERCLOCKWISE)
+	return ImageTexture.create_from_image(img)
 
 
 func _build_ui() -> void:
@@ -287,10 +312,10 @@ func _ingest_room_scene(scene_path: String) -> void:
 	_scene_by_id[key] = scene_path
 	_register_scene_ref(key, scene_path)
 	_shapes_by_id[key] = map_shape
+	# Rooms without an authored map_cell must not default to (0,0) — that overlaps
+	# the real room there (e.g. room 2 was painting a seam over tall room 1).
 	if has_cell:
 		_grid[key] = map_cell
-	else:
-		_grid[key] = Vector2i.ZERO
 
 	var links: Array = []
 	var seen_targets: Dictionary = {} # raw target_room -> true (dedupe Sueño/Pesadilla twin doors)
@@ -349,7 +374,8 @@ func _ingest_room_scene(scene_path: String) -> void:
 			"target_door_id": target_door_id,
 		})
 	_links_by_id[key] = links
-	RunState.register_room_meta(room_id, scene_path, _grid[key], map_shape)
+	if has_cell:
+		RunState.register_room_meta(room_id, scene_path, _grid[key], map_shape)
 	RunState.register_room_links(room_id, links)
 
 
@@ -357,13 +383,44 @@ func _merge_run_state() -> void:
 	for key in RunState.room_cells.keys():
 		_grid[String(key)] = RunState.room_cells[key]
 	for key in RunState.room_shapes.keys():
-		_shapes_by_id[String(key)] = int(RunState.room_shapes[key])
+		var shape := int(RunState.room_shapes[key])
+		var id := String(key)
+		# Keep authored multi-cell shapes; stale saves often store CELL (0).
+		if shape == 0 and int(_shapes_by_id.get(id, 0)) != 0:
+			continue
+		_shapes_by_id[id] = shape
 	for key in RunState.room_scenes.keys():
 		var scene_path := String(RunState.room_scenes[key])
 		_scene_by_id[String(key)] = scene_path
 		_register_scene_ref(String(key), scene_path)
 	for key in RunState.room_links.keys():
 		_links_by_id[String(key)] = RunState.room_links[key]
+
+
+func _refresh_catalog_shapes() -> void:
+	## Re-read map_shape / map_cell from numbered room scenes so TALL/WIDE/L stay correct.
+	for key in _scene_by_id.keys():
+		var id := String(key)
+		if not _is_main_map_room(id):
+			continue
+		var scene_path := String(_scene_by_id[id])
+		if scene_path.is_empty():
+			continue
+		var packed := load(scene_path) as PackedScene
+		if packed == null:
+			continue
+		var state := packed.get_state()
+		if state == null or state.get_node_count() <= 0:
+			continue
+		for i in state.get_node_property_count(0):
+			var prop_name := String(state.get_node_property_name(0, i))
+			var value: Variant = state.get_node_property_value(0, i)
+			if prop_name == "map_shape":
+				_shapes_by_id[id] = int(value)
+				RunState.room_shapes[id] = int(value)
+			elif prop_name == "map_cell" and value is Vector2i:
+				_grid[id] = value
+				RunState.room_cells[id] = value
 
 
 func _register_scene_ref(room_key: String, scene_path: String) -> void:
@@ -473,9 +530,13 @@ func _on_room_entered(_player: Node2D, _room: Room) -> void:
 func _rebuild_icons() -> void:
 	if _rooms_layer == null or _connectors_layer == null:
 		return
-	_merge_run_state()
-	if _grid.is_empty():
+	# Scene catalog is source of truth for cells/shapes (saves can stale CELL=0).
+	if _grid.is_empty() or _shapes_by_id.is_empty():
 		_scan_room_catalog()
+	else:
+		_refresh_catalog_shapes()
+	_merge_run_state()
+	_refresh_catalog_shapes()
 
 	for child in _rooms_layer.get_children():
 		child.queue_free()
@@ -569,7 +630,7 @@ func _local_room_visual(
 	step: Vector2
 ) -> Dictionary:
 	## Returns { bounds, marker, display_size, rotation_deg, kind }
-	## kind: 1=cell, 2=wide/tall, 3=L. rotation_deg is CCW-negative Godot degrees.
+	## kind: 1=cell, 2=wide, 3=L, 4=tall. rotation_deg is CCW-negative Godot degrees.
 	var origin: Vector2i = _grid.get(room_key, Vector2i.ZERO)
 	var shape := int(_shapes_by_id.get(room_key, 0)) as Room.MapShape
 	var bbox := _cell_local_pos(origin, min_g, step)
@@ -580,23 +641,24 @@ func _local_room_visual(
 
 	match shape:
 		Room.MapShape.TALL:
-			# Type 2 is horizontal art — rotate 90° CCW for vertical rooms.
-			var display := _scaled_tex_size(discovered_wide, icon_size)
+			# Upright 1×2 covering both cells with no internal gap / black seam.
+			var display := Vector2(icon_size.x, icon_size.y * 2.0)
 			var bounds := Rect2(
-				bbox.x + (icon_size.x - display.y) * 0.5,
-				bbox.y + (span2.y - display.x) * 0.5,
-				display.y,
-				display.x
+				bbox.x + (icon_size.x - display.x) * 0.5,
+				bbox.y + (span2.y - display.y) * 0.5,
+				display.x,
+				display.y
 			)
 			return {
 				"bounds": bounds,
 				"marker": bounds.get_center(),
 				"display_size": display,
-				"rotation_deg": -90.0,
-				"kind": 2,
+				"rotation_deg": 0.0,
+				"kind": 4,
 			}
 		Room.MapShape.WIDE:
-			var display := _scaled_tex_size(discovered_wide, icon_size)
+			# Horizontal 2×1 covering both cells with no internal gap.
+			var display := Vector2(icon_size.x * 2.0, icon_size.y)
 			var bounds := Rect2(
 				bbox.x + (span2.x - display.x) * 0.5,
 				bbox.y + (icon_size.y - display.y) * 0.5,
@@ -667,6 +729,10 @@ func _texture_for_kind(kind: int, discovered: bool) -> Texture2D:
 			return discovered_wide if discovered else undiscovered_wide
 		3:
 			return discovered_l if discovered else undiscovered_l
+		4:
+			if discovered:
+				return discovered_tall if discovered_tall != null else discovered_wide
+			return undiscovered_tall if undiscovered_tall != null else undiscovered_wide
 		_:
 			return discovered_cell if discovered else undiscovered_cell
 
@@ -702,6 +768,7 @@ func _make_room_icon(
 	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	icon.stretch_mode = TextureRect.STRETCH_SCALE
 	icon.texture = tex
+	icon.clip_contents = false
 	icon.custom_minimum_size = display_size
 	icon.size = display_size
 	icon.pivot_offset = display_size * 0.5
@@ -790,14 +857,12 @@ func _add_connector(from_center: Vector2, to_center: Vector2, delta: Vector2i) -
 	conn.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	conn.stretch_mode = TextureRect.STRETCH_SCALE
 	conn.texture = connector_texture
-	# Keep the corridor mark readable on the dim overlay.
 	conn.modulate = Color(1.0, 1.0, 1.0, 0.95)
 
-	var tex_w := float(connector_texture.get_width())
 	var tex_h := float(connector_texture.get_height())
-	# Span most of the cell gap so doors read clearly between rooms.
-	var span := maxf(cell_gap + 6.0, tex_w * icon_scale * 0.65)
-	var thickness := maxf(tex_h * icon_scale * 0.65, 6.0)
+	# Stay inside the gap between room icons (tiny inset so it doesn't pierce them).
+	var span := maxf(cell_gap - 2.0, 4.0)
+	var thickness := maxf(tex_h * icon_scale * 0.5, 4.0)
 	if horizontal:
 		conn.size = Vector2(span, thickness)
 		conn.custom_minimum_size = conn.size

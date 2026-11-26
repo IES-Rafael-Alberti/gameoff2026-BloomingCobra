@@ -94,6 +94,7 @@ gradient = SubResource("Gradient_c4bcj")
 [node name="2" type="Node2D"]
 script = ExtResource("1_memories")
 room_id = &"2"
+map_cell = Vector2i(1, 0)
 
 [node name="DoorEste" parent="." instance=ExtResource("2_door_vigilia")]
 process_mode = 3
