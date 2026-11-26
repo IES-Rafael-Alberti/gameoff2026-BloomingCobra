@@ -1,10 +1,10 @@
 [gd_scene format=3 uid="uid://djqqe2x4etp4m"]
 
 [ext_resource type="Script" uid="uid://b3gfsx6p7ly70" path="res://assets/scripts/rooms/memories.gd" id="1_memories"]
-[ext_resource type="PackedScene" uid="uid://cb5rvks5i5aea" path="res://assets/scenes/props/vigilia/interactive/doorVigilia.tscn" id="2_door_vigilia"]
 [ext_resource type="PackedScene" uid="uid://b41468s5i5aea" path="res://assets/scenes/props/pesadilla/interactive/doorPesadilla.tscn" id="3_door_pesadilla"]
 [ext_resource type="Shader" uid="uid://6p4fxek8qx0s" path="res://assets/shaders/celestial_pool.gdshader" id="4_pool"]
 [ext_resource type="Shader" uid="uid://dql88870gaqc8" path="res://assets/shaders/celestial_beam.gdshader" id="5_beam"]
+[ext_resource type="PackedScene" uid="uid://dfwiq3ec4b3vb" path="res://assets/scenes/props/pickups/memory.tscn" id="6_b6wbk"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_kd6bk"]
 size = Vector2(208, 16)
@@ -96,18 +96,6 @@ script = ExtResource("1_memories")
 room_id = &"2"
 map_cell = Vector2i(1, 0)
 
-[node name="DoorEste" parent="." unique_id=1348196219 instance=ExtResource("2_door_vigilia")]
-process_mode = 3
-visible = false
-position = Vector2(137, -15)
-disable_mode = 2
-collision_layer = 8
-door_id = &"2E"
-target_room = "uid://dsu4ceiblws3x"
-target_door_id = &"3O"
-starts_open = true
-orientation = 1
-
 [node name="DoorEste2" parent="." unique_id=300450223 instance=ExtResource("3_door_pesadilla")]
 position = Vector2(134, -14)
 scale = Vector2(0.84, 0.84)
@@ -193,3 +181,6 @@ visible = false
 position = Vector2(3, -6)
 texture = SubResource("GradientTexture1D_jyaov")
 polygon = PackedVector2Array(70, -32, 69, 5, 138, -2, 138, 1, 140, 1, 140, -3, 140, -23, 140, -29, 137, -29, 137, -24)
+
+[node name="Memory" parent="." unique_id=630628638 instance=ExtResource("6_b6wbk")]
+position = Vector2(8, -22)
