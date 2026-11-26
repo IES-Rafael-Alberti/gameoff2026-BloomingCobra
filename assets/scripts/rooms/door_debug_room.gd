@@ -1,12 +1,6 @@
 class_name DoorDebugRoom
 extends Room
 
-## Debug arena: closed doors in both modes; any unlock button opens all of them
-## (including unlinked ones, so transport links are optional).
-
-
-func on_button_unlock() -> void:
-	cancel_pending_door_close()
-	for door in get_doors():
-		if door != null:
-			door.set_open(true)
+## Debug arena: closed doors in both modes. Each door opens from the buttons
+## assigned to it (Door > Button Unlock), so assign the same button to several
+## doors to open them together, or different buttons per door.

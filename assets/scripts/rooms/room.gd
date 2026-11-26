@@ -31,14 +31,6 @@ enum MapShape { CELL, TALL, WIDE, L_NO_TL, L_NO_BR, L_NO_BL }
 ## Leave an element empty to keep that marker's default enemy.
 @export var spawn_enemy_scenes: Array[PackedScene] = []
 
-@export_group("Button Unlock")
-## When enabled, assigned buttons can open this room's doors / clear its lock.
-@export var unlock_doors_with_buttons: bool = false
-## Drag PropButton nodes here (buttonPesadilla / buttonVigilia / interactive/button.tscn).
-@export var unlock_buttons: Array[Area2D] = []
-## If true, every assigned button must be pressed. If false, any one is enough.
-@export var require_all_buttons: bool = true
-
 @export_group("Camera")
 ## Extra pixels beyond playable tile bounds for Camera2D limits (shows background past walls).
 ## Does not affect room detection / transitions.
@@ -281,6 +273,12 @@ func save_state(_run_state: Node = null) -> void:
 	var state := RunState.ensure_room(room_id)
 	state["discovered"] = _discovered or bool(state.get("discovered", false))
 	state["cleared"] = _state_cleared or bool(state.get("cleared", false))
+	# Per-door committed unlocks (button-controlled doors only).
+	var committed: Array = state.get("committed_doors", [])
+	for door in get_button_unlock_doors():
+		if door.is_button_unlock_committed() and not committed.has(String(door.door_id)):
+			committed.append(String(door.door_id))
+	state["committed_doors"] = committed
 	state["buttons_committed"] = _button_unlock_committed or bool(state.get("buttons_committed", false))
 	_register_links_with_run_state()
 	RunState.register_room_meta(room_id, scene_file_path, map_cell, int(map_shape))
@@ -290,12 +288,12 @@ func load_state(_run_state: Node = null) -> void:
 	var state := RunState.ensure_room(room_id)
 	_discovered = bool(state.get("discovered", false))
 	_state_cleared = bool(state.get("cleared", false))
-	_button_unlock_committed = bool(state.get("buttons_committed", false))
-	if _button_unlock_committed:
-		_button_unlock_done = true
-		for button in unlock_buttons:
-			if button != null and button.has_method("commit"):
-				button.call("commit")
+	var committed: Array = state.get("committed_doors", [])
+	for door in get_button_unlock_doors():
+		if committed.has(String(door.door_id)):
+			door.commit_buttons()
+	_button_unlock_committed = _are_all_button_doors_committed(get_button_unlock_doors())
+	_button_unlock_done = _are_all_button_doors_unlocked(get_button_unlock_doors())
 
 
 func mark_room_cleared() -> void:
@@ -319,9 +317,10 @@ func nearest_door_to(point: Vector2) -> Door:
 
 
 ## Doors with no target_room stay closed as a permanent barrier.
+## Button-controlled doors are left to their own buttons.
 func _seal_unlinked_doors() -> void:
 	for door in get_doors():
-		if door == null or door.is_linked():
+		if door == null or door.is_linked() or door.has_button_unlock():
 			continue
 		door.starts_open = false
 		door.set_open(false)
@@ -648,78 +647,102 @@ func set_all_doors_open(open: bool) -> void:
 		# Unlinked doors are permanent barriers — never open them via bulk unlock.
 		if open and not door.is_linked():
 			continue
+		# Button-controlled doors follow their own buttons; bulk open/close skips them.
+		if door.has_button_unlock():
+			continue
 		door.set_open(open)
 
 
+## Doors that have their own buttons assigned. Each door opens from its own
+## buttons; the room only aggregates for locks / persistence / cleared hooks.
+func get_button_unlock_doors() -> Array[Door]:
+	var out: Array[Door] = []
+	for door in get_doors():
+		if door != null and door.has_button_unlock():
+			out.append(door)
+	return out
+
+
+func _are_all_button_doors_unlocked(doors: Array[Door]) -> bool:
+	var counted := 0
+	for door in doors:
+		# Mode-scoped duplicates (Pesadilla/Sueño) only count while that mode is active.
+		if not door.is_mode_present():
+			continue
+		counted += 1
+		if not door.is_button_unlock_done():
+			return false
+	return counted > 0
+
+
+func _are_all_button_doors_committed(doors: Array[Door]) -> bool:
+	var counted := 0
+	for door in doors:
+		if not door.is_mode_present():
+			continue
+		counted += 1
+		if not door.is_button_unlock_committed():
+			return false
+	return counted > 0
+
+
 func _setup_button_unlock() -> void:
-	if _buttons_wired or not unlock_doors_with_buttons:
+	if _buttons_wired:
 		return
 	_buttons_wired = true
-	for button in unlock_buttons:
-		if button == null:
-			continue
-		if button.has_signal("pressed") and not button.pressed.is_connected(_on_unlock_button_changed):
-			button.pressed.connect(_on_unlock_button_changed)
-		if button.has_signal("released") and not button.released.is_connected(_on_unlock_button_changed):
-			button.released.connect(_on_unlock_button_changed)
+	for door in get_button_unlock_doors():
+		if door.has_signal("button_unlocked") and not door.button_unlocked.is_connected(_on_door_button_unlocked):
+			door.button_unlocked.connect(_on_door_button_unlocked)
+	# A door may already have unlocked before this deferred setup ran.
+	call_deferred("_reconcile_button_unlock")
 
 
-func _on_unlock_button_changed() -> void:
-	if _button_unlock_done or _button_unlock_committed or not unlock_doors_with_buttons:
+func _reconcile_button_unlock() -> void:
+	if _button_unlock_done:
 		return
-	if not _are_unlock_buttons_satisfied():
+	if _are_all_button_doors_unlocked(get_button_unlock_doors()):
+		_button_unlock_done = true
+		on_button_unlock()
+
+
+func _on_door_button_unlocked() -> void:
+	if _button_unlock_done:
+		return
+	if not _are_all_button_doors_unlocked(get_button_unlock_doors()):
 		return
 	_button_unlock_done = true
-	# Button press arrives during physics flush — open doors next frame.
+	# Button press arrives during physics flush — react next frame.
 	call_deferred("on_button_unlock")
 
 
-func _are_unlock_buttons_satisfied() -> bool:
-	if unlock_buttons.is_empty():
-		return false
-	if require_all_buttons:
-		for button in unlock_buttons:
-			if button == null:
-				return false
-			if button.has_method("is_pressed"):
-				if not bool(button.call("is_pressed")):
-					return false
-			else:
-				return false
-		return true
-	for button in unlock_buttons:
-		if button != null and button.has_method("is_pressed") and bool(button.call("is_pressed")):
-			return true
-	return false
-
-
 ## Call when leaving the room successfully so pressed buttons stay down forever.
+## Commits every door whose buttons are currently pressed.
 func commit_unlock_buttons() -> void:
-	if not unlock_doors_with_buttons:
+	var doors := get_button_unlock_doors()
+	if doors.is_empty():
 		return
-	if not _button_unlock_done and not _are_unlock_buttons_satisfied():
-		return
-	_button_unlock_done = true
-	_button_unlock_committed = true
-	for button in unlock_buttons:
-		if button != null and button.has_method("commit"):
-			button.call("commit")
+	for door in doors:
+		if door.is_button_unlock_done() or door.are_buttons_satisfied():
+			door.commit_buttons()
+	_button_unlock_committed = _are_all_button_doors_committed(doors)
+	_button_unlock_done = _are_all_button_doors_unlocked(doors)
 
 
 ## Call on void respawn / failed attempt — undoes uncommitted button progress.
 func reset_unlock_buttons() -> void:
-	if not unlock_doors_with_buttons or _button_unlock_committed:
+	var doors := get_button_unlock_doors()
+	if doors.is_empty():
 		return
+	for door in doors:
+		door.reset_buttons()
 	_button_unlock_done = false
-	for button in unlock_buttons:
-		if button != null and button.has_method("reset"):
-			button.call("reset")
+	_button_unlock_committed = _are_all_button_doors_committed(doors)
 
 
-## Override in room types that clear locks / open a specific exit door.
+## Called once all button-controlled doors are unlocked. Override in room types
+## to clear locks / mark the room cleared.
 func on_button_unlock() -> void:
 	cancel_pending_door_close()
-	set_all_doors_open(true)
 
 
 ## Closes doors after `door_close_delay`. Cancelled if the player leaves first.

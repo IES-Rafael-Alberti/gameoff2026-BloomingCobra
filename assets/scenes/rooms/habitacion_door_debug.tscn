@@ -17,12 +17,9 @@ size = Vector2(150, 24)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wall_v"]
 size = Vector2(24, 150)
 
-[node name="HabitacionDoorDebug" type="Node2D" unique_id=469190002 node_paths=PackedStringArray("unlock_buttons")]
+[node name="HabitacionDoorDebug" type="Node2D" unique_id=469190002]
 script = ExtResource("1_room")
 room_id = &"habitacion_door_debug"
-unlock_doors_with_buttons = true
-unlock_buttons = [NodePath("Switchable/Pesadilla/ButtonPesadilla"), NodePath("Switchable/Sueño/ButtonVigilia")]
-require_all_buttons = false
 
 [node name="Switchable" type="Node2D" parent="." unique_id=1951390640]
 script = ExtResource("2_switch")
@@ -37,23 +34,27 @@ z_index = -2
 color = Color(0.22, 0.08, 0.12, 1)
 polygon = PackedVector2Array(-200, -200, 200, -200, 200, 200, -200, 200)
 
-[node name="DoorNorte" parent="Switchable/Pesadilla" unique_id=2142786073 instance=ExtResource("3_door_p")]
+[node name="DoorNorte" parent="Switchable/Pesadilla" unique_id=2142786073 instance=ExtResource("3_door_p") node_paths=PackedStringArray("unlock_buttons")]
 position = Vector2(0, -188)
 door_id = &"debugN"
+unlock_buttons = [NodePath("../ButtonPesadilla")]
 
-[node name="DoorEste" parent="Switchable/Pesadilla" unique_id=453112697 instance=ExtResource("3_door_p")]
+[node name="DoorEste" parent="Switchable/Pesadilla" unique_id=453112697 instance=ExtResource("3_door_p") node_paths=PackedStringArray("unlock_buttons")]
 position = Vector2(188, 0)
 door_id = &"debugE"
+unlock_buttons = [NodePath("../ButtonPesadilla")]
 orientation = 1
 
-[node name="DoorSur" parent="Switchable/Pesadilla" unique_id=595433712 instance=ExtResource("3_door_p")]
+[node name="DoorSur" parent="Switchable/Pesadilla" unique_id=595433712 instance=ExtResource("3_door_p") node_paths=PackedStringArray("unlock_buttons")]
 position = Vector2(0, 188)
 door_id = &"debugS"
+unlock_buttons = [NodePath("../ButtonPesadilla")]
 orientation = 2
 
-[node name="DoorOeste" parent="Switchable/Pesadilla" unique_id=767043366 instance=ExtResource("3_door_p")]
+[node name="DoorOeste" parent="Switchable/Pesadilla" unique_id=767043366 instance=ExtResource("3_door_p") node_paths=PackedStringArray("unlock_buttons")]
 position = Vector2(-188, 0)
 door_id = &"debugO"
+unlock_buttons = [NodePath("../ButtonPesadilla")]
 orientation = 3
 
 [node name="ButtonPesadilla" parent="Switchable/Pesadilla" unique_id=1462103195 instance=ExtResource("5_btn_p")]
@@ -66,35 +67,39 @@ z_index = -2
 color = Color(0.12, 0.28, 0.22, 1)
 polygon = PackedVector2Array(-200, -200, 200, -200, 200, 200, -200, 200)
 
-[node name="DoorNorte" parent="Switchable/Sueño" unique_id=216170245 instance=ExtResource("4_door_v")]
+[node name="DoorNorte" parent="Switchable/Sueño" unique_id=216170245 instance=ExtResource("4_door_v") node_paths=PackedStringArray("unlock_buttons")]
 process_mode = 3
 position = Vector2(0, -188)
 disable_mode = 2
 collision_layer = 24
 door_id = &"debugN"
+unlock_buttons = [NodePath("../ButtonVigilia")]
 
-[node name="DoorEste" parent="Switchable/Sueño" unique_id=328057475 instance=ExtResource("4_door_v")]
+[node name="DoorEste" parent="Switchable/Sueño" unique_id=328057475 instance=ExtResource("4_door_v") node_paths=PackedStringArray("unlock_buttons")]
 process_mode = 3
 position = Vector2(188, 0)
 disable_mode = 2
 collision_layer = 24
 door_id = &"debugE"
+unlock_buttons = [NodePath("../ButtonVigilia")]
 orientation = 1
 
-[node name="DoorSur" parent="Switchable/Sueño" unique_id=2089937348 instance=ExtResource("4_door_v")]
+[node name="DoorSur" parent="Switchable/Sueño" unique_id=2089937348 instance=ExtResource("4_door_v") node_paths=PackedStringArray("unlock_buttons")]
 process_mode = 3
 position = Vector2(0, 188)
 disable_mode = 2
 collision_layer = 24
 door_id = &"debugS"
+unlock_buttons = [NodePath("../ButtonVigilia")]
 orientation = 2
 
-[node name="DoorOeste" parent="Switchable/Sueño" unique_id=780638612 instance=ExtResource("4_door_v")]
+[node name="DoorOeste" parent="Switchable/Sueño" unique_id=780638612 instance=ExtResource("4_door_v") node_paths=PackedStringArray("unlock_buttons")]
 process_mode = 3
 position = Vector2(-188, 0)
 disable_mode = 2
 collision_layer = 24
 door_id = &"debugO"
+unlock_buttons = [NodePath("../ButtonVigilia")]
 orientation = 3
 
 [node name="ButtonVigilia" parent="Switchable/Sueño" unique_id=987177911 instance=ExtResource("6_btn_v")]

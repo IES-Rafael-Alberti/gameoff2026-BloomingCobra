@@ -178,15 +178,13 @@ size = Vector2(20, 67)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_h3o3c"]
 size = Vector2(9, 71)
 
-[node name="HabitacionParkour" type="Node2D" unique_id=873851779 node_paths=PackedStringArray("exit_door", "respawn_point", "void_area", "unlock_buttons")]
+[node name="HabitacionParkour" type="Node2D" unique_id=873851779 node_paths=PackedStringArray("exit_door", "respawn_point", "void_area")]
 script = ExtResource("1_2la87")
 exit_door = NodePath("Door4")
 respawn_point = NodePath("Respawn")
 void_area = NodePath("Void")
 room_id = &"habitacion_parkour"
 map_cell = Vector2i(0, 3)
-unlock_doors_with_buttons = true
-unlock_buttons = [NodePath("ButtonVigilia")]
 
 [node name="Switchable" type="Node2D" parent="." unique_id=1028693094]
 script = ExtResource("2_0in37")
@@ -253,11 +251,12 @@ position = Vector2(200, 90.5)
 shape = SubResource("RectangleShape2D_s7cmp")
 disabled = true
 
-[node name="Door4" type="StaticBody2D" parent="." unique_id=1315555281]
+[node name="Door4" type="StaticBody2D" parent="." unique_id=1315555281 node_paths=PackedStringArray("unlock_buttons")]
 position = Vector2(-34, -83)
 orientation = 3
 script = ExtResource("4_akf3y")
 door_id = &"west"
+unlock_buttons = [NodePath("../ButtonVigilia")]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Door4" unique_id=985599619]
 position = Vector2(-148, 91)
