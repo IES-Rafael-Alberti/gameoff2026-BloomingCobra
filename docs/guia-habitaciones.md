@@ -127,7 +127,7 @@ Sin `target_room`, la puerta es **barrera permanente**.
 2. **No hace falta** meter la sala a mano en `game.tscn`; el manager la carga por la ruta de la puerta.
 3. **Enemigos / pickups** van en la escena de la sala; el estado (limpia, pickups cogidos, etc.) lo guarda `RunState` al salir.
 4. **Spawners**: `EnemySpawnPoint` + opcionalmente `spawn_enemy_scenes` en la raíz.
-5. **Botones que abren puertas**: `unlock_doors_with_buttons` + array de botones en la raíz.
+5. **Botones que abren puertas**: se asignan **por puerta** en `Door` → grupo *Button Unlock* (`unlock_buttons` + `require_all_buttons`). Para que un botón abra varias puertas, arrastra ese mismo `PropButton` al array de cada puerta; para que cada puerta tenga su propio botón, asigna botones distintos. La sala solo agrega el estado (persistencia/limpiar bloqueo).
 6. **Cámara**: bounds = unión de tiles (Pesadilla/Sueño) + `Walls` si existen. Los límites se amplían con el tamaño de la vista para que la cámara **siga al jugador en toda la sala** (cerca del borde se verá un poco de fuera). `camera_limit_expand` añade margen extra.
 7. **Props de un solo modo** deben ir bajo ese modo; si están fuera de `Switchable`, siguen activos en ambos mundos.
 8. Tipos de sala cambian reglas (safe, trap, parkour, boss…); elige el script adecuado desde el principio.

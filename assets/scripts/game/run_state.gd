@@ -49,6 +49,7 @@ func ensure_room(room_id: StringName) -> Dictionary:
 			"discovered": false,
 			"cleared": false,
 			"buttons_committed": false,
+			"committed_doors": [],
 			"collected_pickups": [],
 			"dead_residents": [],
 		}
@@ -231,6 +232,7 @@ func _merge_rooms_dict(source: Variant) -> void:
 		dst["discovered"] = bool(src.get("discovered", false))
 		dst["cleared"] = bool(src.get("cleared", false))
 		dst["buttons_committed"] = bool(src.get("buttons_committed", false))
+		dst["committed_doors"] = _to_string_array(src.get("committed_doors", []))
 		dst["collected_pickups"] = _to_string_array(src.get("collected_pickups", []))
 		dst["dead_residents"] = _to_string_array(src.get("dead_residents", []))
 

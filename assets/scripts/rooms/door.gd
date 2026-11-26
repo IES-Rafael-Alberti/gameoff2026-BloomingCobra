@@ -7,6 +7,13 @@ extends StaticBody2D
 ## Switchable/Sueño for mode-scoped doors (like other props).
 ##
 ## Orientation is set on this node; [DoorVisual] updates sprite, collision and spawn.
+##
+## Button unlock is per door: drag [PropButton] nodes into `unlock_buttons` to make
+## this door open when its own buttons are pressed. Share a button across several
+## doors to open them together.
+
+## Emitted when this door's assigned buttons become satisfied and it opens.
+signal button_unlocked
 
 ## Layer bits (1-based Godot layers):
 ## 1 world, 2 player, 3 enemy, 4 door_enemy, 5 door_player
@@ -26,6 +33,15 @@ const ORIENT_WEST := 3
 ## Door id inside the destination room where the player should spawn.
 @export var target_door_id: StringName = &""
 @export var starts_open: bool = false
+
+@export_group("Button Unlock")
+## Buttons that open this door. Empty = not button-controlled.
+## Assign the same button to several doors to make one button open all of them.
+@export var unlock_buttons: Array[Area2D] = []
+## If true, every assigned button must be pressed. If false, any one is enough.
+@export var require_all_buttons: bool = true
+
+@export_group("Orientation")
 ## Facing of the doorway on the room wall. Updates sprite + collision via DoorVisual.
 @export_enum("North", "East", "South", "West") var orientation: int = ORIENT_NORTH:
 	get:
@@ -46,6 +62,9 @@ var _trigger: Area2D = null
 var _spawn: Marker2D = null
 var _requesting_transition: bool = false
 var _switchable: Node = null
+var _buttons_wired: bool = false
+var _button_unlock_done: bool = false
+var _button_unlock_committed: bool = false
 
 
 func _ready() -> void:
@@ -71,6 +90,7 @@ func _ready() -> void:
 	_ensure_spawn()
 	_ensure_trigger()
 	_bind_switchable_mode()
+	_setup_button_unlock()
 	if not Engine.is_editor_hint():
 		set_open(starts_open)
 	else:
@@ -108,6 +128,96 @@ func is_open() -> bool:
 
 func toggle_open() -> void:
 	set_open(not _open)
+
+
+## True when this door has buttons assigned to open it.
+func has_button_unlock() -> bool:
+	return not unlock_buttons.is_empty()
+
+
+func is_button_unlock_done() -> bool:
+	return _button_unlock_done
+
+
+func is_button_unlock_committed() -> bool:
+	return _button_unlock_committed
+
+
+## True when this door's assigned buttons currently satisfy the unlock condition.
+func are_buttons_satisfied() -> bool:
+	if unlock_buttons.is_empty():
+		return false
+	if require_all_buttons:
+		for button in unlock_buttons:
+			if button == null:
+				return false
+			if button.has_method("is_pressed"):
+				if not bool(button.call("is_pressed")):
+					return false
+			else:
+				return false
+		return true
+	for button in unlock_buttons:
+		if button != null and button.has_method("is_pressed") and bool(button.call("is_pressed")):
+			return true
+	return false
+
+
+## Re-evaluate button state. Opens the door once its buttons are satisfied and
+## keeps it open until reset_buttons() (void respawn) — matches the room's old
+## "unlock once" behaviour.
+func refresh_button_state() -> void:
+	if unlock_buttons.is_empty() or _button_unlock_committed or _button_unlock_done:
+		return
+	if not are_buttons_satisfied():
+		return
+	_button_unlock_done = true
+	set_open(true)
+	button_unlocked.emit()
+
+
+## Permanent unlock after leaving the room successfully: buttons stay pressed.
+func commit_buttons() -> void:
+	if unlock_buttons.is_empty():
+		return
+	_button_unlock_committed = true
+	_button_unlock_done = true
+	for button in unlock_buttons:
+		if button != null and button.has_method("commit"):
+			button.call("commit")
+	set_open(true)
+
+
+## Undo uncommitted button progress (e.g. void respawn).
+func reset_buttons() -> void:
+	if unlock_buttons.is_empty() or _button_unlock_committed:
+		return
+	_button_unlock_done = false
+	for button in unlock_buttons:
+		if button != null and button.has_method("reset"):
+			button.call("reset")
+	if not starts_open:
+		set_open(false)
+
+
+func _setup_button_unlock() -> void:
+	if Engine.is_editor_hint() or _buttons_wired or unlock_buttons.is_empty():
+		return
+	_buttons_wired = true
+	for button in unlock_buttons:
+		if button == null:
+			continue
+		if button.has_signal("pressed") and not button.pressed.is_connected(_on_button_changed):
+			button.pressed.connect(_on_button_changed)
+		if button.has_signal("released") and not button.released.is_connected(_on_button_changed):
+			button.released.connect(_on_button_changed)
+	# Buttons may already be committed (room reload); reconcile next frame.
+	call_deferred("refresh_button_state")
+
+
+func _on_button_changed() -> void:
+	# Button press arrives during physics flush — update doors next frame.
+	call_deferred("refresh_button_state")
 
 
 ## True when this door belongs to the active Switchable mode branch (or is not mode-scoped).

@@ -76,7 +76,11 @@ func _check_cleared() -> void:
 
 
 func on_button_unlock() -> void:
-	_clear_locks()
+	_cleared = true
+	_watching = false
+	mark_room_cleared()
+	# Doors already opened from their own buttons; just stop the lock logic.
+	cancel_pending_door_close()
 
 
 func _clear_locks() -> void:
