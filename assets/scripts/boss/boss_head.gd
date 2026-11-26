@@ -275,8 +275,6 @@ func interrupt_charge() -> void:
 	request_cancel()
 	_hide_aoe()
 	_charging_aoe = false
-	if animated_sprite != null:
-		animated_sprite.modulate = Color.WHITE
 
 
 func attack_laser_sweep() -> void:
@@ -383,7 +381,9 @@ func attack_aoe() -> void:
 		return
 
 	_show_aoe()
-	# Warning pulse before the ring expands.
+	# Warning pulse before the ring expands. Keep it outside the head sprite
+	# so the red ring doesn't read as a recolor of the original art.
+	var warn_radius := 48.0
 	var warn_elapsed := 0.0
 	while warn_elapsed < aoe_warn_time:
 		if _should_abort() or WorldMode.get_mode() != WorldMode.MODE_PESADILLA:
@@ -393,7 +393,7 @@ func attack_aoe() -> void:
 			_abort_aoe()
 			return
 		warn_elapsed += get_physics_process_delta_time()
-		_update_aoe_pulse_visual(0.0, warn_elapsed, 14.0 + 6.0 * sin(warn_elapsed * 18.0))
+		_update_aoe_pulse_visual(0.0, warn_elapsed, warn_radius + 5.0 * sin(warn_elapsed * 18.0))
 
 	var max_r_world := aoe_max_radius
 	var arena := get_arena()
@@ -411,10 +411,8 @@ func attack_aoe() -> void:
 			return
 		elapsed += get_physics_process_delta_time()
 		var t := clampf(elapsed / maxf(aoe_grow_duration, 0.01), 0.0, 1.0)
-		var radius := lerpf(12.0, max_r_world, t)
+		var radius := lerpf(warn_radius, max_r_world, t)
 		_update_aoe_pulse_visual(t, elapsed, radius)
-		if animated_sprite != null:
-			animated_sprite.modulate = Color(1.0, 1.0 - 0.25 * t, 1.0 - 0.35 * t)
 
 	# Impact only if the charge finished cleanly in Pesadilla.
 	if (
@@ -433,8 +431,6 @@ func attack_aoe() -> void:
 		return
 	_hide_aoe()
 	_charging_aoe = false
-	if animated_sprite != null:
-		animated_sprite.modulate = Color.WHITE
 	play_anim(&"Idle")
 	_end_attack()
 
@@ -443,8 +439,6 @@ func _abort_aoe() -> void:
 	_hide_aoe()
 	_charging_aoe = false
 	_knockback = Vector2.ZERO
-	if animated_sprite != null:
-		animated_sprite.modulate = Color.WHITE
 	play_anim(&"Idle")
 	_end_attack()
 
@@ -724,7 +718,8 @@ func _make_beam_sprite(node_name: String) -> AnimatedSprite2D:
 	spr.z_index = 21
 	if beam_template != null:
 		spr.sprite_frames = beam_template.sprite_frames
-	_fx_host().add_child(spr)
+	# Parent may still be running child _ready() (e.g. via room load); defer add.
+	_fx_host().add_child.call_deferred(spr)
 	return spr
 
 

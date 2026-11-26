@@ -57,6 +57,8 @@ var _world_lock_active: bool = false
 var _world_lock_center: Vector2 = Vector2.ZERO
 var _stored_zoom: Vector2 = Vector2.ONE
 var _has_stored_zoom: bool = false
+var _limits_before_world_lock: bool = true
+var _world_lock_anim_token: int = 0
 var _shake_time: float = 0.0
 var _shake_duration: float = 0.0
 var _shake_amplitude: float = 0.0
@@ -107,21 +109,56 @@ func _physics_process(delta: float) -> void:
 
 ## Pin the camera to a world point and optionally zoom to fit `fit_size`.
 func lock_to_world_point(center: Vector2, fit_size: Vector2 = Vector2.ZERO, padding: float = 1.1) -> void:
-	_world_lock_active = true
-	_world_lock_center = center
-	if not _has_stored_zoom:
-		_stored_zoom = zoom
-		_has_stored_zoom = true
-	if fit_size.x > 1.0 and fit_size.y > 1.0:
-		var vp := get_viewport_rect().size
-		var zx := vp.x / (fit_size.x * padding)
-		var zy := vp.y / (fit_size.y * padding)
-		var z := minf(zx, zy)
-		# Prefer fitting the room; never zoom in past the stored play zoom.
-		z = minf(z, _stored_zoom.x)
-		zoom = Vector2(z, z)
+	_world_lock_anim_token += 1
+	_begin_world_lock(center, fit_size, padding)
 	var player := get_parent() as Node2D
 	if player != null:
+		_set_look_at(center, player)
+	_snap_now()
+
+
+## Same as `lock_to_world_point`, but eases zoom/center from the current view.
+## Awaitable — returns when the pullback finishes (or immediately if duration <= 0).
+func animate_lock_to_world_point(
+	center: Vector2,
+	fit_size: Vector2 = Vector2.ZERO,
+	padding: float = 1.1,
+	duration: float = 1.5
+) -> void:
+	if duration <= 0.0:
+		lock_to_world_point(center, fit_size, padding)
+		return
+
+	_world_lock_anim_token += 1
+	var token := _world_lock_anim_token
+	var player := get_parent() as Node2D
+	var start_center := _look_at if _has_look_at else (player.global_position if player != null else center)
+	var start_zoom := zoom
+	var end_zoom := _begin_world_lock(center, fit_size, padding, false)
+	_world_lock_center = start_center
+	zoom = start_zoom
+	if player != null:
+		_set_look_at(start_center, player)
+
+	# Manual lerp — avoids SceneTree Tween RID lifetime issues.
+	var start_ms := Time.get_ticks_msec()
+	var duration_ms := maxf(duration, 0.01) * 1000.0
+	while true:
+		if token != _world_lock_anim_token or not _world_lock_active or not is_inside_tree():
+			return
+		var u := clampf(float(Time.get_ticks_msec() - start_ms) / duration_ms, 0.0, 1.0)
+		var eased := u * u * (3.0 - 2.0 * u) # smoothstep
+		_world_lock_center = start_center.lerp(center, eased)
+		zoom = start_zoom.lerp(end_zoom, eased)
+		if u >= 1.0:
+			break
+		await get_tree().process_frame
+
+	if token != _world_lock_anim_token or not _world_lock_active:
+		return
+	_world_lock_center = center
+	zoom = end_zoom
+	if player != null and is_instance_valid(player):
 		_set_look_at(center, player)
 	_snap_now()
 
@@ -129,7 +166,9 @@ func lock_to_world_point(center: Vector2, fit_size: Vector2 = Vector2.ZERO, padd
 func unlock_world_point() -> void:
 	if not _world_lock_active and not _has_stored_zoom:
 		return
+	_world_lock_anim_token += 1
 	_world_lock_active = false
+	limit_enabled = _limits_before_world_lock
 	if _has_stored_zoom:
 		zoom = _stored_zoom
 		_has_stored_zoom = false
@@ -138,7 +177,38 @@ func unlock_world_point() -> void:
 		_look_at = player.global_position
 		_has_look_at = true
 		_apply_mode(true)
+		if _current_room != null:
+			_apply_bounds(_current_room)
 	_snap_now()
+
+
+func _begin_world_lock(
+	center: Vector2,
+	fit_size: Vector2,
+	padding: float,
+	apply_zoom_now: bool = true
+) -> Vector2:
+	if not _world_lock_active:
+		_limits_before_world_lock = limit_enabled
+	_world_lock_active = true
+	_world_lock_center = center
+	# Play-zoom limits clamp a zoomed-out arena frame (cuts the boss head).
+	limit_enabled = false
+	if not _has_stored_zoom:
+		_stored_zoom = zoom
+		_has_stored_zoom = true
+	var end_zoom := zoom
+	if fit_size.x > 1.0 and fit_size.y > 1.0:
+		var vp := get_viewport_rect().size
+		var zx := vp.x / (fit_size.x * padding)
+		var zy := vp.y / (fit_size.y * padding)
+		var z := minf(zx, zy)
+		# Prefer fitting the room; never zoom in past the stored play zoom.
+		z = minf(z, _stored_zoom.x)
+		end_zoom = Vector2(z, z)
+		if apply_zoom_now:
+			zoom = end_zoom
+	return end_zoom
 
 
 func is_world_locked() -> bool:

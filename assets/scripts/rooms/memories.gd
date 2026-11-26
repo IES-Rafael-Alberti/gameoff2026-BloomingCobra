@@ -19,6 +19,9 @@ func on_player_entered(_player: Node2D) -> void:
 	_set_memories_music(true)
 	# Mode listeners may refresh beds in the same frame; re-assert after.
 	call_deferred("_set_memories_music", true)
+	# Pickup may already overlap the player after teleport / room enable.
+	if memory != null and memory.has_method("try_collect_overlapping"):
+		memory.call_deferred("try_collect_overlapping")
 
 
 func on_player_exited(_player: Node2D) -> void:

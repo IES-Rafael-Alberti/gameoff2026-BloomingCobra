@@ -11,12 +11,21 @@ extends Room
 ## Extra padding when fitting the whole arena into view.
 @export var camera_fit_padding: float = 1.08
 ## Extra space north of the playable floor so the external head stays on screen.
-@export var camera_north_margin: float = 120.0
+@export var camera_north_margin: float = 280.0
+## Nudge the locked view (negative Y = raise camera, more headroom above the boss).
+@export var camera_center_offset: Vector2 = Vector2(0, -52)
+@export_group("Intro")
+## Camera pullback from player view to the full arena before the fight starts.
+@export var intro_camera_duration: float = 1.7
+## Beat after the pullback before attacks begin.
+@export var intro_hold_duration: float = 0.55
 
 var _boss: Boss = null
 var _fight_started: bool = false
 var _boss_defeated: bool = false
 var _camera_locked: bool = false
+var _intro_running: bool = false
+var _intro_token: int = 0
 
 
 func _ready() -> void:
@@ -43,21 +52,27 @@ func on_player_entered(player: Node2D) -> void:
 		set_all_doors_open(true)
 		return
 	close_doors_after_delay()
-	if auto_start_fight and not _fight_started:
+	if auto_start_fight and not _fight_started and not _intro_running:
 		call_deferred("_start_boss_fight", player)
 
 
-func on_player_exited(_player: Node2D) -> void:
+func on_player_exited(player: Node2D) -> void:
+	_cancel_intro(player)
 	_unlock_boss_camera()
 
 
-func _start_boss_fight(_player: Node2D) -> void:
-	if _fight_started or _boss_defeated:
+func _start_boss_fight(player: Node2D) -> void:
+	if _fight_started or _boss_defeated or _intro_running:
 		return
 	_boss = get_node_or_null(boss_path) as Boss
 	if _boss == null:
 		return
-	_fight_started = true
+
+	_intro_running = true
+	_intro_token += 1
+	var token := _intro_token
+	_set_player_intro_locked(player, true)
+
 	var arena := get_camera_bounds()
 	var slots: Array = []
 	var slots_node := get_node_or_null(button_slots_path)
@@ -65,23 +80,56 @@ func _start_boss_fight(_player: Node2D) -> void:
 		for child in slots_node.get_children():
 			if child is Marker2D:
 				slots.append(child)
-	_lock_boss_camera(arena)
+
+	await _play_camera_intro(arena)
+	if token != _intro_token or _boss_defeated or not is_inside_tree():
+		_set_player_intro_locked(player, false)
+		_intro_running = false
+		return
+
+	if intro_hold_duration > 0.0:
+		await get_tree().create_timer(intro_hold_duration).timeout
+	if token != _intro_token or _boss_defeated or not is_inside_tree():
+		_set_player_intro_locked(player, false)
+		_intro_running = false
+		return
+
+	_fight_started = true
+	_intro_running = false
+	_set_player_intro_locked(player, false)
 	_boss.start_fight(arena, slots)
 
 
 func _on_boss_defeated() -> void:
 	_boss_defeated = true
 	_fight_started = false
+	_intro_running = false
+	_intro_token += 1
 	_unlock_boss_camera()
 	mark_room_cleared()
 	cancel_pending_door_close()
 	set_all_doors_open(true)
 
 
-func _lock_boss_camera(arena: Rect2) -> void:
+func _play_camera_intro(arena: Rect2) -> void:
 	var cam := _player_camera()
-	if cam == null or not cam.has_method("lock_to_world_point"):
+	if cam == null:
 		return
+	var view := _framed_boss_view(arena)
+	var center := (
+		view.get_center() + camera_center_offset
+		if view.size != Vector2.ZERO
+		else global_position + camera_center_offset
+	)
+	var fit := view.size if view.size != Vector2.ZERO else Vector2.ZERO
+	if cam.has_method("animate_lock_to_world_point"):
+		await cam.animate_lock_to_world_point(center, fit, camera_fit_padding, intro_camera_duration)
+	elif cam.has_method("lock_to_world_point"):
+		cam.lock_to_world_point(center, fit, camera_fit_padding)
+	_camera_locked = true
+
+
+func _framed_boss_view(arena: Rect2) -> Rect2:
 	var view := arena
 	if view.size != Vector2.ZERO and camera_north_margin > 0.0:
 		# Include the head parked above the north wall in the framed view.
@@ -91,10 +139,22 @@ func _lock_boss_camera(arena: Rect2) -> void:
 			view.size.x,
 			view.size.y + camera_north_margin
 		)
-	var center := view.get_center() if view.size != Vector2.ZERO else global_position
-	var fit := view.size if view.size != Vector2.ZERO else Vector2.ZERO
-	cam.lock_to_world_point(center, fit, camera_fit_padding)
-	_camera_locked = true
+	return view
+
+
+func _cancel_intro(player: Node2D = null) -> void:
+	if not _intro_running:
+		return
+	_intro_token += 1
+	_intro_running = false
+	_set_player_intro_locked(player, false)
+
+
+func _set_player_intro_locked(player: Node2D, locked: bool) -> void:
+	if player == null or not is_instance_valid(player):
+		return
+	if player.has_method("set_cutscene_locked"):
+		player.call("set_cutscene_locked", locked)
 
 
 func _unlock_boss_camera() -> void:
