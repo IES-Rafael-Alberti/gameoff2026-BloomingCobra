@@ -12,10 +12,12 @@ size = Vector2(14, 48)
 
 [node name="PusherProp" type="AnimatableBody2D" unique_id=1623427499]
 z_index = 1
+scale = Vector2(2.02, 2.02)
 collision_mask = 0
 script = ExtResource("1_pusher")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=139818386]
+modulate = Color(0.28933236, 0.32243666, 0.5730836, 1)
 texture_filter = 1
 position = Vector2(-1, 17)
 scale = Vector2(0.135, 0.135)
