@@ -286,19 +286,21 @@ detection_radius = 180.0
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=818412766]
 position = Vector2(-1, -2)
-scale = Vector2(0.06, 0.06)
+scale = Vector2(0.1, 0.1)
 sprite_frames = SubResource("SpriteFrames_l4rmu")
 animation = &"idle"
 autoplay = "idle"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1600442201]
 position = Vector2(0, -4)
+scale = Vector2(1.4, 1.4)
 shape = SubResource("CircleShape2D_r7qfn")
 
 [node name="hurtbox" type="Area2D" parent="." unique_id=1418285266]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="hurtbox" unique_id=949769062]
-position = Vector2(0, -4)
+position = Vector2(0, -1.735)
+scale = Vector2(1.6, 1.6)
 shape = SubResource("CircleShape2D_bhbtl")
 
 [node name="Damageable" type="Node2D" parent="." unique_id=604712311]

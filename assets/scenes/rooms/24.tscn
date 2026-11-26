@@ -8,8 +8,8 @@
 
 [node name="24" type="Node2D" unique_id=1556955998]
 script = ExtResource("1_cmo6r")
-map_cell = Vector2i(4, 4)
 room_id = &"24"
+map_cell = Vector2i(4, 4)
 map_shape = 2
 
 [node name="Switchable" type="Node2D" parent="." unique_id=884800511]
@@ -32,14 +32,20 @@ tile_map_data = PackedByteArray("AAAPAP7/AAACAAAAAAAPAP//AAACAAEAAAD6//7/AAAAAAA
 tile_set = ExtResource("4_jkuap")
 
 [node name="DoorNorte" parent="Switchable/Sueño" unique_id=173168588 instance=ExtResource("5_ob0b1")]
+process_mode = 3
 position = Vector2(-80, -160)
+disable_mode = 2
+collision_layer = 8
 door_id = &"24N1"
 target_room = "uid://dqm5wmuukt5yb"
 target_door_id = &"15S"
 starts_open = true
 
 [node name="DoorNorte2" parent="Switchable/Sueño" unique_id=555708795 instance=ExtResource("5_ob0b1")]
+process_mode = 3
 position = Vector2(496, -160)
+disable_mode = 2
+collision_layer = 8
 door_id = &"24N2"
 target_room = "uid://bcbo8le7eca2c"
 target_door_id = &"19S"

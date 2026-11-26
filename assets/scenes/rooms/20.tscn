@@ -5,13 +5,14 @@
 [ext_resource type="TileSet" uid="uid://mo5sa42ii37l" path="res://assets/resources/tilesets/tileset_pesadilla_red.tres" id="3_ed1n3"]
 [ext_resource type="PackedScene" uid="uid://b41468s5i5aea" path="res://assets/scenes/props/pesadilla/interactive/doorPesadilla.tscn" id="4_ed1n3"]
 [ext_resource type="TileSet" uid="uid://bk7uacfb2knda" path="res://assets/resources/tilesets/tileset_vigilia_red.tres" id="4_yl8s8"]
+[ext_resource type="TileSet" uid="uid://cod5hqlj1hrki" path="res://assets/resources/tilesets/tileset_spikes_pesadilla.tres" id="5_cqude"]
 [ext_resource type="PackedScene" uid="uid://cb5rvks5i5aea" path="res://assets/scenes/props/vigilia/interactive/doorVigilia.tscn" id="6_yl8s8"]
+[ext_resource type="Script" uid="uid://cgr461snah57y" path="res://assets/scripts/rooms/enemy_spawn_point.gd" id="7_yl8s8"]
 
 [node name="20" type="Node2D" unique_id=1556955998]
 script = ExtResource("1_usnps")
-map_shape = 0
-map_cell = Vector2i(6, 3)
 room_id = &"20"
+map_cell = Vector2i(6, 3)
 
 [node name="Switchable" type="Node2D" parent="." unique_id=884800511]
 script = ExtResource("2_m6w41")
@@ -25,20 +26,28 @@ tile_set = ExtResource("3_ed1n3")
 
 [node name="DoorOeste" parent="Switchable/Pesadilla" unique_id=268869019 instance=ExtResource("4_ed1n3")]
 position = Vector2(-162.745, -18)
-orientation = 3
+collision_layer = 8
 door_id = &"20O"
 target_room = "uid://bcbo8le7eca2c"
 target_door_id = &"19E"
 starts_open = true
+orientation = 3
 
 [node name="DoorSur" parent="Switchable/Pesadilla" unique_id=1639127600 instance=ExtResource("4_ed1n3")]
 position = Vector2(21, 136)
-orientation = 2
+collision_layer = 8
 door_id = &"20S"
 target_door_id = &"25N"
 starts_open = true
+orientation = 2
+
+[node name="Spike" type="TileMapLayer" parent="Switchable/Pesadilla" unique_id=327844367]
+scale = Vector2(0.3, 0.3)
+tile_map_data = PackedByteArray("AAD///3/AAAAAAAAAAD///7/AAAAAAAAAAACAAEAAAAAAAAAAAACAAIAAAAAAAAAAAACAAMAAAAAAAAAAAD/////AAAAAAAAAAD//wAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAD///z/AAAAAAAAAAD8//7/AAAAAAAAAAD9//7/AAAAAAAAAAD+//7/AAAAAAAAAAABAAAAAAAAAAAAAAADAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA=")
+tile_set = ExtResource("5_cqude")
 
 [node name="Sueño" type="Node2D" parent="Switchable" unique_id=1018947006]
+visible = false
 
 [node name="Tiles" type="TileMapLayer" parent="Switchable/Sueño" unique_id=1715976387]
 position = Vector2(35.6, 6)
@@ -47,19 +56,25 @@ tile_map_data = PackedByteArray("AAD6//v/AAAAAAAAAAD7//v/AAABAAAAAAD8//v/AAABAAA
 tile_set = ExtResource("4_yl8s8")
 
 [node name="DoorOeste" parent="Switchable/Sueño" unique_id=173168588 instance=ExtResource("6_yl8s8")]
+process_mode = 3
 position = Vector2(-163, -18)
-orientation = 3
+disable_mode = 2
+collision_layer = 8
 door_id = &"20O"
 target_room = "uid://bcbo8le7eca2c"
 target_door_id = &"19E"
 starts_open = true
+orientation = 3
 
 [node name="DoorSur" parent="Switchable/Sueño" unique_id=1838181197 instance=ExtResource("6_yl8s8")]
+process_mode = 3
 position = Vector2(21, 136)
-orientation = 2
+disable_mode = 2
+collision_layer = 8
 door_id = &"20S"
 target_door_id = &"25N"
 starts_open = true
+orientation = 2
 
 [node name="Walls" type="StaticBody2D" parent="." unique_id=1872382948]
 
@@ -68,3 +83,23 @@ polygon = PackedVector2Array(-178, -177, -182, 28, -144, 33, -144, 65, -98, 68, 
 
 [node name="CollisionPolygon2D2" type="CollisionPolygon2D" parent="Walls" unique_id=430890255]
 polygon = PackedVector2Array(74, 180, 74, 143, 206, 143, 205, 67, 169, 68, 167, -47, 129, -47, 130, -129, 56, -132, 56, -172, 31, -175, 31, -220, 276, -215, 260, 188)
+
+[node name="EnemySpawnpoint2" type="Marker2D" parent="." unique_id=721300118]
+position = Vector2(33, -100)
+script = ExtResource("7_yl8s8")
+enemy_type = 2
+
+[node name="EnemySpawnpoint3" type="Marker2D" parent="." unique_id=1109563323]
+position = Vector2(112, -28)
+script = ExtResource("7_yl8s8")
+enemy_type = 2
+
+[node name="EnemySpawnpoint4" type="Marker2D" parent="." unique_id=1236478114]
+position = Vector2(-119, -116)
+script = ExtResource("7_yl8s8")
+enemy_type = 2
+
+[node name="EnemySpawnpoint6" type="Marker2D" parent="." unique_id=1378270886]
+position = Vector2(156, 96)
+script = ExtResource("7_yl8s8")
+enemy_type = 2
