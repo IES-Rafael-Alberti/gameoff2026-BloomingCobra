@@ -8,7 +8,7 @@
 [ext_resource type="Texture2D" path="res://assets/sprittesheets/HUD/definitivo/map/discoveredRoom3.png" id="6_disc3"]
 [ext_resource type="Texture2D" path="res://assets/sprittesheets/HUD/definitivo/map/undiscoveredRoom3.png" id="7_und3"]
 [ext_resource type="Texture2D" path="res://assets/sprittesheets/HUD/placeholders/mapPanel.png" id="8_panel"]
-[ext_resource type="Texture2D" path="res://assets/sprittesheets/HUD/placeholders/mapPlayer.png" id="9_marker"]
+[ext_resource type="Texture2D" uid="uid://bx3ngrivub02y" path="res://assets/sprittesheets/player/definitivo/iconpj.PNG" id="9_marker"]
 [ext_resource type="Texture2D" path="res://assets/sprittesheets/HUD/placeholders/mapConnector.png" id="10_conn"]
 [ext_resource type="Texture2D" path="res://assets/sprittesheets/HUD/definitivo/map/discoveredRoom2Tall.png" id="11_tall"]
 [ext_resource type="Texture2D" path="res://assets/sprittesheets/HUD/definitivo/map/undiscoveredRoom2Tall.png" id="12_utall"]

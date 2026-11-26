@@ -12,6 +12,7 @@
 script = ExtResource("1_ecge7")
 respawn_point = NodePath("Respawn")
 room_id = &"1"
+map_cell = Vector2i(0, 0)
 map_shape = 1
 
 [node name="Switchable" type="Node2D" parent="." unique_id=884800511]
