@@ -1,11 +1,10 @@
 [gd_scene format=3 uid="uid://djqqe2x4etp4m"]
 
-[ext_resource type="Script" uid="uid://bnjkxhgyfy8mc" path="res://assets/scripts/rooms/safe.gd" id="1_c4bcj"]
-[ext_resource type="Script" uid="uid://b3gfsx6p7ly70" path="res://assets/scripts/rooms/memories.gd" id="2_ll5gr"]
-[ext_resource type="PackedScene" uid="uid://cb5rvks5i5aea" path="res://assets/scenes/props/vigilia/interactive/doorVigilia.tscn" id="3_ll5gr"]
-[ext_resource type="PackedScene" uid="uid://b41468s5i5aea" path="res://assets/scenes/props/pesadilla/interactive/doorPesadilla.tscn" id="4_b6wbk"]
-[ext_resource type="Shader" uid="uid://6p4fxek8qx0s" path="res://assets/shaders/celestial_pool.gdshader" id="4_mfnce"]
-[ext_resource type="Shader" uid="uid://dql88870gaqc8" path="res://assets/shaders/celestial_beam.gdshader" id="5_rc4bc"]
+[ext_resource type="Script" uid="uid://b3gfsx6p7ly70" path="res://assets/scripts/rooms/memories.gd" id="1_memories"]
+[ext_resource type="PackedScene" uid="uid://cb5rvks5i5aea" path="res://assets/scenes/props/vigilia/interactive/doorVigilia.tscn" id="2_door_vigilia"]
+[ext_resource type="PackedScene" uid="uid://b41468s5i5aea" path="res://assets/scenes/props/pesadilla/interactive/doorPesadilla.tscn" id="3_door_pesadilla"]
+[ext_resource type="Shader" uid="uid://6p4fxek8qx0s" path="res://assets/shaders/celestial_pool.gdshader" id="4_pool"]
+[ext_resource type="Shader" uid="uid://dql88870gaqc8" path="res://assets/shaders/celestial_beam.gdshader" id="5_beam"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_kd6bk"]
 size = Vector2(208, 16)
@@ -14,7 +13,7 @@ size = Vector2(208, 16)
 size = Vector2(12.5, 167.5)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_73wj3"]
-shader = ExtResource("3_pool")
+shader = ExtResource("4_pool")
 shader_parameter/rect_half_size = Vector2(26, 9)
 shader_parameter/glow_color = Color(1, 0.91, 0.68, 1)
 shader_parameter/intensity = 0.55
@@ -60,7 +59,7 @@ scale_max = 0.22
 color_ramp = SubResource("GradientTexture1D_mote")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_51e0d"]
-shader = ExtResource("4_beam")
+shader = ExtResource("5_beam")
 shader_parameter/rect_half_size = Vector2(70, 110)
 shader_parameter/beam_color = Color(1, 0.93, 0.74, 1)
 shader_parameter/intensity = 0.42
@@ -76,7 +75,7 @@ shader_parameter/flicker_speed = 0.45
 shader_parameter/dust_amount = 0.35
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_i02a7"]
-shader = ExtResource("3_pool")
+shader = ExtResource("4_pool")
 shader_parameter/rect_half_size = Vector2(65, 35)
 shader_parameter/glow_color = Color(1, 0.91, 0.68, 1)
 shader_parameter/intensity = 0.55
@@ -92,14 +91,11 @@ colors = PackedColorArray(0, 0, 0, 0, 0, 0, 0, 0, 0.7579225, 0.70900553, 0.59109
 [sub_resource type="GradientTexture1D" id="GradientTexture1D_jyaov"]
 gradient = SubResource("Gradient_c4bcj")
 
-[node name="19" type="Node2D" unique_id=1556955998]
-script = ExtResource("1_c4bcj")
-
-[node name="2" type="Node2D" parent="."]
-script = ExtResource("2_ll5gr")
+[node name="2" type="Node2D"]
+script = ExtResource("1_memories")
 room_id = &"2"
 
-[node name="DoorEste" parent="." instance=ExtResource("2_door")]
+[node name="DoorEste" parent="." instance=ExtResource("2_door_vigilia")]
 process_mode = 3
 visible = false
 position = Vector2(137, -15)
@@ -111,11 +107,7 @@ target_door_id = &"3O"
 starts_open = true
 orientation = 1
 
-[node name="Polygon2D" type="Polygon2D" parent="."]
-color = Color(0.012617188, 0.012617188, 0.012617188, 1)
-polygon = PackedVector2Array(250, -684, 942, -353, 1154, 656, -1131, 712, -959, -653, -54, -714, 135, -700)
-
-[node name="DoorEste2" parent="Memoria" unique_id=268869019 instance=ExtResource("4_b6wbk")]
+[node name="DoorEste2" parent="." instance=ExtResource("3_door_pesadilla")]
 position = Vector2(134, -14)
 scale = Vector2(0.84, 0.84)
 collision_layer = 8
@@ -125,7 +117,11 @@ target_door_id = &"3O"
 starts_open = true
 orientation = 1
 
-[node name="Walls" type="StaticBody2D" parent="." unique_id=1849972134]
+[node name="Polygon2D" type="Polygon2D" parent="."]
+color = Color(0.012617188, 0.012617188, 0.012617188, 1)
+polygon = PackedVector2Array(250, -684, 942, -353, 1154, 656, -1131, 712, -959, -653, -54, -714, 135, -700)
+
+[node name="Walls" type="StaticBody2D" parent="."]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Walls"]
 position = Vector2(-67, -107)
@@ -135,7 +131,7 @@ shape = SubResource("RectangleShape2D_kd6bk")
 position = Vector2(-140, 75)
 shape = SubResource("RectangleShape2D_kd6bk")
 
-[node name="CollisionShape2D3" type="CollisionShape2D" parent="Walls" unique_id=1773625081]
+[node name="CollisionShape2D3" type="CollisionShape2D" parent="Walls"]
 position = Vector2(69, 74)
 shape = SubResource("RectangleShape2D_kd6bk")
 
@@ -191,7 +187,7 @@ scale = Vector2(1.33, 1.33)
 polygon = PackedVector2Array(-65, -35, 65, -35, 65, 35, -65, 35)
 uv = PackedVector2Array(0, 0, 1, 0, 1, 1, 0, 1)
 
-[node name="Door" type="Polygon2D" parent="." unique_id=614491188]
+[node name="Door" type="Polygon2D" parent="."]
 visible = false
 position = Vector2(3, -6)
 texture = SubResource("GradientTexture1D_jyaov")

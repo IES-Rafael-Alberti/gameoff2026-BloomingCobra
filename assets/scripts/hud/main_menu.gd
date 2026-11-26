@@ -8,7 +8,8 @@ const MenuNavGate := preload("res://assets/scripts/hud/menu_nav_gate.gd")
 
 const INTRO_SLIDE_SECONDS := 2.8
 const UI_FADE_SECONDS := 0.85
-const MENU_LABELS: PackedStringArray = ["Play", "Options", "Exit"]
+const MENU_LABELS_FRESH: PackedStringArray = ["Play", "Options", "Exit"]
+const MENU_LABELS_CONTINUE: PackedStringArray = ["Continue", "New Game", "Options", "Exit"]
 
 @export var menu_font_size: int = 56
 @export var menu_color: Color = Color(0.96, 0.92, 0.86, 1.0)
@@ -135,14 +136,21 @@ func _layout_scroll_background(at_top: bool) -> void:
 	_scroll_bg.position.y = 0.0 if at_top else _scroll_start_y()
 
 
+func _menu_labels() -> PackedStringArray:
+	if RunState != null and RunState.has_method("has_save") and bool(RunState.has_save()):
+		return MENU_LABELS_CONTINUE
+	return MENU_LABELS_FRESH
+
+
 func _setup_menu_labels() -> void:
 	for child in _menu_row.get_children():
 		child.queue_free()
 	_menu_items.clear()
 
-	for i in MENU_LABELS.size():
+	var labels := _menu_labels()
+	for i in labels.size():
 		var label := Label.new()
-		label.text = MENU_LABELS[i]
+		label.text = labels[i]
 		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		label.mouse_filter = Control.MOUSE_FILTER_STOP
@@ -212,19 +220,42 @@ func _move_selection(delta: int) -> void:
 
 
 func _activate_selection() -> void:
-	match _selected_index:
-		0:
-			_start_game()
-		1:
+	var labels := _menu_labels()
+	if _selected_index < 0 or _selected_index >= labels.size():
+		return
+	match String(labels[_selected_index]):
+		"Continue":
+			_continue_game()
+		"New Game", "Play":
+			_start_new_game()
+		"Options":
 			_open_options()
-		2:
+		"Exit":
 			_open_exit_confirm()
 
 
-func _start_game() -> void:
+func _continue_game() -> void:
 	_input_enabled = false
-	if RunState != null and RunState.has_method("reset"):
+	if RunState == null or not RunState.has_method("load_save") or not bool(RunState.load_save()):
+		_input_enabled = true
+		push_warning("MainMenu: continue failed, starting new game")
+		_start_new_game()
+		return
+	_launch_game_scene()
+
+
+func _start_new_game() -> void:
+	_input_enabled = false
+	if RunState != null and RunState.has_method("begin_new_run"):
+		RunState.begin_new_run()
+	elif RunState != null and RunState.has_method("reset"):
 		RunState.reset()
+		if RunState.has_method("clear_save"):
+			RunState.clear_save()
+	_launch_game_scene()
+
+
+func _launch_game_scene() -> void:
 	# Call the autoload directly so the async transition survives change_scene.
 	# (Object.call on a freeing menu node can stall the loading overlay.)
 	if SceneTransition != null and SceneTransition.has_method("change_to"):

@@ -27,9 +27,8 @@ size = Vector2(12.5, 167.5)
 
 [node name="7" type="Node2D" unique_id=1556955998]
 script = ExtResource("1_oclpg")
-map_shape = 0
-map_cell = Vector2i(1, 1)
 room_id = &"7"
+map_cell = Vector2i(1, 1)
 
 [node name="Switchable" type="Node2D" parent="." unique_id=884800511]
 script = ExtResource("2_8c7qs")

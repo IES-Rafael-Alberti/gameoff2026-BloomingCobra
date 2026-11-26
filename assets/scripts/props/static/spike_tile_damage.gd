@@ -98,11 +98,30 @@ func _overlaps_player(player: Node2D) -> bool:
 
 
 func _cell_is_spike(cell: Vector2i) -> bool:
+	var source_id := _layer.get_cell_source_id(cell)
+	if source_id == -1:
+		return false
+	# Skip cells pointing at removed / invalid atlas coords (avoids TileSet errors).
+	if not _cell_atlas_exists(cell, source_id):
+		return false
 	var data := _layer.get_cell_tile_data(cell)
 	if data != null and data.get_custom_data(CUSTOM_SPIKES):
 		return true
 	# Dedicated spike tilesets flag every painted cell.
-	return _tileset_is_dedicated_spikes(_layer.tile_set) and _layer.get_cell_source_id(cell) != -1
+	return _tileset_is_dedicated_spikes(_layer.tile_set)
+
+
+func _cell_atlas_exists(cell: Vector2i, source_id: int) -> bool:
+	var ts := _layer.tile_set
+	if ts == null or not ts.has_source(source_id):
+		return false
+	var source := ts.get_source(source_id)
+	if source is TileSetAtlasSource:
+		var atlas := source as TileSetAtlasSource
+		var coords := _layer.get_cell_atlas_coords(cell)
+		var alt := _layer.get_cell_alternative_tile(cell)
+		return atlas.has_tile(coords) and atlas.has_alternative_tile(coords, alt)
+	return true
 
 
 static func tileset_has_spikes(ts: TileSet) -> bool:

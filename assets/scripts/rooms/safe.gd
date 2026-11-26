@@ -18,6 +18,8 @@ func on_player_entered(player: Node2D) -> void:
 	_set_safe_music(true)
 	# Mode listeners may refresh beds in the same frame; re-assert after.
 	call_deferred("_set_safe_music", true)
+	# Checkpoint: spawn here + progress (cleared rooms, map, memories).
+	_write_checkpoint()
 
 
 func on_player_exited(_exiting: Node2D) -> void:
@@ -83,3 +85,9 @@ func _regen_vitality(amount: float) -> void:
 	var vit: Node = _player.get_node_or_null("Vitality")
 	if vit != null and vit.has_method("heal"):
 		vit.call("heal", amount)
+
+
+func _write_checkpoint() -> void:
+	save_state(RunState)
+	if RunState != null and RunState.has_method("save_checkpoint"):
+		RunState.save_checkpoint(self)

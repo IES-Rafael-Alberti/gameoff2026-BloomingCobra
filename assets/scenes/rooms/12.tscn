@@ -81,11 +81,10 @@ tile_set = ExtResource("5_ldia3")
 
 [node name="Spike" type="TileMapLayer" parent="Switchable/Pesadilla" unique_id=915639019]
 scale = Vector2(0.3, 0.3)
-tile_map_data = PackedByteArray("AAD8//z/AAAAAAAAAAD8//7/AAAAAAAAAAD8/wAAAAAAAAAAAAD8/wIAAAAAAAAAAAADAPz/AAAAAAAAAAADAP7/AAAAAAAAAAADAAAAAAAAAAAAAAADAAIAAAAAAAAAAAD+//z/AAAAAAAAAAABAPz/AAAAAAAAAAD1//r/AAAAAAIAAAD1//v/AAAAAAIAAAD1//z/AAAAAAMAAAD2//r/AAAAAAIAAAD2//v/AAAAAAIAAAD2//z/AAACAAMAAAA=")
+tile_map_data = PackedByteArray("AAD8//z/AAAAAAAAAAD8//7/AAAAAAAAAAD8/wAAAAAAAAAAAAD8/wIAAAAAAAAAAAADAPz/AAAAAAAAAAADAP7/AAAAAAAAAAADAAAAAAAAAAAAAAADAAIAAAAAAAAAAAD+//z/AAAAAAAAAAABAPz/AAAAAAAAAAD1//r/AAAAAAAAAAD1//v/AAAAAAAAAAD1//z/AAAAAAAAAAD2//r/AAAAAAAAAAD2//v/AAAAAAAAAAD2//z/AAAAAAAAAAA=")
 tile_set = ExtResource("6_dskna")
 
 [node name="Sueño" type="Node2D" parent="Switchable" unique_id=1018947006]
-visible = false
 
 [node name="Tiles" type="TileMapLayer" parent="Switchable/Sueño" unique_id=1715976387]
 position = Vector2(35.6, 6)

@@ -6,6 +6,13 @@ extends Room
 @export var memory: MemoryInteractable
 
 
+func load_state(_run_state: Node = null) -> void:
+	super.load_state(_run_state)
+	if memory == null:
+		memory = _find_memory()
+	# MemoryInteractable removes itself in _ready when already collected.
+
+
 func on_player_entered(_player: Node2D) -> void:
 	if memory == null:
 		memory = _find_memory()
