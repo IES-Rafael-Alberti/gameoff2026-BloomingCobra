@@ -2,16 +2,27 @@ class_name PropPickupDef
 extends PropDefinition
 
 ## Collectible pickup definition (heal, upgrades…).
-## `amount` meaning depends on pickup_type:
-## - heal / cat_heal: vitality restored
-## - max_health: max vitality gained (also heals that much)
-## - attack_boost / projectile_boost: damage stacks added (permanent)
-## - shield: number of hits absorbed
-## `duration` is unused (kept for older .tres files).
+## `amount` — heal / cat_heal / max_health vitality points.
+## `stacks` — attack_boost / projectile_boost / shield accumulations (not timed).
 
 @export var pickup_type: StringName = &"heal"
 @export var amount: int = 25
-@export var duration: float = 0.0
+## Stacks granted for attack / projectile / shield pickups.
+@export_range(1, 99) var stacks: int = 1
+
+
+func is_stack_pickup() -> bool:
+	match pickup_type:
+		&"attack_boost", &"attack", &"projectile_boost", &"projectile", &"shield":
+			return true
+		_:
+			return false
+
+
+func get_effect_value() -> int:
+	if is_stack_pickup():
+		return maxi(stacks, 1)
+	return amount
 
 
 func _init() -> void:

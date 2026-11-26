@@ -14,6 +14,8 @@ signal depleted
 @export var drain_per_second: float = 2.5
 ## How much bar each Damageable damage point removes (contact_damage 1 → 10).
 @export var vitality_per_damage_point: float = 10.0
+## If true, cat pickup restores the full bar. If false, heals `cat_heal_amount`.
+@export var cat_heal_full: bool = true
 @export var cat_heal_amount: float = 40.0
 
 var current: float = 100.0
@@ -77,6 +79,8 @@ func heal(amount: float) -> float:
 
 
 func heal_from_cat() -> float:
+	if cat_heal_full:
+		return heal(max_vitality)
 	return heal(cat_heal_amount)
 
 

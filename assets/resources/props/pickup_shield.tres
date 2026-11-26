@@ -13,3 +13,4 @@ z_index = 1
 sprite_scale = 0.18
 pickup_type = &"shield"
 amount = 3
+stacks = 3
