@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://assets/scripts/hud/map_overlay.gd" id="1_map"]
 [ext_resource type="Texture2D" path="res://assets/sprittesheets/HUD/definitivo/map/discoveredRoom1.png" id="2_disc1"]
@@ -10,6 +10,8 @@
 [ext_resource type="Texture2D" path="res://assets/sprittesheets/HUD/placeholders/mapPanel.png" id="8_panel"]
 [ext_resource type="Texture2D" path="res://assets/sprittesheets/HUD/placeholders/mapPlayer.png" id="9_marker"]
 [ext_resource type="Texture2D" path="res://assets/sprittesheets/HUD/placeholders/mapConnector.png" id="10_conn"]
+[ext_resource type="Texture2D" path="res://assets/sprittesheets/HUD/definitivo/map/discoveredRoom2Tall.png" id="11_tall"]
+[ext_resource type="Texture2D" path="res://assets/sprittesheets/HUD/definitivo/map/undiscoveredRoom2Tall.png" id="12_utall"]
 
 [node name="MapOverlay" type="CanvasLayer"]
 layer = 80
@@ -20,6 +22,8 @@ discovered_wide = ExtResource("4_disc2")
 undiscovered_wide = ExtResource("5_und2")
 discovered_l = ExtResource("6_disc3")
 undiscovered_l = ExtResource("7_und3")
+discovered_tall = ExtResource("11_tall")
+undiscovered_tall = ExtResource("12_utall")
 discovered_texture = ExtResource("2_disc1")
 undiscovered_texture = ExtResource("3_und1")
 panel_texture = ExtResource("8_panel")
