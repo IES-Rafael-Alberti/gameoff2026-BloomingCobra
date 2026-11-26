@@ -1,0 +1,14 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/common/switchable.gd" id="1_switch"]
+
+[node name="Switchable" type="Node2D"]
+script = ExtResource("1_switch")
+
+[node name="Pesadilla" type="Node2D" parent="."]
+
+[node name="Tiles" type="TileMapLayer" parent="Pesadilla"]
+
+[node name="Sueño" type="Node2D" parent="."]
+
+[node name="Tiles" type="TileMapLayer" parent="Sueño"]

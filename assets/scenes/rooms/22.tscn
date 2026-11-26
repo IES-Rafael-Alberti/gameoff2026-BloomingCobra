@@ -1,0 +1,241 @@
+[gd_scene format=4 uid="uid://d3km4f565j3br"]
+
+[ext_resource type="Script" uid="uid://bnjkxhgyfy8mc" path="res://assets/scripts/rooms/safe.gd" id="1_k74wi"]
+[ext_resource type="PackedScene" uid="uid://cb5rvks5i5aea" path="res://assets/scenes/props/vigilia/interactive/doorVigilia.tscn" id="2_k74wi"]
+[ext_resource type="Shader" uid="uid://6p4fxek8qx0s" path="res://assets/shaders/celestial_pool.gdshader" id="3_p8uab"]
+[ext_resource type="Shader" uid="uid://dql88870gaqc8" path="res://assets/shaders/celestial_beam.gdshader" id="4_k74wi"]
+[ext_resource type="Texture2D" uid="uid://bofmusj07iwon" path="res://assets/scenary/tilesetsafezoneRed.png" id="5_o0j8m"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_r37uk"]
+texture = ExtResource("5_o0j8m")
+texture_region_size = Vector2i(128, 128)
+4:1/0 = 0
+6:1/0 = 0
+4:2/0 = 0
+5:2/0 = 0
+6:2/0 = 0
+1:4/0 = 0
+2:4/0 = 0
+5:4/0 = 0
+6:4/0 = 0
+7:4/0 = 0
+1:5/0 = 0
+2:5/0 = 0
+5:5/0 = 0
+6:5/0 = 0
+7:5/0 = 0
+1:6/0 = 0
+2:6/0 = 0
+5:6/0 = 0
+6:6/0 = 0
+7:6/0 = 0
+4:0/0 = 0
+5:0/0 = 0
+6:0/0 = 0
+1:0/0 = 0
+2:0/0 = 0
+2:1/0 = 0
+2:2/0 = 0
+1:2/0 = 0
+0:2/0 = 0
+0:1/0 = 0
+0:0/0 = 0
+1:1/0 = 0
+0:4/0 = 0
+0:5/0 = 0
+0:6/0 = 0
+
+[sub_resource type="TileSet" id="TileSet_8bkgl"]
+tile_size = Vector2i(128, 128)
+sources/0 = SubResource("TileSetAtlasSource_r37uk")
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_6jfki"]
+size = Vector2(208, 16)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_o0j8m"]
+size = Vector2(12.5, 167.5)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_cigb3"]
+shader = ExtResource("3_p8uab")
+shader_parameter/rect_half_size = Vector2(26, 9)
+shader_parameter/glow_color = Color(1, 0.91, 0.68, 1)
+shader_parameter/intensity = 0.55
+shader_parameter/opacity = 1.0
+shader_parameter/core_size = 0.12
+shader_parameter/core_softness = 0.26
+shader_parameter/pulse_speed = 0.55
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_uc7st"]
+blend_mode = 1
+
+[sub_resource type="Gradient" id="Gradient_702ev"]
+offsets = PackedFloat32Array(0, 0.35, 1)
+colors = PackedColorArray(1, 1, 0.9, 1, 1, 0.95, 0.72, 0.8, 1, 0.9, 0.6, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_6xxqy"]
+gradient = SubResource("Gradient_702ev")
+width = 16
+height = 16
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[sub_resource type="Gradient" id="Gradient_nomkr"]
+offsets = PackedFloat32Array(0, 0.3, 1)
+colors = PackedColorArray(1, 0.98, 0.85, 0, 1, 0.95, 0.7, 0.9, 1, 0.9, 0.6, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_h1wmb"]
+gradient = SubResource("Gradient_nomkr")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_3l26w"]
+particle_flag_disable_z = true
+emission_shape_offset = Vector3(0, 40, 0)
+emission_shape = 3
+emission_box_extents = Vector3(48, 95, 1)
+direction = Vector3(0, -1, 0)
+spread = 20.0
+initial_velocity_min = 2.0
+initial_velocity_max = 6.0
+gravity = Vector3(0, -1, 0)
+scale_min = 0.08
+scale_max = 0.22
+color_ramp = SubResource("GradientTexture1D_h1wmb")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_upkwg"]
+shader = ExtResource("4_k74wi")
+shader_parameter/rect_half_size = Vector2(70, 110)
+shader_parameter/beam_color = Color(1, 0.93, 0.74, 1)
+shader_parameter/intensity = 0.42
+shader_parameter/opacity = 0.2999999932944
+shader_parameter/top_half_width = 0.09
+shader_parameter/bottom_half_width = 0.37
+shader_parameter/edge_softness = 0.55
+shader_parameter/floor_fade_start = 0.35
+shader_parameter/floor_fade_end = 0.94
+shader_parameter/floor_edge_softness = 1.7
+shader_parameter/ray_strength = 0.18
+shader_parameter/flicker_speed = 0.45
+shader_parameter/dust_amount = 0.35
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_c7jlp"]
+shader = ExtResource("3_p8uab")
+shader_parameter/rect_half_size = Vector2(65, 35)
+shader_parameter/glow_color = Color(1, 0.91, 0.68, 1)
+shader_parameter/intensity = 0.55
+shader_parameter/opacity = 1.0
+shader_parameter/core_size = 0.12
+shader_parameter/core_softness = 0.26
+shader_parameter/pulse_speed = 0.55
+
+[node name="22" type="Node2D" unique_id=1556955998]
+script = ExtResource("1_k74wi")
+map_shape = 0
+map_cell = Vector2i(1, 4)
+room_id = &"22"
+
+[node name="SafeRoom" type="Node2D" parent="." unique_id=1167923288]
+script = ExtResource("1_k74wi")
+
+[node name="TileMapLayer" type="TileMapLayer" parent="SafeRoom" unique_id=681812390]
+position = Vector2(35, 6)
+scale = Vector2(0.3, 0.3)
+tile_map_data = PackedByteArray("AAD8//3/AAAAAAAAAAD8//7/AAAAAAEAAAD8////AAAAAAEAAAD8/wAAAAAAAAEAAAD8/wEAAAAAAAIAAAD9//3/AAABAAAAAAD9//7/AAABAAEAAAD9////AAABAAEAAAD9/wAAAAABAAEAAAD9/wEAAAABAAIAAAD+//3/AAABAAAAAAD+//7/AAABAAEAAAD+////AAABAAEAAAD+/wAAAAABAAEAAAD+/wEAAAABAAIAAAD///3/AAABAAAAAAD///7/AAABAAEAAAD/////AAABAAEAAAD//wAAAAABAAEAAAD//wEAAAABAAIAAAAAAP3/AAABAAAAAAAAAP7/AAABAAEAAAAAAP//AAABAAEAAAAAAAAAAAABAAEAAAAAAAEAAAABAAIAAAABAP3/AAABAAAAAAABAP7/AAABAAEAAAABAP//AAABAAEAAAABAAAAAAABAAEAAAABAAEAAAABAAIAAAACAP3/AAACAAAAAAACAP7/AAACAAEAAAACAP//AAACAAEAAAACAAAAAAACAAEAAAACAAEAAAACAAIAAAA=")
+tile_set = SubResource("TileSet_8bkgl")
+
+[node name="TileMapLayer2" type="TileMapLayer" parent="SafeRoom" unique_id=1983279722]
+position = Vector2(35, 6)
+scale = Vector2(0.3, 0.3)
+tile_map_data = PackedByteArray("AAABAP7/AAABAAEAAAABAP//AAABAAEAAAABAAAAAAABAAEAAAAAAP7/AAAHAAQAAAAAAP//AAAHAAUAAAAAAAAAAAAHAAYAAAD8//3/AAAAAAAAAAD8//7/AAAAAAEAAAD8////AAAAAAEAAAD8/wAAAAAAAAEAAAD8/wEAAAAAAAIAAAD9//3/AAABAAAAAAD9//7/AAABAAEAAAD9////AAABAAEAAAD9/wAAAAABAAEAAAD9/wEAAAABAAIAAAD+//3/AAABAAAAAAD+//7/AAAFAAQAAAD+////AAAFAAUAAAD+/wAAAAAFAAYAAAD+/wEAAAABAAIAAAD///3/AAABAAAAAAD///7/AAAGAAQAAAD/////AAAGAAUAAAD//wAAAAAGAAYAAAD//wEAAAABAAIAAAAAAP3/AAABAAAAAAAAAAEAAAABAAIAAAABAP3/AAABAAAAAAABAAEAAAABAAIAAAACAP3/AAACAAAAAAACAP7/AAACAAEAAAACAP//AAACAAEAAAACAAAAAAACAAEAAAACAAEAAAACAAIAAAA=")
+tile_set = SubResource("TileSet_8bkgl")
+
+[node name="DoorOeste" parent="SafeRoom" unique_id=850193153 instance=ExtResource("2_k74wi")]
+process_mode = 3
+position = Vector2(-102, -18)
+disable_mode = 2
+collision_layer = 8
+door_id = &"22O"
+target_room = "uid://c2ee6wvop3dtf"
+target_door_id = &"23E"
+starts_open = true
+orientation = 3
+
+[node name="DoorEste" parent="SafeRoom" unique_id=1288544816 instance=ExtResource("2_k74wi")]
+process_mode = 3
+position = Vector2(137, -15)
+disable_mode = 2
+collision_layer = 8
+door_id = &"22E"
+target_room = "uid://bwkaa8ycbdfuy"
+target_door_id = &"21O"
+starts_open = true
+orientation = 1
+
+[node name="Walls" type="StaticBody2D" parent="." unique_id=1449812764]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls" unique_id=1960576505]
+position = Vector2(-67, -107)
+shape = SubResource("RectangleShape2D_6jfki")
+
+[node name="CollisionShape2D2" type="CollisionShape2D" parent="Walls" unique_id=1937576297]
+position = Vector2(-140, 75)
+shape = SubResource("RectangleShape2D_6jfki")
+
+[node name="CollisionShape2D3" type="CollisionShape2D" parent="Walls" unique_id=30731962]
+position = Vector2(69, 74)
+shape = SubResource("RectangleShape2D_6jfki")
+
+[node name="CollisionShape2D4" type="CollisionShape2D" parent="Walls" unique_id=1852870312]
+position = Vector2(141, -107)
+shape = SubResource("RectangleShape2D_6jfki")
+
+[node name="CollisionShape2D5" type="CollisionShape2D" parent="Walls" unique_id=1134849236]
+position = Vector2(-117, -74)
+shape = SubResource("RectangleShape2D_o0j8m")
+
+[node name="CollisionShape2D6" type="CollisionShape2D" parent="Walls" unique_id=1777292833]
+position = Vector2(-117, 93)
+shape = SubResource("RectangleShape2D_o0j8m")
+
+[node name="CollisionShape2D8" type="CollisionShape2D" parent="Walls" unique_id=406599533]
+position = Vector2(226, 68.25)
+shape = SubResource("RectangleShape2D_o0j8m")
+
+[node name="CollisionShape2D9" type="CollisionShape2D" parent="Walls" unique_id=2122700220]
+position = Vector2(146, -13)
+shape = SubResource("RectangleShape2D_o0j8m")
+
+[node name="CelestialSource" type="Polygon2D" parent="." unique_id=1193353494]
+visible = false
+z_index = 1
+material = SubResource("ShaderMaterial_cigb3")
+position = Vector2(16, -184)
+polygon = PackedVector2Array(-26, -9, 26, -9, 26, 9, -26, 9)
+uv = PackedVector2Array(0, 0, 1, 0, 1, 1, 0, 1)
+
+[node name="CelestialMotes" type="GPUParticles2D" parent="." unique_id=365505916]
+z_index = 1
+material = SubResource("CanvasItemMaterial_uc7st")
+position = Vector2(16, -80)
+amount = 12
+texture = SubResource("GradientTexture2D_6xxqy")
+lifetime = 5.0
+preprocess = 2.5
+randomness = 0.7
+visibility_rect = Rect2(-80, -120, 160, 240)
+process_material = SubResource("ParticleProcessMaterial_3l26w")
+
+[node name="CelestialBeam" type="Polygon2D" parent="." unique_id=1300182645]
+z_index = 3
+material = SubResource("ShaderMaterial_upkwg")
+position = Vector2(20, -82)
+scale = Vector2(1.65, 1.65)
+polygon = PackedVector2Array(-70, -176, 70, -176, 70, 44, -70, 44)
+uv = PackedVector2Array(0, 0, 1, 0, 1, 1, 0, 1)
+
+[node name="CelestialPool" type="Polygon2D" parent="." unique_id=1044289149]
+z_index = 3
+material = SubResource("ShaderMaterial_c7jlp")
+position = Vector2(19, -16)
+scale = Vector2(4.655, 4.655)
+polygon = PackedVector2Array(-65, -35, 65, -35, 65, 35, -65, 35)
+uv = PackedVector2Array(0, 0, 1, 0, 1, 1, 0, 1)

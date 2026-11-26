@@ -1,0 +1,152 @@
+[gd_scene format=3 uid="uid://ch57l1467b64o"]
+
+[ext_resource type="Script" uid="uid://bikswul83o1qs" path="res://assets/scripts/rooms/door_debug_room.gd" id="1_room"]
+[ext_resource type="Script" uid="uid://bkoec71xnejuk" path="res://assets/scripts/common/switchable.gd" id="2_switch"]
+[ext_resource type="PackedScene" uid="uid://b41468s5i5aea" path="res://assets/scenes/props/pesadilla/interactive/doorPesadilla.tscn" id="3_door_p"]
+[ext_resource type="TileSet" uid="uid://cod5hqlj1hrki" path="res://assets/resources/tilesets/tileset_spikes_pesadilla.tres" id="3_ea4t3"]
+[ext_resource type="PackedScene" uid="uid://cb5rvks5i5aea" path="res://assets/scenes/props/vigilia/interactive/doorVigilia.tscn" id="4_door_v"]
+[ext_resource type="PackedScene" uid="uid://tvq6u6rrx621" path="res://assets/scenes/props/pesadilla/interactive/buttonPesadilla.tscn" id="5_btn_p"]
+[ext_resource type="PackedScene" uid="uid://cm16eeyma7gae" path="res://assets/scenes/props/vigilia/interactive/buttonVigilia.tscn" id="6_btn_v"]
+[ext_resource type="PackedScene" uid="uid://dsapw6jvuy0uq" path="res://assets/scenes/enemies/divider_1.tscn" id="7_avt6d"]
+[ext_resource type="PackedScene" uid="uid://cbt3w2furilt1" path="res://assets/scenes/enemies/hunter.tscn" id="8_ea4t3"]
+[ext_resource type="PackedScene" uid="uid://biqe6ous6m14k" path="res://assets/scenes/enemies/roamer.tscn" id="9_j686y"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wall_h"]
+size = Vector2(150, 24)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wall_v"]
+size = Vector2(24, 150)
+
+[node name="HabitacionDoorDebug" type="Node2D" unique_id=469190002]
+script = ExtResource("1_room")
+room_id = &"habitacion_door_debug"
+
+[node name="Switchable" type="Node2D" parent="." unique_id=1951390640]
+script = ExtResource("2_switch")
+
+[node name="Pesadilla" type="Node2D" parent="Switchable" unique_id=561919387]
+
+[node name="TileMapLayer" type="TileMapLayer" parent="Switchable/Pesadilla" unique_id=652417084]
+tile_set = ExtResource("3_ea4t3")
+
+[node name="Floor" type="Polygon2D" parent="Switchable/Pesadilla" unique_id=46794726]
+z_index = -2
+color = Color(0.22, 0.08, 0.12, 1)
+polygon = PackedVector2Array(-200, -200, 200, -200, 200, 200, -200, 200)
+
+[node name="DoorNorte" parent="Switchable/Pesadilla" unique_id=2142786073 instance=ExtResource("3_door_p") node_paths=PackedStringArray("unlock_buttons")]
+position = Vector2(0, -188)
+door_id = &"debugN"
+unlock_buttons = [NodePath("../ButtonPesadilla")]
+
+[node name="DoorEste" parent="Switchable/Pesadilla" unique_id=453112697 instance=ExtResource("3_door_p") node_paths=PackedStringArray("unlock_buttons")]
+position = Vector2(188, 0)
+door_id = &"debugE"
+unlock_buttons = [NodePath("../ButtonPesadilla")]
+orientation = 1
+
+[node name="DoorSur" parent="Switchable/Pesadilla" unique_id=595433712 instance=ExtResource("3_door_p") node_paths=PackedStringArray("unlock_buttons")]
+position = Vector2(0, 188)
+door_id = &"debugS"
+unlock_buttons = [NodePath("../ButtonPesadilla")]
+orientation = 2
+
+[node name="DoorOeste" parent="Switchable/Pesadilla" unique_id=767043366 instance=ExtResource("3_door_p") node_paths=PackedStringArray("unlock_buttons")]
+position = Vector2(-188, 0)
+door_id = &"debugO"
+unlock_buttons = [NodePath("../ButtonPesadilla")]
+orientation = 3
+
+[node name="ButtonPesadilla" parent="Switchable/Pesadilla" unique_id=1462103195 instance=ExtResource("5_btn_p")]
+position = Vector2(0, 40)
+
+[node name="Sueño" type="Node2D" parent="Switchable" unique_id=1922022956]
+
+[node name="Floor" type="Polygon2D" parent="Switchable/Sueño" unique_id=431287619]
+z_index = -2
+color = Color(0.12, 0.28, 0.22, 1)
+polygon = PackedVector2Array(-200, -200, 200, -200, 200, 200, -200, 200)
+
+[node name="DoorNorte" parent="Switchable/Sueño" unique_id=216170245 instance=ExtResource("4_door_v") node_paths=PackedStringArray("unlock_buttons")]
+process_mode = 3
+position = Vector2(0, -188)
+disable_mode = 2
+collision_layer = 24
+door_id = &"debugN"
+unlock_buttons = [NodePath("../ButtonVigilia")]
+
+[node name="DoorEste" parent="Switchable/Sueño" unique_id=328057475 instance=ExtResource("4_door_v") node_paths=PackedStringArray("unlock_buttons")]
+process_mode = 3
+position = Vector2(188, 0)
+disable_mode = 2
+collision_layer = 24
+door_id = &"debugE"
+unlock_buttons = [NodePath("../ButtonVigilia")]
+orientation = 1
+
+[node name="DoorSur" parent="Switchable/Sueño" unique_id=2089937348 instance=ExtResource("4_door_v") node_paths=PackedStringArray("unlock_buttons")]
+process_mode = 3
+position = Vector2(0, 188)
+disable_mode = 2
+collision_layer = 24
+door_id = &"debugS"
+unlock_buttons = [NodePath("../ButtonVigilia")]
+orientation = 2
+
+[node name="DoorOeste" parent="Switchable/Sueño" unique_id=780638612 instance=ExtResource("4_door_v") node_paths=PackedStringArray("unlock_buttons")]
+process_mode = 3
+position = Vector2(-188, 0)
+disable_mode = 2
+collision_layer = 24
+door_id = &"debugO"
+unlock_buttons = [NodePath("../ButtonVigilia")]
+orientation = 3
+
+[node name="ButtonVigilia" parent="Switchable/Sueño" unique_id=987177911 instance=ExtResource("6_btn_v")]
+position = Vector2(0, 40)
+
+[node name="Walls" type="StaticBody2D" parent="." unique_id=888467850]
+
+[node name="NorthLeft" type="CollisionShape2D" parent="Walls" unique_id=1027098805]
+position = Vector2(-125, -200)
+shape = SubResource("RectangleShape2D_wall_h")
+
+[node name="NorthRight" type="CollisionShape2D" parent="Walls" unique_id=1586842430]
+position = Vector2(125, -200)
+shape = SubResource("RectangleShape2D_wall_h")
+
+[node name="SouthLeft" type="CollisionShape2D" parent="Walls" unique_id=294668184]
+position = Vector2(-125, 200)
+shape = SubResource("RectangleShape2D_wall_h")
+
+[node name="SouthRight" type="CollisionShape2D" parent="Walls" unique_id=1204314798]
+position = Vector2(125, 200)
+shape = SubResource("RectangleShape2D_wall_h")
+
+[node name="WestTop" type="CollisionShape2D" parent="Walls" unique_id=541330384]
+position = Vector2(-200, -125)
+shape = SubResource("RectangleShape2D_wall_v")
+
+[node name="WestBottom" type="CollisionShape2D" parent="Walls" unique_id=90884611]
+position = Vector2(-200, 125)
+shape = SubResource("RectangleShape2D_wall_v")
+
+[node name="EastTop" type="CollisionShape2D" parent="Walls" unique_id=89239338]
+position = Vector2(200, -125)
+shape = SubResource("RectangleShape2D_wall_v")
+
+[node name="EastBottom" type="CollisionShape2D" parent="Walls" unique_id=465114232]
+position = Vector2(200, 125)
+shape = SubResource("RectangleShape2D_wall_v")
+
+[node name="Spawn" type="Marker2D" parent="." unique_id=1948255777]
+position = Vector2(0, -20)
+
+[node name="Divider_1" parent="." unique_id=1299799807 instance=ExtResource("7_avt6d")]
+position = Vector2(-103, -37)
+
+[node name="Hunter" parent="." unique_id=1191328024 instance=ExtResource("8_ea4t3")]
+position = Vector2(-46, -43)
+
+[node name="Roamer" parent="." unique_id=632087891 instance=ExtResource("9_j686y")]
+position = Vector2(-94, 22)

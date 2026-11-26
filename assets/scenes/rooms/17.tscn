@@ -1,0 +1,154 @@
+[gd_scene format=4 uid="uid://cly78kf0hwlsn"]
+
+[ext_resource type="Script" uid="uid://dv7i76b04aw1s" path="res://assets/scripts/rooms/trap.gd" id="1_lb8lx"]
+[ext_resource type="Script" uid="uid://bkoec71xnejuk" path="res://assets/scripts/common/switchable.gd" id="1_pd5op"]
+[ext_resource type="TileSet" uid="uid://mo5sa42ii37l" path="res://assets/resources/tilesets/tileset_pesadilla_red.tres" id="4_l0d6y"]
+[ext_resource type="TileSet" uid="uid://bk7uacfb2knda" path="res://assets/resources/tilesets/tileset_vigilia_red.tres" id="4_lb8lx"]
+[ext_resource type="PackedScene" uid="uid://b41468s5i5aea" path="res://assets/scenes/props/pesadilla/interactive/doorPesadilla.tscn" id="4_rihe3"]
+[ext_resource type="TileSet" uid="uid://ca112a4s4rpwe" path="res://assets/resources/tilesets/barreraPesadilla.tres" id="5_p81wj"]
+[ext_resource type="TileSet" uid="uid://cod5hqlj1hrki" path="res://assets/resources/tilesets/tileset_spikes_pesadilla.tres" id="6_7jrlm"]
+[ext_resource type="PackedScene" uid="uid://cb5rvks5i5aea" path="res://assets/scenes/props/vigilia/interactive/doorVigilia.tscn" id="6_p81wj"]
+[ext_resource type="Texture2D" uid="uid://chy5pa84snsoq" path="res://assets/sprittesheets/props/definitivo/Vigil props.png" id="9_6si2c"]
+[ext_resource type="TileSet" uid="uid://cod5hqrnop0ki" path="res://assets/resources/tilesets/tileset_spikes_vigilia.tres" id="10_5k3u7"]
+[ext_resource type="Script" uid="uid://cgr461snah57y" path="res://assets/scripts/rooms/enemy_spawn_point.gd" id="11_uge44"]
+[ext_resource type="PackedScene" uid="uid://cbt3w2furilt1" path="res://assets/scenes/enemies/hunter.tscn" id="12_yyn4g"]
+[ext_resource type="PackedScene" uid="uid://biqe6ous6m14k" path="res://assets/scenes/enemies/roamer.tscn" id="13_oxyln"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_uge44"]
+texture = ExtResource("9_6si2c")
+texture_region_size = Vector2i(675, 675)
+0:1/0 = 0
+0:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-46.70331, -269.10013, -43.93802, 320.1198, 13.809082, 307.5661, 11.119873, 162.34967, 295.78778, 126.766174, 309.1316, -126.766174, 51.151306, -122.31824, 28.911621, -255.75632)
+1:1/0 = 0
+1:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-350.88895, -138.22897, -59.240997, -144.30496, -72.65704, -277.17313, 79.03357, -262.83255, 45.74701, -137.24109, 309.46515, -153.38708, 340.02814, 170.93307, -347.38007, 170.93307)
+2:1/0 = 0
+2:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-353.6109, -149.00586, -73.39093, -149.00586, -82.286804, -260.20425, 64.32965, -255.48059, 68.35501, 356.96497, -59.240997, 347.85095, -53.164978, 147.34302, -358.40802, 145.2012)
+1:2/0 = 0
+1:2/0/physics_layer_0/polygon_0/points = PackedVector2Array(-86.38553, 163.58115, -86.38553, -277.53647, 86.38556, -251.80461, 101.08948, 156.22916)
+0:2/0 = 0
+0:2/0/physics_layer_0/polygon_0/points = PackedVector2Array(-73.39093, -335.81915, -46.70331, 362.50677, 60.04718, 358.05884, 46.70337, -344.71503)
+0:3/0 = 0
+0:3/0/physics_layer_0/polygon_0/points = PackedVector2Array(-60.653656, 189.31296, 329.00018, 156.22916, 351.0561, -137.84924, 56.977722, -148.87717, 15.56781, -340.2671, -55.599182, -340.2671)
+2:3/0 = 0
+2:3/0/physics_layer_0/polygon_0/points = PackedVector2Array(66.5347, 179.51816, -347.38007, 141.52524, -347.38007, -141.5252, -71.68161, -137.84924, -78.039, -357.90317, 40.36505, -352.52118)
+
+[sub_resource type="TileSet" id="TileSet_uge44"]
+tile_size = Vector2i(675, 675)
+physics_layer_0/collision_layer = 1
+physics_layer_0/collision_mask = 0
+sources/0 = SubResource("TileSetAtlasSource_uge44")
+
+[node name="17" type="Node2D" unique_id=1556955998]
+script = ExtResource("1_lb8lx")
+room_id = &"17"
+map_cell = Vector2i(0, 3)
+
+[node name="Switchable" type="Node2D" parent="." unique_id=884800511]
+script = ExtResource("1_pd5op")
+
+[node name="Pesadilla" type="Node2D" parent="Switchable" unique_id=966715375]
+
+[node name="Tiles" type="TileMapLayer" parent="Switchable/Pesadilla" unique_id=891083346]
+scale = Vector2(0.3, 0.3)
+tile_map_data = PackedByteArray("AAD+//v/AAAAAAAAAAD///v/AAABAAAAAAAAAPv/AAABAAAAAAABAPv/AAABAAAAAAACAPv/AAACAAAAAAAFAP//AAACAAEAAAAFAAAAAAACAAIAAAD+/wMAAAAAAAIAAAD//wMAAAABAAIAAAAAAAMAAAABAAIAAAABAAMAAAABAAIAAAACAAMAAAACAAIAAAD7//7/AAAAAAAAAAD7////AAAAAAEAAAD7/wAAAAAAAAIAAAD9////AAABAAEAAAD9//7/AAABAAEAAAD8//7/AQAGAAIAAAD8////AAABAAEAAAD8/wAAAQAGAAAAAAD9/wIAAAAAAAIAAAD9/wEAAQAGAAAAAAD9/wAAAAABAAEAAAD+/wAAAAABAAEAAAD+////AAABAAEAAAD+//7/AAABAAEAAAD+//3/AAABAAEAAAD+//z/AQAGAAIAAAD///z/AAABAAEAAAD///3/AAABAAEAAAD///7/AAABAAEAAAD/////AAABAAEAAAD//wAAAAABAAEAAAD//wEAAAABAAEAAAD+/wEAAAABAAEAAAD+/wIAAQAGAAAAAAD//wIAAAABAAEAAAAAAAIAAAABAAEAAAAAAAEAAAABAAEAAAAAAAAAAAABAAEAAAAAAP//AAABAAEAAAAAAP7/AAABAAEAAAAAAP3/AAABAAEAAAAAAPz/AAABAAEAAAABAPz/AAABAAEAAAABAP3/AAABAAEAAAABAP7/AAABAAEAAAABAP//AAABAAEAAAABAAAAAAABAAEAAAABAAEAAAABAAEAAAABAAIAAAABAAEAAAACAAIAAQAEAAAAAAACAAEAAAABAAEAAAACAAAAAAABAAEAAAACAP//AAABAAEAAAACAP7/AAABAAEAAAACAP3/AAABAAEAAAACAPz/AQAEAAIAAAADAP//AAABAAEAAAADAAAAAAABAAEAAAADAAEAAQAEAAAAAAADAAIAAAACAAIAAAAEAAEAAAACAAIAAAAEAAAAAQAEAAAAAAAEAP//AAABAAEAAAADAPz/AAACAAAAAAADAP3/AQAEAAIAAAADAP7/AAABAAEAAAAEAP3/AAACAAAAAAAEAP7/AQAEAAIAAAAFAP7/AAACAAAAAAD9//z/AAAAAAAAAAD9//3/AQAGAAIAAAD8/wEAAAAAAAIAAAD8//3/AAAAAAAAAAA=")
+tile_set = ExtResource("4_l0d6y")
+
+[node name="DoorEste" parent="Switchable/Pesadilla" unique_id=268869019 instance=ExtResource("4_rihe3")]
+position = Vector2(198.415, -18)
+collision_layer = 8
+door_id = &"17E"
+target_room = "uid://ctawxi625peqa"
+target_door_id = &"13O2"
+starts_open = true
+orientation = 1
+
+[node name="DoorNorte" parent="Switchable/Pesadilla" unique_id=980627680 instance=ExtResource("4_rihe3")]
+position = Vector2(21, -167.115)
+collision_layer = 8
+door_id = &"17N"
+target_room = "uid://8jabqmbopiw5"
+target_door_id = &"11S"
+starts_open = true
+
+[node name="BarreraPesadilla" type="TileMapLayer" parent="Switchable/Pesadilla" unique_id=1491897393]
+scale = Vector2(0.05, 0.05)
+tile_map_data = PackedByteArray("AAD7////AAAAAAIAAAD7//7/AAAAAAEAAAD8//3/AAAAAAEAAAD9//z/AAAAAAEAAAD+//v/AAAAAAEAAAACAPv/AAACAAEAAAADAPz/AAACAAEAAAAEAP3/AAACAAEAAAAEAAEAAAACAAMAAAADAAIAAAACAAMAAAACAAMAAAACAAMAAAD+/wMAAAAAAAMAAAD9/wIAAAAAAAMAAAD8/wEAAAAAAAMAAAD7/wAAAAAAAAMAAAD8//7/AAACAAMAAAD9//3/AAACAAMAAAD+//z/AAACAAMAAAD8/wAAAAACAAEAAAD9/wEAAAACAAEAAAD+/wIAAAACAAEAAAACAAIAAAAAAAEAAAADAAEAAAAAAAEAAAADAP3/AAAAAAMAAAACAPz/AAAAAAMAAAD///v/AAABAAEAAAABAPv/AAABAAEAAAD//wMAAAABAAEAAAAAAAMAAAABAAEAAAABAAMAAAABAAEAAAAFAAAAAAACAAMAAAAEAAAAAAAAAAEAAAAFAP7/AAACAAEAAAAEAP7/AAAAAAMAAAA=")
+tile_set = ExtResource("5_p81wj")
+
+[node name="Spike" type="TileMapLayer" parent="Switchable/Pesadilla" unique_id=327389255]
+scale = Vector2(0.3, 0.3)
+tile_map_data = PackedByteArray("AAAAAP7/AAAAAAAAAAAAAP3/AAAAAAAAAAAAAAAAAAAAAAAAAAA=")
+tile_set = ExtResource("6_7jrlm")
+
+[node name="Sueño" type="Node2D" parent="Switchable" unique_id=1018947006]
+
+[node name="Tiles" type="TileMapLayer" parent="Switchable/Sueño" unique_id=1715976387]
+position = Vector2(35.6, 6)
+scale = Vector2(0.3, 0.3)
+tile_map_data = PackedByteArray("AAD9//v/AAAAAAAAAAD+//v/AAABAAAAAAD///v/AAABAAAAAAAAAPv/AAABAAAAAAABAPv/AAACAAAAAAAEAP7/AAACAAAAAAAEAP//AAACAAEAAAAEAAAAAAACAAIAAAD9/wMAAAAAAAIAAAD+/wMAAAABAAIAAAD//wMAAAABAAIAAAAAAAMAAAABAAIAAAABAAMAAAACAAIAAAD6//7/AAAAAAAAAAD6////AAAAAAEAAAD+////AAAFAAUAAAD+//7/AAAFAAQAAAD+//3/AAABAAEAAAD+//z/AAABAAEAAAD9//z/AAAGAAIAAAD8//z/AAAAAAAAAAD7//3/AAAAAAAAAAD7//7/AAAGAAIAAAD7////AAABAAEAAAD7/wAAAAAGAAAAAAD7/wEAAAAAAAIAAAD8/wIAAAAAAAIAAAD8/wEAAAAGAAAAAAD8/wAAAAABAAEAAAD8////AAABAAEAAAD8//7/AAABAAEAAAD8//3/AAAGAAIAAAD9//3/AAABAAEAAAD9//7/AAABAAEAAAD9////AAABAAEAAAD9/wAAAAABAAEAAAD9/wEAAAABAAEAAAD9/wIAAAAGAAAAAAD+/wIAAAABAAEAAAD+/wEAAAABAAEAAAD+/wAAAAAFAAYAAAD//wAAAAAGAAYAAAD/////AAAGAAUAAAD///7/AAAGAAQAAAD///3/AAABAAEAAAD///z/AAABAAEAAAAAAPz/AAABAAEAAAAAAP3/AAABAAEAAAAAAP7/AAAHAAQAAAAAAP//AAAHAAUAAAAAAAAAAAAHAAYAAAAAAAEAAAABAAEAAAD//wEAAAABAAEAAAD//wIAAAABAAEAAAAAAAIAAAABAAEAAAABAAIAAAAEAAAAAAABAAEAAAABAAEAAAABAAAAAAABAAEAAAABAP//AAABAAEAAAABAP7/AAABAAEAAAABAP3/AAABAAEAAAABAPz/AAAEAAIAAAACAPz/AAACAAAAAAACAP3/AAAEAAIAAAACAP7/AAABAAEAAAACAP//AAABAAEAAAACAAAAAAABAAEAAAACAAEAAAAEAAAAAAACAAIAAAACAAIAAAADAAEAAAACAAIAAAADAAAAAAAEAAAAAAADAP//AAABAAEAAAADAP7/AAAEAAIAAAADAP3/AAACAAAAAAD6/wAAAAAAAAIAAAA=")
+tile_set = ExtResource("4_lb8lx")
+
+[node name="DoorEste" parent="Switchable/Sueño" unique_id=173168588 instance=ExtResource("6_p81wj")]
+process_mode = 3
+position = Vector2(199, -18)
+disable_mode = 2
+collision_layer = 8
+door_id = &"17E"
+target_room = "uid://ctawxi625peqa"
+target_door_id = &"13O2"
+starts_open = true
+orientation = 1
+
+[node name="DoorNorte" parent="Switchable/Sueño" unique_id=1218557529 instance=ExtResource("6_p81wj")]
+process_mode = 3
+position = Vector2(21, -167)
+disable_mode = 2
+collision_layer = 8
+door_id = &"17N"
+target_room = "uid://8jabqmbopiw5"
+target_door_id = &"11S"
+starts_open = true
+
+[node name="BarreraVigila" type="TileMapLayer" parent="Switchable/Sueño" unique_id=1435110240]
+scale = Vector2(0.05, 0.05)
+tile_map_data = PackedByteArray("AAD9//z/AAAAAAEAAAD8//3/AAAAAAEAAAD7//7/AAAAAAEAAAD+//v/AAAAAAEAAAACAPv/AAACAAEAAAADAPz/AAACAAEAAAAEAP3/AAACAAEAAAAFAP7/AAACAAEAAAD7/wAAAAAAAAMAAAD8/wEAAAAAAAMAAAD9/wIAAAAAAAMAAAD+/wMAAAAAAAMAAAACAAMAAAACAAMAAAADAAIAAAACAAMAAAAEAAEAAAACAAMAAAAFAAAAAAACAAMAAAD9//3/AAACAAMAAAD+//z/AAACAAMAAAD8//7/AAACAAMAAAD8/wAAAAACAAEAAAD9/wEAAAACAAEAAAD+/wIAAAACAAEAAAACAAIAAAAAAAEAAAADAAEAAAAAAAEAAAAEAAAAAAAAAAEAAAACAPz/AAAAAAMAAAADAP3/AAAAAAMAAAAEAP7/AAAAAAMAAAD7////AAAAAAIAAAD///v/AAABAAEAAAABAPv/AAABAAEAAAD//wMAAAABAAEAAAAAAAMAAAABAAEAAAABAAMAAAABAAEAAAA=")
+tile_set = SubResource("TileSet_uge44")
+
+[node name="SpikeVigilia" type="TileMapLayer" parent="Switchable/Sueño" unique_id=2086586177]
+scale = Vector2(0.3, 0.3)
+tile_map_data = PackedByteArray("AAD8////AAAAAAAAAAD9//7/AAAAAAAAAAD9/wAAAAAAAAAAAAD+/wEAAAAAAAAAAAD//wIAAAAAAAAAAAAAAAIAAAAAAAAAAAABAAIAAAAAAAAAAAACAAEAAAAAAAAAAAADAAAAAAAAAAAAAAADAP7/AAAAAAAAAAACAP3/AAAAAAAAAAABAPz/AAAAAAAAAAD///z/AAAAAAAAAAD+//3/AAAAAAAAAAD///7/AAAAAAAAAAD/////AAAAAAAAAAAAAP7/AAAAAAAAAAABAP7/AAAAAAAAAAABAP//AAAAAAAAAAD//wAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAA=")
+tile_set = ExtResource("10_5k3u7")
+
+[node name="Walls" type="StaticBody2D" parent="." unique_id=1872382948]
+visible = false
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Walls" unique_id=840627076]
+polygon = PackedVector2Array(-148, -66, -185, -64, -182, 31, -149, 32, -146, 63, -106, 69, -106, 97, -69, 102, -69, 138, 102, 144, 102, 112, 135, 102, 135, 66, 177, 69, 179, 23, 215, 32, 214, -62, 179, -64, 182, -85, 243, -78, 234, 163, -259, 163, -255, -113, -138, -110, -137, -101)
+
+[node name="CollisionPolygon2D2" type="CollisionPolygon2D" parent="Walls" unique_id=661132480]
+polygon = PackedVector2Array(-134, -100, -108, -99, -105, -139, -67, -140, -66, -176, 97, -173, 99, -137, 137, -137, 136, -101, 179, -101, 181, -85, 242, -78, 235, -224, -180, -225, -174, -111, -138, -109)
+
+[node name="EnemySpawnpoint" type="Marker2D" parent="." unique_id=117467818]
+position = Vector2(-99, -5)
+script = ExtResource("11_uge44")
+enemy_scene = ExtResource("12_yyn4g")
+
+[node name="EnemySpawnpoint2" type="Marker2D" parent="." unique_id=1111741126]
+position = Vector2(60, 97)
+script = ExtResource("11_uge44")
+enemy_scene = ExtResource("13_oxyln")
+
+[node name="EnemySpawnpoint4" type="Marker2D" parent="." unique_id=7330624]
+position = Vector2(-39, -102)
+script = ExtResource("11_uge44")
+enemy_scene = ExtResource("13_oxyln")
+
+[node name="EnemySpawnpoint5" type="Marker2D" parent="." unique_id=645620337]
+position = Vector2(-49, 48)
+script = ExtResource("11_uge44")
+enemy_scene = ExtResource("13_oxyln")
+
+[node name="EnemySpawnpoint3" type="Marker2D" parent="." unique_id=1910489673]
+position = Vector2(91, -87)
+script = ExtResource("11_uge44")
+enemy_scene = ExtResource("12_yyn4g")

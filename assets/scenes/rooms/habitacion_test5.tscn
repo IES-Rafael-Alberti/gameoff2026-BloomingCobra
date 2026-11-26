@@ -1,0 +1,33 @@
+[gd_scene format=3 uid="uid://vig12soa71fl"]
+
+[ext_resource type="PackedScene" uid="uid://bd24eu5qqqv2d" path="res://assets/scenes/rooms/habitacion_enemy_test.tscn" id="1_base"]
+[ext_resource type="PackedScene" uid="uid://dsapw6jvuy0uq" path="res://assets/scenes/enemies/divider_1.tscn" id="2_divider"]
+[ext_resource type="PackedScene" path="res://assets/scenes/props/pickups/pickup_projectile_boost.tscn" id="2_utus8"]
+[ext_resource type="PackedScene" path="res://assets/scenes/props/pickups/pickup_shield.tscn" id="3_jscuv"]
+[ext_resource type="PackedScene" path="res://assets/scenes/props/pickups/pickup_attack_boost.tscn" id="4_fsrj2"]
+
+[node name="HabitacionTest5" unique_id=1449836500 instance=ExtResource("1_base")]
+room_id = &"habitacion_test5"
+map_cell = Vector2i(1, 0)
+
+[node name="PickupProjectileBoost" parent="Switchable/Pesadilla" parent_id_path=PackedInt32Array(450328622) index="0" unique_id=860791392 instance=ExtResource("2_utus8")]
+position = Vector2(-16, 62)
+
+[node name="PickupShield" parent="Switchable/Pesadilla" parent_id_path=PackedInt32Array(450328622) index="1" unique_id=1027705434 instance=ExtResource("3_jscuv")]
+position = Vector2(-64, 70)
+
+[node name="PickupAttackBoost" parent="Switchable/Pesadilla" parent_id_path=PackedInt32Array(450328622) index="2" unique_id=194349496 instance=ExtResource("4_fsrj2")]
+position = Vector2(39, 58)
+
+[node name="Door2" parent="." index="3" unique_id=1627573497]
+target_room = "res://assets/scenes/rooms/habitacion_test3.tscn"
+target_door_id = &"north"
+
+[node name="Divider1" parent="." index="7" unique_id=1934336325 instance=ExtResource("2_divider")]
+position = Vector2(-10, -27)
+
+[node name="Divider2" parent="." index="8" unique_id=1294407312 instance=ExtResource("2_divider")]
+position = Vector2(-90, 20)
+
+[node name="Divider3" parent="." index="9" unique_id=674253446 instance=ExtResource("2_divider")]
+position = Vector2(73, 15)

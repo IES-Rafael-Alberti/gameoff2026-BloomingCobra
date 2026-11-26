@@ -2,22 +2,18 @@
 
 [ext_resource type="Script" uid="uid://dq6a2d17nrtuf" path="res://assets/scripts/player/player.gd" id="1_8sknh"]
 [ext_resource type="Script" uid="uid://dfa52d5b3glk2" path="res://assets/scripts/player/player_attack.gd" id="1_attack"]
+[ext_resource type="Script" uid="uid://bjkhc7rerwwta" path="res://assets/scripts/player/player_buffs.gd" id="1_buffs"]
 [ext_resource type="Script" uid="uid://bgh2aslom8hdu" path="res://assets/scripts/common/damageable.gd" id="1_damage"]
 [ext_resource type="Script" uid="uid://cjbqh3leyst8e" path="res://assets/scripts/sfx/player_sfx.gd" id="1_sfx"]
 [ext_resource type="Script" uid="uid://bkoec71xnejuk" path="res://assets/scripts/common/switchable.gd" id="1_switch"]
-[ext_resource type="Script" path="res://assets/scripts/player/player_vitality.gd" id="1_vitality"]
-[ext_resource type="Script" path="res://assets/scripts/player/player_buffs.gd" id="1_buffs"]
-[ext_resource type="Texture2D" uid="uid://c1ppi4f3mwnwe" path="res://assets/sprittesheets/player/placeholders/attack.png" id="2_0gfpk"]
+[ext_resource type="Script" uid="uid://crfc8d31o0l7" path="res://assets/scripts/player/player_vitality.gd" id="1_vitality"]
 [ext_resource type="Texture2D" uid="uid://bypcfcnb8jnwf" path="res://assets/sprittesheets/player/definitivo/attack.png" id="2_ratp2"]
 [ext_resource type="Texture2D" uid="uid://d1ie6f5p8dswh" path="res://assets/sprittesheets/player/placeholders/charging.png" id="3_0hrit"]
 [ext_resource type="Texture2D" uid="uid://c0jcvr47mp2vw" path="res://assets/sprittesheets/player/definitivo/idle.png" id="5_84enu"]
 [ext_resource type="Texture2D" uid="uid://d3urhwm4yt11l" path="res://assets/sprittesheets/player/definitivo/idle_vigilia.png" id="5_cd4ww"]
 [ext_resource type="Texture2D" uid="uid://ktgkeaht36da" path="res://assets/sprittesheets/player/placeholders/bubble.png" id="6_0gfpk"]
 [ext_resource type="Texture2D" uid="uid://dwh00hi4p2iv2" path="res://assets/sprittesheets/player/definitivo/walking.png" id="7_cd4ww"]
-[ext_resource type="Texture2D" uid="uid://crilqom8fmch0" path="res://assets/sprittesheets/player/placeholders/attacks/swipe.png" id="7_swipe"]
 [ext_resource type="Texture2D" uid="uid://no8bg5jiirva" path="res://assets/sprittesheets/player/definitivo/bubble_walk.png" id="8_bwalk"]
-[ext_resource type="Texture2D" uid="uid://1rkwo0t8b0us" path="res://assets/sprittesheets/player/placeholders/attacks/piercing.png" id="8_pierce"]
-[ext_resource type="Texture2D" uid="uid://cjakw38c6hsl3" path="res://assets/sprittesheets/player/placeholders/attacks/Projectile.png" id="9_proj"]
 [ext_resource type="AudioStream" uid="uid://di0o7cs5h541h" path="res://assets/audio/protagonist/Slash.wav" id="11_6luef"]
 [ext_resource type="AudioStream" uid="uid://b27mt482ojdov" path="res://assets/audio/protagonist/SlashHit.wav" id="12_gmant"]
 [ext_resource type="AudioStream" uid="uid://dxmlyh5ojqymt" path="res://assets/audio/protagonist/Stab.wav" id="13_omckb"]
@@ -29,38 +25,6 @@
 [ext_resource type="AudioStream" uid="uid://c344c0jmg533v" path="res://assets/audio/general/MemoryPickUp.wav" id="19_0rf7b"]
 [ext_resource type="AudioStream" uid="uid://dthb0rvdrgnnk" path="res://assets/audio/general/ItemPickUp.wav" id="20_anufl"]
 [ext_resource type="AudioStream" uid="uid://cumhcpab81cdl" path="res://assets/audio/protagonist/Damage.wav" id="21_hurt"]
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_60g6h"]
-atlas = ExtResource("2_0gfpk")
-region = Rect2(0, 0, 72, 72)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_hrrj1"]
-atlas = ExtResource("2_0gfpk")
-region = Rect2(72, 0, 72, 72)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_c6vv5"]
-atlas = ExtResource("2_0gfpk")
-region = Rect2(144, 0, 72, 72)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_nh07x"]
-atlas = ExtResource("2_0gfpk")
-region = Rect2(216, 0, 72, 72)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_00pic"]
-atlas = ExtResource("2_0gfpk")
-region = Rect2(288, 0, 72, 72)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_0bskb"]
-atlas = ExtResource("2_0gfpk")
-region = Rect2(360, 0, 72, 72)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_1dmvh"]
-atlas = ExtResource("2_0gfpk")
-region = Rect2(432, 0, 72, 72)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_ratp2"]
-atlas = ExtResource("2_0gfpk")
-region = Rect2(504, 0, 72, 72)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_84enu"]
 atlas = ExtResource("2_ratp2")
@@ -1119,12 +1083,12 @@ script = ExtResource("1_8sknh")
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=635096296]
 texture_filter = 2
 scale = Vector2(0.035139, 0.035139)
-offset = Vector2(0, -48.304)
 sprite_frames = SubResource("SpriteFrames_bhbtl")
 animation = &"idle_nightmare_down"
+offset = Vector2(0, -48.304)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1234165900]
-position = Vector2(-1.5, -2)
+position = Vector2(0, 5)
 shape = SubResource("RectangleShape2D_gfef2")
 
 [node name="Bubble" type="Node2D" parent="." unique_id=1844617268]
@@ -1138,7 +1102,7 @@ texture = ExtResource("6_0gfpk")
 script = ExtResource("1_switch")
 follow_world = true
 
-[node name="SfxPlayer" type="Node2D" parent="."]
+[node name="SfxPlayer" type="Node2D" parent="." unique_id=2113242680]
 script = ExtResource("1_sfx")
 slash = ExtResource("11_6luef")
 slash_hit = ExtResource("12_gmant")
@@ -1154,23 +1118,14 @@ item_pickup = ExtResource("20_anufl")
 
 [node name="Damageable" type="Node2D" parent="." unique_id=651315614]
 script = ExtResource("1_damage")
-invulnerability_time = 0.6
+invulnerability_time = 1.1
 immortal = true
 
-[node name="Vitality" type="Node" parent="."]
+[node name="Vitality" type="Node" parent="." unique_id=328548463]
 script = ExtResource("1_vitality")
-max_vitality = 100.0
-drain_per_second = 2.5
-vitality_per_damage_point = 10.0
-cat_heal_amount = 40.0
 
-[node name="Buffs" type="Node" parent="."]
+[node name="Buffs" type="Node" parent="." unique_id=1912084608]
 script = ExtResource("1_buffs")
-default_attack_duration = 12.0
-default_projectile_duration = 12.0
-default_attack_bonus = 1
-default_projectile_bonus = 1
-default_shield_hits = 3
 
 [node name="Attack" type="Node2D" parent="." unique_id=1728842701]
 script = ExtResource("1_attack")

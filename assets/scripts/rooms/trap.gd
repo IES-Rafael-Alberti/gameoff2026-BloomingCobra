@@ -8,8 +8,10 @@ var _watching: bool = false
 
 
 func on_player_entered(_player: Node2D) -> void:
+	if is_room_cleared():
+		_cleared = true
 	if _cleared:
-		spawn_enemies()
+		set_all_doors_open(true)
 		return
 
 	spawn_enemies()
@@ -61,11 +63,16 @@ func _check_cleared() -> void:
 
 
 func on_button_unlock() -> void:
-	_clear_trap()
+	_cleared = true
+	_watching = false
+	mark_room_cleared()
+	# Doors already opened from their own buttons; just stop the lock logic.
+	cancel_pending_door_close()
 
 
 func _clear_trap() -> void:
 	_cleared = true
 	_watching = false
+	mark_room_cleared()
 	cancel_pending_door_close()
 	set_all_doors_open(true)

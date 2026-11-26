@@ -1,0 +1,9 @@
+[gd_scene format=3]
+
+[ext_resource type="TileSet" path="res://assets/resources/tilesets/tileset_spikes_vigilia.tres" id="1_qpo4d"]
+[ext_resource type="Script" path="res://assets/scripts/props/static/spikes_tile_layer.gd" id="2_4v7rh"]
+
+[node name="SpikesVigilia" type="TileMapLayer" unique_id=131860363]
+z_index = 1
+tile_set = ExtResource("1_qpo4d")
+script = ExtResource("2_4v7rh")

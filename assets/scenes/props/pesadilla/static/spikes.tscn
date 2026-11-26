@@ -1,0 +1,9 @@
+[gd_scene format=3]
+
+[ext_resource type="TileSet" path="res://assets/resources/tilesets/tileset_spikes_pesadilla.tres" id="1_wpuv0"]
+[ext_resource type="Script" path="res://assets/scripts/props/static/spikes_tile_layer.gd" id="2_nictn"]
+
+[node name="SpikesPesadilla" type="TileMapLayer" unique_id=1967443981]
+z_index = 1
+tile_set = ExtResource("1_wpuv0")
+script = ExtResource("2_nictn")

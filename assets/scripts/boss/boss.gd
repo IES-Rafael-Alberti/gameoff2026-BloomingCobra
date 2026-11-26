@@ -9,10 +9,10 @@ signal defeated
 enum State { IDLE, FIGHTING, WEAKPOINT_EXPOSED, DEAD }
 
 @export var total_phases: int = 3
-@export var attack_cooldown: float = 1.6
-@export var phase_cooldown_multipliers: PackedFloat32Array = PackedFloat32Array([1.0, 0.8, 0.65])
+@export var attack_cooldown: float = 2.6
+@export var phase_cooldown_multipliers: PackedFloat32Array = PackedFloat32Array([1.0, 0.9, 0.8])
 @export var heal_drop_scene: PackedScene = preload("res://assets/scenes/props/pickups/pickup_heal.tscn")
-@export var button_scene: PackedScene = preload("res://assets/scenes/props/interactive/button.tscn")
+@export var button_scene: PackedScene = preload("res://assets/scenes/props/vigilia/interactive/buttonVigilia.tscn")
 @export var button_only_in_vigilia: bool = true
 
 @onready var head: BossHead = get_node_or_null("BossCabeza") as BossHead
@@ -61,7 +61,7 @@ func start_fight(arena: Rect2 = Rect2(), button_slots: Array = []) -> void:
 	_phase = 0
 	_overlap_chance = 0.0
 	_state = State.FIGHTING
-	_attack_cd = 0.8
+	_attack_cd = 1.4
 	_ensure_button()
 	_place_button()
 	_sync_button_mode(WorldMode.get_mode())
@@ -126,19 +126,19 @@ func _schedule_attack() -> void:
 
 func _attack_choices_for_phase() -> Array[Dictionary]:
 	var out: Array[Dictionary] = []
-	# Hands
+	# Hands — swipe is the readable half-room sweep; slam is the shadow drop.
 	if left_hand != null and not left_hand.is_busy():
-		out.append({"id": "swipe_left", "w": 3.0})
-		out.append({"id": "slam_left", "w": 2.0})
+		out.append({"id": "swipe_left", "w": 3.5})
+		out.append({"id": "slam_left", "w": 2.2})
 	if right_hand != null and not right_hand.is_busy():
-		out.append({"id": "swipe_right", "w": 3.0})
-		out.append({"id": "slam_right", "w": 2.0})
+		out.append({"id": "swipe_right", "w": 3.5})
+		out.append({"id": "slam_right", "w": 2.2})
 	# Head
 	if head != null and not head.is_busy():
-		out.append({"id": "laser_sweep", "w": 2.5})
-		out.append({"id": "aoe", "w": 2.0})
+		out.append({"id": "laser_sweep", "w": 2.2})
+		out.append({"id": "aoe", "w": 1.8})
 		if _phase >= 1:
-			out.append({"id": "laser_bounce", "w": 2.0})
+			out.append({"id": "laser_bounce", "w": 2.4})
 	return out
 
 
@@ -238,9 +238,12 @@ func _on_button_pressed() -> void:
 	if _state != State.FIGHTING:
 		return
 	_state = State.WEAKPOINT_EXPOSED
+	for part in [left_hand, right_hand, head]:
+		if part != null:
+			part.request_cancel()
 	if head != null:
 		head.reset_weakpoint_hp()
-		head.expose_weakpoint()
+		await head.expose_weakpoint()
 
 
 func _on_weakpoint_broken() -> void:
@@ -248,17 +251,20 @@ func _on_weakpoint_broken() -> void:
 		return
 	_phase += 1
 	weakpoint_broken.emit(_phase)
-	_spawn_heal_drop()
+	# Defer: this often runs inside a physics hit callback.
+	call_deferred("_spawn_heal_drop")
 	if _phase >= total_phases:
+		if head != null:
+			head.hide_weakpoint()
 		_die()
 		return
 
-	_overlap_chance = 0.35 if _phase == 1 else 0.55
-	_state = State.FIGHTING
-	_attack_cd = _cooldown_for_phase() * 0.6
 	if head != null:
-		head.hide_weakpoint()
+		await head.retreat_to_perch()
 		head.reset_weakpoint_hp()
+	_overlap_chance = 0.18 if _phase == 1 else 0.3
+	_state = State.FIGHTING
+	_attack_cd = _cooldown_for_phase() * 0.85
 	_place_button()
 	_sync_button_mode(WorldMode.get_mode())
 
@@ -284,8 +290,16 @@ func _on_world_mode_changed(index: int) -> void:
 	_sync_button_mode(index)
 	if _state == State.IDLE or _state == State.DEAD:
 		return
-	# Projectiles spawn when shifting into Vigilia.
-	if index == WorldMode.MODE_SUENO and head != null:
+	# Escaping the charge AoE by shifting should cancel it cleanly (no projectile tax).
+	var cancelled_charge := false
+	if head != null and head.has_method("is_charging_aoe") and head.is_charging_aoe():
+		cancelled_charge = true
+		if head.has_method("interrupt_charge"):
+			head.interrupt_charge()
+	elif head != null and head.has_method("interrupt_charge"):
+		head.interrupt_charge()
+	# Projectiles spawn when shifting into Vigilia, unless that shift cancelled the charge.
+	if not cancelled_charge and index == WorldMode.MODE_SUENO and head != null:
 		head.fire_shift_burst()
 
 

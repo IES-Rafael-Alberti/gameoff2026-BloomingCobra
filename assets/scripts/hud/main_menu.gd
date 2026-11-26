@@ -4,6 +4,7 @@ extends Control
 
 const GAME_SCENE := "res://assets/scenes/game.tscn"
 const FONT_PATH := "res://assets/fonts/MagicalNeverlandRegular-JpRZ7.ttf"
+const MenuNavGate := preload("res://assets/scripts/hud/menu_nav_gate.gd")
 
 const INTRO_SLIDE_SECONDS := 2.8
 const UI_FADE_SECONDS := 0.85
@@ -32,6 +33,9 @@ var _selected_index: int = 0
 var _input_enabled: bool = false
 var _intro_done: bool = false
 var _menu_font: Font
+var _options: Control
+var _exit_confirm: Control
+var _nav := MenuNavGate.new()
 
 
 
@@ -43,6 +47,8 @@ func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_menu_font = load(FONT_PATH) as Font
 	_setup_menu_labels()
+	_setup_options()
+	_setup_exit_confirm()
 	_ui.modulate.a = 0.0
 	_welcome.modulate.a = 0.0
 	_welcome_text.modulate.a = 0.0
@@ -57,18 +63,31 @@ func _ready() -> void:
 	_update_selection_visuals()
 
 
+func _process(delta: float) -> void:
+	if not _input_enabled or not is_inside_tree():
+		return
+	if _is_options_open() or _is_exit_confirm_open():
+		return
+	_nav.update(delta)
+	var step := _nav.poll_step()
+	if step.x != 0:
+		_move_selection(step.x)
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if not _input_enabled or not is_inside_tree():
 		return
 
-	if event.is_action_pressed("ui_left") or event.is_action_pressed("move_left"):
-		_mark_input_handled()
-		_move_selection(-1)
+	if _exit_confirm != null and _exit_confirm.has_method("is_open") and bool(_exit_confirm.call("is_open")):
+		if _exit_confirm.has_method("handle_input") and bool(_exit_confirm.call("handle_input", event)):
+			_mark_input_handled()
 		return
-	if event.is_action_pressed("ui_right") or event.is_action_pressed("move_right"):
-		_mark_input_handled()
-		_move_selection(1)
+
+	if _options != null and _options.has_method("is_open") and bool(_options.call("is_open")):
+		if _options.has_method("handle_input") and bool(_options.call("handle_input", event)):
+			_mark_input_handled()
 		return
+
 	if event.is_action_pressed("ui_accept") or event.is_action_pressed("ui_select"):
 		_mark_input_handled()
 		_activate_selection()
@@ -194,7 +213,7 @@ func _setup_menu_labels() -> void:
 			_on_menu_item_gui_input(index, event)
 		)
 		label.mouse_entered.connect(func() -> void:
-			if _input_enabled:
+			if _input_enabled and not _is_options_open() and not _is_exit_confirm_open():
 				_selected_index = index
 				_update_selection_visuals()
 		)
@@ -202,8 +221,36 @@ func _setup_menu_labels() -> void:
 		_menu_items.append(label)
 
 
+func _setup_options() -> void:
+	var options_script := load("res://assets/scripts/hud/options_overlay.gd") as Script
+	_options = Control.new()
+	_options.set_script(options_script)
+	_options.name = "OptionsOverlay"
+	add_child(_options)
+	if _options.has_signal("closed"):
+		_options.closed.connect(_on_options_closed)
+
+
+func _setup_exit_confirm() -> void:
+	var exit_script := load("res://assets/scripts/hud/exit_confirm_overlay.gd") as Script
+	_exit_confirm = Control.new()
+	_exit_confirm.set_script(exit_script)
+	_exit_confirm.name = "ExitConfirmOverlay"
+	add_child(_exit_confirm)
+	if _exit_confirm.has_signal("closed"):
+		_exit_confirm.closed.connect(_on_exit_confirm_closed)
+
+
+func _is_options_open() -> bool:
+	return _options != null and _options.has_method("is_open") and bool(_options.call("is_open"))
+
+
+func _is_exit_confirm_open() -> bool:
+	return _exit_confirm != null and _exit_confirm.has_method("is_open") and bool(_exit_confirm.call("is_open"))
+
+
 func _on_menu_item_gui_input(index: int, event: InputEvent) -> void:
-	if not _input_enabled:
+	if not _input_enabled or _is_options_open() or _is_exit_confirm_open():
 		return
 	if event is InputEventMouseButton:
 		var mouse := event as InputEventMouseButton
@@ -228,19 +275,51 @@ func _activate_selection() -> void:
 		1:
 			_open_options()
 		2:
-			get_tree().quit()
+			_open_exit_confirm()
 
 
 func _start_game() -> void:
 	_input_enabled = false
-	get_tree().change_scene_to_file(GAME_SCENE)
+	if RunState != null and RunState.has_method("begin_new_run"):
+		RunState.begin_new_run()
+	elif RunState != null and RunState.has_method("reset"):
+		RunState.reset()
+	# Call the autoload directly so the async transition survives change_scene.
+	# (Object.call on a freeing menu node can stall the loading overlay.)
+	if SceneTransition != null and SceneTransition.has_method("change_to"):
+		SceneTransition.change_to(GAME_SCENE)
+	else:
+		get_tree().change_scene_to_file(GAME_SCENE)
 
 
 func _open_options() -> void:
-	pass
+	if _options != null and _options.has_method("open"):
+		_options.call("open")
+	_selector_left.visible = false
+	_selector_right.visible = false
+
+
+func _open_exit_confirm() -> void:
+	if _exit_confirm != null and _exit_confirm.has_method("open"):
+		_exit_confirm.call("open")
+	_selector_left.visible = false
+	_selector_right.visible = false
+
+
+func _on_options_closed() -> void:
+	_update_selection_visuals()
+
+
+func _on_exit_confirm_closed() -> void:
+	_update_selection_visuals()
 
 
 func _update_selection_visuals() -> void:
+	if _is_options_open() or _is_exit_confirm_open():
+		_selector_left.visible = false
+		_selector_right.visible = false
+		return
+
 	if _menu_items.is_empty():
 		_selector_left.visible = false
 		_selector_right.visible = false
@@ -253,7 +332,7 @@ func _update_selection_visuals() -> void:
 
 
 func _place_selectors() -> void:
-	if _menu_items.is_empty() or _selected_index < 0 or _selected_index >= _menu_items.size():
+	if _is_options_open() or _is_exit_confirm_open() or _menu_items.is_empty() or _selected_index < 0 or _selected_index >= _menu_items.size():
 		return
 
 	var selected := _menu_items[_selected_index]
@@ -280,7 +359,7 @@ func _on_resized() -> void:
 	#_fit_brand()
 	_fit_menu_row()
 	_fit_selectors()
-	if _input_enabled:
+	if _input_enabled and not _is_options_open() and not _is_exit_confirm_open():
 		_update_selection_visuals()
 
 

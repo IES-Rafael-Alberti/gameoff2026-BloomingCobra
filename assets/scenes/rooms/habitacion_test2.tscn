@@ -1,0 +1,32 @@
+[gd_scene format=3 uid="uid://l7p117an7v1e"]
+
+[ext_resource type="PackedScene" uid="uid://bd24eu5qqqv2d" path="res://assets/scenes/rooms/habitacion_enemy_test.tscn" id="1_base"]
+[ext_resource type="PackedScene" uid="uid://bxk5iodhcl1y1" path="res://assets/scenes/enemies/bouncer.tscn" id="2_bouncer"]
+
+[node name="HabitacionTest2" unique_id=1454762883 instance=ExtResource("1_base")]
+room_id = &"habitacion_test2"
+map_cell = Vector2i(2, 2)
+
+[node name="Tiles" parent="Switchable/Pesadilla" index="0" unique_id=327332008]
+visible = true
+
+[node name="Door" parent="." index="2" unique_id=879425557]
+target_room = "res://assets/scenes/rooms/habitacion_test4.tscn"
+target_door_id = &"south"
+
+[node name="Door2" parent="." index="3" unique_id=1627573497]
+target_room = "res://assets/scenes/rooms/habitacion_trampa.tscn"
+target_door_id = &"north"
+
+[node name="Door4" parent="." index="5" unique_id=1315555281]
+target_room = "res://assets/scenes/rooms/habitacion_descanso.tscn"
+target_door_id = &"east"
+
+[node name="Bouncer1" parent="." index="7" unique_id=501592792 instance=ExtResource("2_bouncer")]
+position = Vector2(-13, 57)
+
+[node name="Bouncer2" parent="." index="8" unique_id=888120769 instance=ExtResource("2_bouncer")]
+position = Vector2(-91, -38)
+
+[node name="Bouncer3" parent="." index="9" unique_id=27132339 instance=ExtResource("2_bouncer")]
+position = Vector2(65, -27)

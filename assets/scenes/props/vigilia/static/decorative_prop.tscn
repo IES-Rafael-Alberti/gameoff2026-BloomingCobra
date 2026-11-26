@@ -1,0 +1,18 @@
+[gd_scene format=3 uid="uid://b6110k4jeyhcj"]
+
+[ext_resource type="Script" uid="uid://dgvwro07yrgfh" path="res://assets/scripts/props/static/decorative_prop.gd" id="1_decor"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_decor"]
+size = Vector2(16, 16)
+
+[node name="DecorativeProp" type="StaticBody2D" unique_id=1051531791]
+z_index = 1
+collision_layer = 0
+collision_mask = 0
+script = ExtResource("1_decor")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=2135790811]
+texture_filter = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=2008934024]
+shape = SubResource("RectangleShape2D_decor")

@@ -1,0 +1,131 @@
+[gd_scene format=4 uid="uid://mpsapmarxum7"]
+
+[ext_resource type="Script" uid="uid://dt3yvbfauwt1k" path="res://assets/scripts/rooms/parkour.gd" id="1_ecge7"]
+[ext_resource type="Script" uid="uid://bkoec71xnejuk" path="res://assets/scripts/common/switchable.gd" id="2_xgywt"]
+[ext_resource type="TileSet" uid="uid://mo5sa42ii37l" path="res://assets/resources/tilesets/tileset_pesadilla_red.tres" id="3_qt1fj"]
+[ext_resource type="PackedScene" uid="uid://b41468s5i5aea" path="res://assets/scenes/props/pesadilla/interactive/doorPesadilla.tscn" id="4_qt1fj"]
+[ext_resource type="TileSet" uid="uid://bk7uacfb2knda" path="res://assets/resources/tilesets/tileset_vigilia_red.tres" id="4_wau77"]
+[ext_resource type="PackedScene" uid="uid://cb5rvks5i5aea" path="res://assets/scenes/props/vigilia/interactive/doorVigilia.tscn" id="6_wau77"]
+[ext_resource type="PackedScene" uid="uid://cxga68f10just" path="res://assets/scenes/props/vigilia/dynamic/pusher_prop.tscn" id="7_wau77"]
+[ext_resource type="PackedScene" uid="uid://belkw4urryhch" path="res://assets/scenes/props/pickups/pickup_max_health.tscn" id="8_xsx5g"]
+[ext_resource type="PackedScene" uid="uid://biuk4fta6kx8k" path="res://assets/scenes/props/pickups/pickup_heal.tscn" id="9_r1pe7"]
+
+[node name="1" type="Node2D" unique_id=1556955998 node_paths=PackedStringArray("respawn_point")]
+script = ExtResource("1_ecge7")
+respawn_point = NodePath("Respawn")
+room_id = &"1"
+map_cell = Vector2i(0, 0)
+map_shape = 1
+
+[node name="Switchable" type="Node2D" parent="." unique_id=884800511]
+script = ExtResource("2_xgywt")
+
+[node name="Pesadilla" type="Node2D" parent="Switchable" unique_id=966715375]
+visible = false
+
+[node name="Tiles" type="TileMapLayer" parent="Switchable/Pesadilla" unique_id=891083346]
+scale = Vector2(0.3, 0.3)
+tile_map_data = PackedByteArray("AAD///v/AAAAAAAAAAAAAPv/AAABAAAAAAABAPv/AAABAAAAAAACAPv/AAABAAAAAAADAPv/AAABAAAAAAAEAPv/AAABAAAAAAAFAPv/AAACAAAAAAAFAPz/AAACAAEAAAAFAP3/AAACAAEAAAAFAP7/AAACAAEAAAAFAP//AAACAAEAAAAFAAAAAAACAAQAAAAFAAEAAAACAAQAAAAFAAIAAAACAAQAAAAFAAMAAAACAAQAAAD8/wMAAAAAAAcAAAD9/wMAAAAAAAcAAAD+/wMAAAAAAAcAAAD//wMAAAAAAAcAAAAAAAMAAAAAAAcAAAABAAMAAAAAAAcAAAACAAMAAAAAAAcAAAADAAMAAAAAAAcAAAAEAAMAAAAAAAcAAAD7/wMAAAAAAAQAAAD7/wAAAAAAAAQAAAD7/wEAAAAAAAQAAAD7/wIAAAAAAAQAAAD9////AAABAAEAAAD9//7/AQAGAAIAAAD9//3/AAAAAAAAAAD8/wAAAAAAAAcAAAD8/wEAAAABAAQAAGD8/wIAAAAAAAcAAAD9/wIAAAAAAAcAAAD9/wEAAAABAAQAAGD9/wAAAAAAAAcAAAD+/wAAAAAAAAcAAAD+////AAABAAEAAAD+//7/AAABAAEAAAD+//3/AQAGAAIAAAD+//z/AAAAAAAAAAD///z/AQAGAAIAAAD///3/AAABAAEAAAD///7/AAABAAEAAAD/////AAABAAEAAAD//wAAAAAAAAcAAAD//wEAAAABAAQAAGD+/wEAAAABAAQAAGD+/wIAAAAAAAcAAAD//wIAAAAAAAcAAAAAAAIAAAAAAAcAAAAAAAEAAAABAAQAAGAAAAAAAAAAAAcAAAAAAP//AAABAAEAAAAAAP7/AAABAAEAAAAAAP3/AAABAAEAAAAAAPz/AAABAAEAAAABAPz/AAABAAEAAAABAP3/AAABAAEAAAABAP7/AAABAAEAAAABAP//AAABAAEAAAABAAAAAAAAAAcAAAABAAEAAAABAAQAAGABAAIAAAAAAAcAAAACAAIAAAAAAAcAAAACAAEAAAABAAQAAGACAAAAAAAAAAcAAAACAP//AAABAAEAAAACAP7/AAABAAEAAAACAP3/AAABAAEAAAACAPz/AAABAAEAAAADAPz/AAABAAEAAAADAP3/AAABAAEAAAADAP7/AAABAAEAAAADAP//AAABAAEAAAADAAAAAAAAAAcAAAADAAEAAAABAAQAAGADAAIAAAAAAAcAAAAEAAIAAAAAAAcAAAAEAAEAAAABAAQAAGAEAAAAAAAAAAcAAAAEAP//AAABAAEAAAAEAP7/AAABAAEAAAAEAP3/AAABAAEAAAAEAPz/AAABAAEAAAD7/wQAAAAAAAQAAAD7/wUAAAAAAAQAAAD7/wYAAAAAAAQAAAD7/wcAAAAAAAQAAAD7/wgAAAAAAAEAAAD7/wkAAAAAAAEAAAD7/woAAAAAAAEAAAD7/wsAAAAAAAEAAAD7/wwAAAAAAAIAAAD8/wQAAAAAAAcAAAD8/wUAAAAAAAcAAAD8/wYAAAABAAQAAGD8/wcAAAAAAAcAAAD8/wgAAAABAAEAAAD8/wkAAAABAAEAAAD8/woAAAABAAEAAAD8/wsAAAABAAEAAAD8/wwAAAABAAIAAAD9/wQAAAAAAAcAAAD9/wUAAAAAAAcAAAD9/wYAAAABAAQAAGD9/wcAAAAAAAcAAAD9/wgAAAABAAEAAAD9/wkAAAABAAEAAAD9/woAAAABAAEAAAD9/wsAAAABAAEAAAD9/wwAAAABAAIAAAD+/wQAAAAAAAcAAAD+/wUAAAAAAAcAAAD+/wYAAAABAAQAAGD+/wcAAAAAAAcAAAD+/wgAAAABAAEAAAD+/wkAAAABAAEAAAD+/woAAAABAAEAAAD+/wsAAAABAAEAAAD+/wwAAAABAAIAAAD//wQAAAAAAAcAAAD//wUAAAAAAAcAAAD//wYAAAABAAQAAGD//wcAAAAAAAcAAAD//wgAAAABAAEAAAD//wkAAAABAAEAAAD//woAAAABAAEAAAD//wsAAAABAAEAAAD//wwAAAABAAIAAAAAAAQAAAAAAAcAAAAAAAUAAAAAAAcAAAAAAAYAAAABAAQAAGAAAAcAAAAAAAcAAAAAAAgAAAABAAEAAAAAAAkAAAABAAEAAAAAAAoAAAABAAEAAAAAAAsAAAABAAEAAAAAAAwAAAABAAIAAAABAAQAAAAAAAcAAAABAAUAAAAAAAcAAAABAAYAAAABAAQAAGABAAcAAAAAAAcAAAABAAgAAAABAAEAAAABAAkAAAABAAEAAAABAAoAAAABAAEAAAABAAsAAQAEAAAAAAABAAwAAAACAAIAAAACAAQAAAAAAAcAAAACAAUAAAAAAAcAAAACAAYAAAABAAQAAGACAAcAAAAAAAcAAAACAAgAAAABAAEAAAACAAkAAAABAAEAAAACAAoAAQAEAAAAAAACAAsAAAACAAIAAAADAAQAAAAAAAcAAAADAAUAAAAAAAcAAAADAAYAAAABAAQAAGADAAcAAAAAAAcAAAADAAgAAAABAAEAAAADAAkAAQAEAAAAAAADAAoAAAACAAIAAAAEAAQAAAAAAAcAAAAEAAUAAAAAAAcAAAAEAAYAAAABAAQAAGAEAAcAAAAAAAcAAAAEAAgAAQAEAAAAAAAEAAkAAAACAAIAAAAFAAQAAAACAAQAAAAFAAUAAAACAAQAAAAFAAYAAAACAAQAAAAFAAcAAAACAAQAAAAFAAgAAAACAAIAAAD8////AQAGAAIAAAD8//7/AAAAAAAAAAD7////AAAAAAAAAAA=")
+tile_set = ExtResource("3_qt1fj")
+
+[node name="DoorEste" parent="Switchable/Pesadilla" unique_id=268869019 instance=ExtResource("4_qt1fj")]
+position = Vector2(202.415, 233)
+collision_layer = 8
+door_id = &"7E"
+target_room = "uid://bwkaa8ycbdfuy"
+target_door_id = &"8O"
+starts_open = true
+orientation = 1
+
+[node name="DoorSur" parent="Switchable/Pesadilla" unique_id=1201928384 instance=ExtResource("4_qt1fj")]
+position = Vector2(21, 136)
+collision_layer = 8
+door_id = &"7S"
+target_room = "uid://bc6vlosc3usda"
+target_door_id = &"12N"
+starts_open = true
+orientation = 2
+
+[node name="Sueño" type="Node2D" parent="Switchable" unique_id=1018947006]
+
+[node name="Tiles" type="TileMapLayer" parent="Switchable/Sueño" unique_id=1715976387]
+position = Vector2(35.6, 6)
+scale = Vector2(0.3, 0.3)
+tile_map_data = PackedByteArray("AAD//woAAwAAAAAAAAD//wsAAwACAAEAAAAAAAoAAwABAAAAAAACAAoAAwACAAIAAAABAAoAAwABAAAAAAACAAkAAwACAAEAAAACAAgAAwACAAAAAAABAAgAAwABAAAAAAAAAAgAAwABAAAAAAD//wgAAwABAAAAAAD+/wgAAwABAAAAAAD9/wgAAwABAAAAAAD8/wgAAwAAAAIAAAD8/wcAAwAAAAEAAAD8/wYAAwAAAAAAAAD9/wYAAwACAAIAAAD9/wUAAwAAAAAAAAD+/wUAAwACAAIAAAD+/wQAAwAAAAAAAAD//wQAAwABAAAAAAAAAAQAAwABAAAAAAABAAQAAwABAAAAAAACAAQAAwACAAAAAAABAAMAAwAAAAEAAAACAAUAAwACAAEAAAACAAYAAwAAAAIAAAADAAYAAwABAAAAAAAEAAYAAwABAAAAAAD+/wMAAwACAAEAAAD+/wIAAwACAAAAAAD9/wIAAwABAAAAAAD8/wIAAwAAAAIAAAD8/wEAAwACAAAAAAD7/wEAAwABAAAAAAD6/wEAAwAAAAIAAAD6/wAAAwAAAAEAAAD6////AwAAAAEAAAD6//7/AwAAAAEAAAD6//3/AwAAAAAAAAD7//3/AwACAAAAAAD7//7/AwAAAAIAAAD8//7/AwACAAIAAAD8//3/AwACAAEAAAD8//z/AwAAAAEAAAD8//v/AwAAAAAAAAD9//v/AwABAAAAAAD+//v/AwACAAAAAAD+//z/AwACAAEAAAD+//3/AwACAAEAAAD+//7/AwACAAEAAAD+////AwAAAAIAAAD/////AwACAAIAAAD///7/AwACAAEAAAD///3/AwACAAEAAAD///z/AwAAAAAAAAAAAPz/AwABAAAAAAABAPz/AwACAAAAAAABAP3/AwAAAAIAAAACAP3/AwABAAAAAAADAP3/AwACAAAAAAADAP7/AwACAAEAAAADAP//AwACAAEAAAADAAAAAwACAAEAAAADAAEAAwACAAIAAAABAAEAAwAAAAAAAAACAAEAAwABAAAAAAABAAIAAwAAAAEAAAA=")
+tile_set = ExtResource("4_wau77")
+
+[node name="Tiles2" type="TileMapLayer" parent="Switchable/Sueño" unique_id=844601466]
+position = Vector2(35.6, 6)
+scale = Vector2(0.3, 0.3)
+tile_map_data = PackedByteArray("AAD//woAAwAAAAAAAAD//wsAAwACAAEAAAAAAAoAAwABAAAAAAACAAoAAwACAAIAAAABAAoAAwABAAAAAAACAAkAAwACAAEAAAACAAgAAwACAAAAAAABAAgAAwABAAAAAAAAAAgAAwABAAAAAAD//wgAAwABAAAAAAD+/wgAAwABAAAAAAD9/wgAAwABAAAAAAD8/wgAAwAAAAIAAAD8/wcAAwAAAAEAAAD8/wYAAwAAAAAAAAD9/wYAAwACAAIAAAD9/wUAAwAAAAAAAAD+/wUAAwACAAIAAAD+/wQAAwAAAAIAAAD//wQAAwABAAAAAAAAAAQAAwABAAAAAAABAAQAAwACAAIAAAACAAQAAwACAAAAAAABAAMAAwAAAAEAAAACAAUAAwACAAEAAAACAAYAAwAAAAIAAAADAAYAAwABAAAAAAAEAAYAAwABAAAAAAD+/wMAAwACAAEAAAD+/wIAAwACAAAAAAD9/wIAAwABAAAAAAD8/wIAAwAAAAIAAAD8/wEAAwACAAAAAAD7/wEAAwABAAAAAAD6/wEAAwAAAAIAAAD6/wAAAwAAAAEAAAD6////AwAAAAEAAAD6//7/AwAAAAEAAAD6//3/AwAAAAAAAAD7//3/AwACAAAAAAD7//7/AwAAAAIAAAD8//7/AwACAAIAAAD8//3/AwACAAEAAAD8//z/AwAAAAEAAAD8//v/AwAAAAAAAAD9//v/AwABAAAAAAD+//v/AwACAAAAAAD+//z/AwACAAEAAAD+//3/AwACAAEAAAD+//7/AwACAAEAAAD+////AwAAAAIAAAD/////AwACAAIAAAD///7/AwACAAEAAAD///3/AwACAAEAAAD///z/AwAAAAAAAAAAAPz/AwABAAAAAAABAPz/AwACAAAAAAABAP3/AwAAAAIAAAACAP3/AwABAAAAAAADAP3/AwACAAAAAAADAP7/AwACAAEAAAADAP//AwACAAEAAAADAAAAAwACAAEAAAADAAEAAwACAAIAAAABAAEAAwAAAAAAAAACAAEAAwABAAAAAAABAAIAAwAAAAEAAAA=")
+tile_set = ExtResource("4_wau77")
+
+[node name="DoorEste" parent="Switchable/Sueño" unique_id=173168588 instance=ExtResource("6_wau77")]
+process_mode = 3
+position = Vector2(221, 252)
+disable_mode = 2
+collision_layer = 8
+door_id = &"1E"
+target_room = "uid://bubx6cfyi03av"
+target_door_id = &"7O"
+starts_open = true
+orientation = 1
+
+[node name="DoorSur" parent="Switchable/Sueño" unique_id=2063987366 instance=ExtResource("6_wau77")]
+process_mode = 3
+position = Vector2(17, 463)
+disable_mode = 2
+collision_layer = 8
+door_id = &"1S"
+target_room = "uid://8jabqmbopiw5"
+target_door_id = &"11N"
+starts_open = true
+orientation = 2
+
+[node name="Walls" type="StaticBody2D" parent="." unique_id=1872382948]
+visible = false
+
+[node name="Void" type="Area2D" parent="." unique_id=1011905400]
+collision_layer = 0
+collision_mask = 2
+monitorable = false
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Void" unique_id=474559465]
+polygon = PackedVector2Array(-157, 48, -160, -78, -151, -78, -151, -35, -82, -33, -82, -155, -34, -153, -36, 4, 31, 5, 33, -116, 82, -116, 82, -75, 158, -76, 158, 50, 77, 50, 82, 162, -8, 163, -7, 89, -85, 89, -84, 49, -158, 50)
+
+[node name="CollisionPolygon2D2" type="CollisionPolygon2D" parent="Void" unique_id=336736064]
+polygon = PackedVector2Array(36, 441, 33, 418, 147, 423, 146, 317, -86, 322, -86, 271, -45, 270, -45, 233, -6, 232, -7, 192, 120, 194, 121, 267, 194, 273, 202, 471, 40, 452)
+
+[node name="CollisionPolygon2D3" type="CollisionPolygon2D" parent="Void" unique_id=1882614097]
+polygon = PackedVector2Array(3, 424, 3, 396, 118, 397, 119, 346, -114, 349, -114, 240, -75, 242, -77, 203, -35, 203, -37, 117, -115, 117, -113, 79, -192, 80, -192, -107, -124, -106, -123, -64, -112, -64, -114, -185, -8, -182, -6, -27, 3, -27, 3, -147, 105, -146, 109, -106, 185, -105, 187, 80, 108, 77, 111, 163, 238, 163, 200, -215, -218, -238, -330, 323, -296, 509)
+
+[node name="CollisionPolygon2D4" type="CollisionPolygon2D" parent="Void" unique_id=703705827]
+polygon = PackedVector2Array(148, 240, 146, 163, 243, 163, 238, 206, 198, 219, 184, 242, 148, 244)
+
+[node name="CollisionPolygon2D5" type="CollisionPolygon2D" parent="Void" unique_id=1831668091]
+polygon = PackedVector2Array(181, 238, 188, 240, 193, 222, 216, 198, 280, 197, 284, 214, 285, 236, 259, 236, 257, 240, 193, 238, 187, 240)
+
+[node name="CollisionPolygon2D6" type="CollisionPolygon2D" parent="Void" unique_id=706422801]
+polygon = PackedVector2Array(196, 299, 194, 272, 275, 272, 272, 291)
+
+[node name="CollisionPolygon2D7" type="CollisionPolygon2D" parent="Void" unique_id=509752159]
+polygon = PackedVector2Array(-30, 473, -27, 432, 3, 423, -2, 466, 36, 463, 34, 426, 52, 466, 59, 487, -55, 488)
+
+[node name="CollisionPolygon2D8" type="CollisionPolygon2D" parent="Void" unique_id=1675583942]
+polygon = PackedVector2Array(233, 223, 229, 277, 280, 275, 273, 234)
+
+[node name="Respawn" type="Marker2D" parent="." unique_id=1193166463]
+position = Vector2(13, 460)
+
+[node name="PusherProp" parent="." unique_id=1623427499 instance=ExtResource("7_wau77")]
+position = Vector2(112.00001, 349)
+scale = Vector2(1.25, 1.25)
+
+[node name="PickupMaxHealth" parent="." unique_id=464626054 instance=ExtResource("8_xsx5g")]
+position = Vector2(-62, -170)
+
+[node name="PickupHeal" parent="." unique_id=1245818749 instance=ExtResource("9_r1pe7")]
+position = Vector2(-20, 176)
+
+[node name="PickupHeal2" parent="." unique_id=1766567702 instance=ExtResource("9_r1pe7")]
+position = Vector2(171, 255)

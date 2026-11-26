@@ -1,0 +1,49 @@
+[gd_scene format=3 uid="uid://tvq6u6rrx621"]
+
+[ext_resource type="Script" uid="uid://bdnr7738cnbyo" path="res://assets/scripts/props/interactive/button.gd" id="1_btn"]
+[ext_resource type="Texture2D" uid="uid://nadfbq72pvc1" path="res://assets/sprittesheets/props/definitivo/boton_pesadilla.png" id="2_sheet"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_pressed"]
+atlas = ExtResource("2_sheet")
+region = Rect2(58, 0, 58, 58)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_unpressed"]
+atlas = ExtResource("2_sheet")
+region = Rect2(0, 0, 58, 58)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_btn"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_pressed")
+}],
+"loop": 1,
+"name": &"pressed",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_unpressed")
+}],
+"loop": 1,
+"name": &"unpressed",
+"speed": 5.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_btn"]
+size = Vector2(28, 28)
+
+[node name="ButtonPesadilla" type="Area2D" unique_id=1335373054]
+collision_layer = 0
+collision_mask = 2
+monitorable = false
+script = ExtResource("1_btn")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1455875612]
+scale = Vector2(0.4, 0.4)
+sprite_frames = SubResource("SpriteFrames_btn")
+animation = &"unpressed"
+autoplay = "unpressed"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=745583831]
+shape = SubResource("RectangleShape2D_btn")

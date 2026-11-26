@@ -1,0 +1,28 @@
+[gd_scene format=3 uid="uid://cxga68f10just"]
+
+[ext_resource type="Script" uid="uid://b363uem7v0lt5" path="res://assets/scripts/props/dynamic/pusher_prop.gd" id="1_pusher"]
+[ext_resource type="Texture2D" uid="uid://bsg04j7co0pxg" path="res://assets/scenary/decoracionestiles1.png" id="2_8nqre"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_k8s63"]
+atlas = ExtResource("2_8nqre")
+region = Rect2(8, 16, 104, 368)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_pusher"]
+size = Vector2(14, 48)
+
+[node name="PusherProp" type="AnimatableBody2D" unique_id=1623427499]
+z_index = 1
+scale = Vector2(2.02, 2.02)
+collision_mask = 0
+script = ExtResource("1_pusher")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=139818386]
+modulate = Color(0.28933236, 0.32243666, 0.5730836, 1)
+texture_filter = 1
+position = Vector2(-1, 17)
+scale = Vector2(0.135, 0.135)
+texture = SubResource("AtlasTexture_k8s63")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=199534027]
+position = Vector2(-1, 16)
+shape = SubResource("RectangleShape2D_pusher")

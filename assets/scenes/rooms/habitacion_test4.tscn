@@ -1,0 +1,22 @@
+[gd_scene format=3 uid="uid://0g8asi7iuyaa"]
+
+[ext_resource type="PackedScene" uid="uid://bd24eu5qqqv2d" path="res://assets/scenes/rooms/habitacion_enemy_test.tscn" id="1_base"]
+[ext_resource type="PackedScene" uid="uid://bv4cgmj36fw4k" path="res://assets/scenes/enemies/cat.tscn" id="2_cat"]
+
+[node name="HabitacionTest4" unique_id=1353640735 instance=ExtResource("1_base")]
+room_id = &"habitacion_test4"
+map_cell = Vector2i(2, 1)
+
+[node name="Tiles" parent="Switchable/Pesadilla" index="0" unique_id=327332008]
+visible = true
+
+[node name="Door2" parent="." index="3" unique_id=1627573497]
+target_room = "res://assets/scenes/rooms/habitacion_test2.tscn"
+target_door_id = &"north"
+
+[node name="Door4" parent="." index="5" unique_id=1315555281]
+target_room = "res://assets/scenes/rooms/habitacion_test3.tscn"
+target_door_id = &"east"
+
+[node name="Cat" parent="." index="7" unique_id=155478217 instance=ExtResource("2_cat")]
+position = Vector2(-16, 34)

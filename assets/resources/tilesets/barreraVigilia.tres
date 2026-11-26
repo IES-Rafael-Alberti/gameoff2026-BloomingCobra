@@ -1,0 +1,27 @@
+[gd_resource type="TileSet" format=3 uid="uid://rrdpge4ki82b"]
+
+[ext_resource type="Texture2D" uid="uid://chy5pa84snsoq" path="res://assets/sprittesheets/props/definitivo/Vigil props.png" id="1_cmuqu"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_cs0a8"]
+texture = ExtResource("1_cmuqu")
+texture_region_size = Vector2i(675, 675)
+0:1/0 = 0
+0:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-46.70331, -269.10013, -43.93802, 320.1198, 13.809082, 307.5661, 11.119873, 162.34967, 295.78778, 126.766174, 309.1316, -126.766174, 51.151306, -122.31824, 28.911621, -255.75632)
+1:1/0 = 0
+1:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-350.88895, -138.22897, -59.240997, -144.30496, -72.65704, -277.17313, 79.03357, -262.83255, 45.74701, -137.24109, 309.46515, -153.38708, 340.02814, 170.93307, -347.38007, 170.93307)
+2:1/0 = 0
+2:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-353.6109, -149.00586, -73.39093, -149.00586, -82.286804, -260.20425, 64.32965, -255.48059, 68.35501, 356.96497, -59.240997, 347.85095, -53.164978, 147.34302, -358.40802, 145.2012)
+1:2/0 = 0
+1:2/0/physics_layer_0/polygon_0/points = PackedVector2Array(-86.38553, 163.58115, -86.38553, -277.53647, 86.38556, -251.80461, 101.08948, 156.22916)
+0:2/0 = 0
+0:2/0/physics_layer_0/polygon_0/points = PackedVector2Array(-73.39093, -335.81915, -46.70331, 362.50677, 60.04718, 358.05884, 46.70337, -344.71503)
+0:3/0 = 0
+0:3/0/physics_layer_0/polygon_0/points = PackedVector2Array(-60.653656, 189.31296, 329.00018, 156.22916, 351.0561, -137.84924, 56.977722, -148.87717, 15.56781, -340.2671, -55.599182, -340.2671)
+2:3/0 = 0
+2:3/0/physics_layer_0/polygon_0/points = PackedVector2Array(66.5347, 179.51816, -347.38007, 141.52524, -347.38007, -141.5252, -71.68161, -137.84924, -78.039, -357.90317, 40.36505, -352.52118)
+
+[resource]
+tile_size = Vector2i(675, 675)
+physics_layer_0/collision_layer = 1
+physics_layer_0/collision_mask = 0
+sources/0 = SubResource("TileSetAtlasSource_cs0a8")

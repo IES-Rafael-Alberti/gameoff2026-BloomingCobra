@@ -5,6 +5,8 @@ extends Node
 ## Hitting 0 kills the player.
 
 signal vitality_changed(current: float, max_vitality: float, ratio: float)
+## Fired only for discrete hits (enemies / spikes / hazards), not vigilia drain.
+signal hit_applied(lost: float, current: float, max_vitality: float)
 signal depleted
 
 @export var max_vitality: float = 100.0
@@ -12,6 +14,8 @@ signal depleted
 @export var drain_per_second: float = 2.5
 ## How much bar each Damageable damage point removes (contact_damage 1 → 10).
 @export var vitality_per_damage_point: float = 10.0
+## If true, cat pickup restores the full bar. If false, heals `cat_heal_amount`.
+@export var cat_heal_full: bool = true
 @export var cat_heal_amount: float = 40.0
 
 var current: float = 100.0
@@ -44,7 +48,10 @@ func tick(delta: float, in_vigil: bool) -> void:
 func apply_hit_damage(amount: int) -> float:
 	if _dead or _invulnerable or amount <= 0:
 		return 0.0
-	return _lose(float(amount) * maxf(vitality_per_damage_point, 0.0))
+	var lost := _lose(float(amount) * maxf(vitality_per_damage_point, 0.0))
+	if lost > 0.0:
+		hit_applied.emit(lost, current, max_vitality)
+	return lost
 
 
 func set_invulnerable(enabled: bool) -> void:
@@ -72,6 +79,8 @@ func heal(amount: float) -> float:
 
 
 func heal_from_cat() -> float:
+	if cat_heal_full:
+		return heal(max_vitality)
 	return heal(cat_heal_amount)
 
 

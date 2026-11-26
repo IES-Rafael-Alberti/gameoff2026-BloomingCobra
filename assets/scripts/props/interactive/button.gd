@@ -1,18 +1,21 @@
 class_name PropButton
 extends Area2D
 
-## Floor button: player steps on it to press. Emits `pressed` / `released`.
+## Floor button: player steps on it to press. Visual via AnimatedSprite2D states.
 
 signal pressed
 signal released
 
-@export var unpressed_texture: Texture2D = preload("res://assets/sprittesheets/props/placeholders/interactive/unpressed_button.png")
-@export var pressed_texture: Texture2D = preload("res://assets/sprittesheets/props/placeholders/interactive/pressed_button.png")
+@export var unpressed_anim: StringName = &"unpressed"
+@export var pressed_anim: StringName = &"pressed"
+## Optional: swap art when WorldMode changes. Leave empty on mode-specific scenes.
+@export var pesadilla_frames: SpriteFrames
+@export var vigilia_frames: SpriteFrames
 ## If true, stays down after stepping off until reset() (e.g. void fall) or commit().
 @export var stay_pressed: bool = true
 @export var one_shot: bool = false
 
-@onready var sprite: Sprite2D = get_node_or_null("Sprite2D") as Sprite2D
+@onready var animated_sprite: AnimatedSprite2D = get_node_or_null("AnimatedSprite2D") as AnimatedSprite2D
 
 var _is_pressed: bool = false
 var _committed: bool = false
@@ -31,6 +34,10 @@ func _ready() -> void:
 		body_entered.connect(_on_body_entered)
 	if not body_exited.is_connected(_on_body_exited):
 		body_exited.connect(_on_body_exited)
+	if _has_mode_frames() and WorldMode != null:
+		if not WorldMode.mode_changed.is_connected(_on_world_mode_changed):
+			WorldMode.mode_changed.connect(_on_world_mode_changed)
+		_apply_mode_frames(WorldMode.get_mode())
 	_update_visual()
 
 
@@ -96,9 +103,32 @@ func _set_pressed(value: bool) -> void:
 		released.emit()
 
 
-func _update_visual() -> void:
-	if sprite == null:
-		sprite = get_node_or_null("Sprite2D") as Sprite2D
-	if sprite == null:
+func _on_world_mode_changed(mode: int) -> void:
+	_apply_mode_frames(mode)
+	_update_visual()
+
+
+func _has_mode_frames() -> bool:
+	return pesadilla_frames != null and vigilia_frames != null
+
+
+func _apply_mode_frames(mode: int) -> void:
+	if animated_sprite == null:
+		animated_sprite = get_node_or_null("AnimatedSprite2D") as AnimatedSprite2D
+	if animated_sprite == null or not _has_mode_frames():
 		return
-	sprite.texture = pressed_texture if _is_pressed else unpressed_texture
+	animated_sprite.sprite_frames = (
+		vigilia_frames if mode == WorldMode.MODE_SUENO else pesadilla_frames
+	)
+
+
+func _update_visual() -> void:
+	if animated_sprite == null:
+		animated_sprite = get_node_or_null("AnimatedSprite2D") as AnimatedSprite2D
+	if animated_sprite == null or animated_sprite.sprite_frames == null:
+		return
+	var anim := pressed_anim if _is_pressed else unpressed_anim
+	if not animated_sprite.sprite_frames.has_animation(anim):
+		return
+	if animated_sprite.animation != anim or not animated_sprite.is_playing():
+		animated_sprite.play(anim)

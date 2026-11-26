@@ -51,7 +51,9 @@ func physics_update(delta: float) -> void:
 	if brain.circular != null and brain.circular.is_busy():
 		brain.circular.physics_update(delta)
 		return
-	# Cooldown tick for circular even when idle in this state.
+	# Cooldown ticks while not mid-attack.
+	if brain.charge != null and brain.charge.has_method("tick_cooldown"):
+		brain.charge.tick_cooldown(delta)
 	if brain.circular != null:
 		brain.circular.physics_update(delta)
 
@@ -81,7 +83,7 @@ func physics_update(delta: float) -> void:
 		brain.charge.begin(to_player)
 		return
 
-	# Slow advance through the room.
+	# Walk toward the player when outside charge band / on charge cooldown.
 	var dir: Vector2 = brain.cardinal_from(to_player)
 	brain.set_facing(dir)
 	enemy.velocity = dir * move_speed
@@ -95,10 +97,16 @@ func _try_contact(player: Node2D) -> void:
 	var enemy: CharacterBody2D = brain.get_enemy()
 	if enemy.global_position.distance_to(player.global_position) > 18.0:
 		return
-	_contact_cd = contact_cooldown
+	if player.has_method("is_iframe_active") and bool(player.call("is_iframe_active")):
+		return
 	var dmg := player.get_node_or_null("Damageable")
+	if dmg != null and dmg.has_method("is_invulnerable") and bool(dmg.call("is_invulnerable")):
+		return
+	_contact_cd = contact_cooldown
 	if dmg != null and dmg.has_method("take_damage"):
-		dmg.take_damage(contact_damage)
+		var landed: Variant = dmg.call("take_damage", contact_damage)
+		if landed is bool and not bool(landed):
+			return
 	if player.has_method("apply_knockback"):
 		var away: Vector2 = player.global_position - enemy.global_position
 		if away == Vector2.ZERO:

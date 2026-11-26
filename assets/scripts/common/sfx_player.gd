@@ -201,7 +201,7 @@ func _as_looping(stream: AudioStream) -> AudioStream:
 		var end_frame := wav.loop_end
 		if end_frame <= wav.loop_begin:
 			var rate := maxi(wav.mix_rate, 1)
-			end_frame = maxi(int(ceil(wav.get_length() * float(rate))) - 1, 1)
+			end_frame = maxi(ceili(wav.get_length() * float(rate)) - 1, 1)
 		wav.loop_end = end_frame
 	return copy
 
@@ -348,28 +348,8 @@ func _get_current_room() -> Node:
 	return null
 
 
-func _find_room_at(point: Vector2) -> Node:
+func _find_room_at(_point: Vector2) -> Node:
 	var manager := get_tree().get_first_node_in_group("room_manager") if get_tree() != null else null
-	if manager != null and manager.has_method("get_room_at"):
-		return manager.call("get_room_at", point, 48.0)
-
-	var tree := get_tree()
-	if tree == null:
-		return null
-	var best: Node = null
-	var best_area := INF
-	for room in tree.get_nodes_in_group("rooms"):
-		if room == null or not room.has_method("contains_world_point"):
-			continue
-		# Wider margin than gameplay (8px) so doorway / offset placements still match.
-		if not bool(room.call("contains_world_point", point, 48.0)):
-			continue
-		var area := INF
-		if room.has_method("get_camera_bounds"):
-			var bounds: Rect2 = room.call("get_camera_bounds")
-			if bounds.size != Vector2.ZERO:
-				area = absf(bounds.get_area())
-		if area < best_area:
-			best_area = area
-			best = room
-	return best
+	if manager != null and "current_room" in manager:
+		return manager.current_room
+	return _get_own_room()

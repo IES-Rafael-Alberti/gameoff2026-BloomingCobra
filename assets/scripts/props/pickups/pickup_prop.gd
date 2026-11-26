@@ -4,6 +4,8 @@ extends Area2D
 ## Collectible prop. Heal / buff / shield / max-health pickups.
 
 @export var definition: PropPickupDef
+## Stacks for attack / projectile / shield. -1 = use definition.stacks.
+@export_range(-1, 99) var stacks: int = -1
 ## Vertical float amplitude in pixels.
 @export var float_amplitude: float = 2.5
 ## Full up-down cycles per second.
@@ -23,8 +25,9 @@ func _ready() -> void:
 	add_to_group("prop_pickup")
 	collision_layer = 0
 	collision_mask = 1 << 1 # player
-	monitoring = true
-	monitorable = false
+	# Deferred: pickups may spawn during physics callbacks (boss heal drop, etc.).
+	set_deferred("monitoring", true)
+	set_deferred("monitorable", false)
 	apply_definition()
 	_sprite_base_pos = sprite.position
 	_float_phase = randf() * TAU
@@ -72,10 +75,15 @@ func get_pickup_amount() -> int:
 	return 1
 
 
-func get_pickup_duration() -> float:
+func get_pickup_stacks() -> int:
+	if stacks > 0:
+		return stacks
 	if definition != null:
-		return definition.duration
-	return 0.0
+		if definition.has_method("get_effect_value") and definition.is_stack_pickup():
+			return definition.get_effect_value()
+		# Legacy .tres that only set amount for shield/boosts.
+		return maxi(definition.amount, 1)
+	return 1
 
 
 func _on_body_entered(body: Node2D) -> void:
@@ -84,7 +92,7 @@ func _on_body_entered(body: Node2D) -> void:
 	if not body.is_in_group("player"):
 		return
 	_collected = true
-	monitoring = false
+	set_deferred("monitoring", false)
 	if collision_shape != null:
 		collision_shape.set_deferred("disabled", true)
 	_apply_pickup(body)
@@ -108,18 +116,20 @@ func _play_collect_fade() -> void:
 func _apply_pickup(player: Node) -> void:
 	var kind := get_pickup_type()
 	var amount := get_pickup_amount()
-	var duration := get_pickup_duration()
+	var stack_count := get_pickup_stacks()
 	match kind:
-		&"heal", &"cat_heal":
+		&"cat_heal":
+			_apply_cat_heal(player)
+		&"heal":
 			_apply_heal(player, float(amount))
 		&"max_health", &"maxhealth":
 			_apply_max_health(player, float(amount))
 		&"attack_boost", &"attack":
-			_apply_attack_boost(player, amount, duration)
+			_apply_attack_boost(player, stack_count)
 		&"projectile_boost", &"projectile":
-			_apply_projectile_boost(player, amount, duration)
+			_apply_projectile_boost(player, stack_count)
 		&"shield":
-			_apply_shield(player, amount)
+			_apply_shield(player, stack_count)
 		_:
 			_apply_heal(player, float(amount))
 
@@ -133,6 +143,20 @@ func _apply_heal(player: Node, amount: float) -> void:
 		vit.call("heal", amount)
 
 
+func _apply_cat_heal(player: Node) -> void:
+	if player.has_method("heal_vitality_from_cat"):
+		player.call("heal_vitality_from_cat")
+		return
+	var vit: Node = player.get_node_or_null("Vitality")
+	if vit != null and vit.has_method("heal_from_cat"):
+		vit.call("heal_from_cat")
+		return
+	# Fallback: fill the bar.
+	if vit != null and "max_vitality" in vit and vit.has_method("heal"):
+		vit.call("heal", float(vit.max_vitality))
+
+
+
 func _apply_max_health(player: Node, amount: float) -> void:
 	if player.has_method("increase_max_vitality"):
 		player.call("increase_max_vitality", amount)
@@ -142,16 +166,16 @@ func _apply_max_health(player: Node, amount: float) -> void:
 		vit.call("increase_max", amount)
 
 
-func _apply_attack_boost(player: Node, bonus: int, duration: float) -> void:
+func _apply_attack_boost(player: Node, stacks: int) -> void:
 	var buffs := _get_buffs(player)
 	if buffs != null and buffs.has_method("apply_attack_boost"):
-		buffs.call("apply_attack_boost", duration, bonus)
+		buffs.call("apply_attack_boost", stacks)
 
 
-func _apply_projectile_boost(player: Node, bonus: int, duration: float) -> void:
+func _apply_projectile_boost(player: Node, stacks: int) -> void:
 	var buffs := _get_buffs(player)
 	if buffs != null and buffs.has_method("apply_projectile_boost"):
-		buffs.call("apply_projectile_boost", duration, bonus)
+		buffs.call("apply_projectile_boost", stacks)
 
 
 func _apply_shield(player: Node, hits: int) -> void:

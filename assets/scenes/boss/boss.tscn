@@ -1,20 +1,69 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene format=3 uid="uid://djwxph87hc7k3"]
 
-[ext_resource type="Script" path="res://assets/scripts/boss/boss.gd" id="1_boss"]
+[ext_resource type="Script" uid="uid://dmjyum3sbak3y" path="res://assets/scripts/boss/boss.gd" id="1_boss"]
 [ext_resource type="PackedScene" uid="uid://ccj6ql724ejnm" path="res://assets/scenes/boss/partes/boss_cabeza.tscn" id="2_head"]
 [ext_resource type="PackedScene" uid="uid://cdfot8mhpuy82" path="res://assets/scenes/boss/partes/boss_mano_izquierda.tscn" id="3_left"]
 [ext_resource type="PackedScene" uid="uid://bgkrpyrlcewku" path="res://assets/scenes/boss/partes/boss_mano_derecha.tscn" id="4_right"]
+[ext_resource type="Texture2D" uid="uid://bi7p2iwqnvf2o" path="res://assets/sprittesheets/boss/definitivo/boss1.png" id="5_8n1fi"]
 
-[node name="Boss" type="Node2D"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_n3y06"]
+atlas = ExtResource("5_8n1fi")
+region = Rect2(1652, 2478, 826, 826)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_c2byh"]
+atlas = ExtResource("5_8n1fi")
+region = Rect2(2478, 2478, 826, 826)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gh7g6"]
+atlas = ExtResource("5_8n1fi")
+region = Rect2(0, 2478, 826, 826)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_c16fp"]
+atlas = ExtResource("5_8n1fi")
+region = Rect2(826, 2478, 826, 826)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_bhbtl"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_n3y06")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_c2byh")
+}],
+"loop": 1,
+"name": &"hit",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gh7g6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_c16fp")
+}],
+"loop": 1,
+"name": &"projectile",
+"speed": 5.0
+}]
+
+[node name="Boss" type="Node2D" unique_id=1877763010]
 script = ExtResource("1_boss")
 
-[node name="BossCabeza" parent="." instance=ExtResource("2_head")]
-position = Vector2(0, -48)
+[node name="BossCabeza" parent="." unique_id=307427094 instance=ExtResource("2_head")]
+position = Vector2(0, -190)
 
-[node name="BossManoIzquierda" parent="." instance=ExtResource("3_left")]
-position = Vector2(-72, -8)
+[node name="BossManoIzquierda" parent="." unique_id=1745133524 instance=ExtResource("3_left")]
+position = Vector2(-100, -155)
 
-[node name="BossManoDerecha" parent="." instance=ExtResource("4_right")]
-position = Vector2(72, -8)
+[node name="BossManoDerecha" parent="." unique_id=1289684195 instance=ExtResource("4_right")]
+position = Vector2(100, -155)
 
-[node name="Projectiles" type="Node2D" parent="."]
+[node name="Projectiles" type="Node2D" parent="." unique_id=1747242292]
+z_index = 12
+
+[node name="projectile" type="AnimatedSprite2D" parent="Projectiles" unique_id=346921186]
+visible = false
+sprite_frames = SubResource("SpriteFrames_bhbtl")
+animation = &"hit"
+frame_progress = 0.6714464

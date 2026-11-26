@@ -1,0 +1,25 @@
+[gd_scene format=3 uid="uid://cy3nwj5nh10n6"]
+
+[ext_resource type="Script" uid="uid://dgvwro07yrgfh" path="res://assets/scripts/props/static/decorative_prop.gd" id="1_y3rwx"]
+[ext_resource type="Texture2D" uid="uid://blvmfxg2814y6" path="res://assets/sprittesheets/props/definitivo/props_pesadilla_Y.png" id="2_7ywi7"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0ys2u"]
+atlas = ExtResource("2_7ywi7")
+region = Rect2(189, 0, 65, 68)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_decor"]
+size = Vector2(16, 16)
+
+[node name="DecorativeProp" type="StaticBody2D" unique_id=704718027]
+z_index = 1
+collision_layer = 0
+collision_mask = 0
+script = ExtResource("1_y3rwx")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1259905834]
+texture_filter = 1
+scale = Vector2(0.2, 0.2)
+texture = SubResource("AtlasTexture_0ys2u")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1294316903]
+shape = SubResource("RectangleShape2D_decor")

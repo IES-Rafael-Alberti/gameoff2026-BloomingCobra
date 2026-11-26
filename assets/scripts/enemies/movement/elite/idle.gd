@@ -15,7 +15,7 @@ func enter(_from: StringName = &"") -> void:
 		return
 	brain.get_enemy().velocity = Vector2.ZERO
 	brain.set_shield_active(true)
-	brain.play_defense_anim()
+	brain.play_resting_anim(brain.get_facing())
 
 
 func exit(_to: StringName = &"") -> void:
@@ -26,7 +26,7 @@ func physics_update(delta: float) -> void:
 	if brain == null:
 		return
 	brain.get_enemy().velocity = Vector2.ZERO
-	brain.play_defense_anim()
+	brain.play_resting_anim(brain.get_facing())
 	var player: Node2D = brain.get_player()
 	if player == null:
 		_aggro_timer = 0.0

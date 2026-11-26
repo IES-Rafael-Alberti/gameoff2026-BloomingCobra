@@ -3,7 +3,7 @@ extends Room
 
 ## Closed exit until the challenge is done. Falling into the void resets to start.
 ## Forces dream mode and locks switching to nightmare while inside.
-## Enable Button Unlock + assign PropButtons (interactive/button.tscn) to open the exit.
+## Assign PropButtons to the exit door (Door > Button Unlock) so its buttons open it.
 ## Falling resets uncommitted buttons; leaving the room with them pressed commits them.
 ## Void uses coyote time, then a shrink fall beat, then respawn.
 
@@ -23,20 +23,25 @@ var _void_falling: bool = false
 
 func _ready() -> void:
 	super._ready()
-	if exit_door != null and keep_exit_closed:
-		exit_door.set_open(false)
+	_apply_exit_state()
 	_setup_void_area()
 
 
 func on_player_entered(_player: Node2D) -> void:
 	_force_dream_and_lock()
-	if exit_door != null and keep_exit_closed and not _button_unlock_done and not _button_unlock_committed:
-		exit_door.set_open(false)
-	elif exit_door != null and (_button_unlock_done or _button_unlock_committed):
-		exit_door.set_open(true)
+	_apply_exit_state()
 	_setup_void_area()
 	# If the player already overlaps the void (or re-entered mid-fall), resume coyote.
 	_void_overlap_time = 0.0
+
+
+func _apply_exit_state() -> void:
+	if exit_door == null:
+		return
+	if not keep_exit_closed:
+		return
+	# Keep the exit closed until its own buttons are satisfied or committed.
+	exit_door.set_open(exit_door.is_button_unlock_done() or exit_door.is_button_unlock_committed())
 
 
 func on_player_exited(player: Node2D) -> void:
@@ -65,10 +70,10 @@ func _is_void_exit(player: Node2D) -> bool:
 
 
 func on_button_unlock() -> void:
+	# Doors already opened themselves from their own buttons; keep the exit open
+	# even if the room later re-applies its closed state.
 	if exit_door != null:
 		exit_door.set_open(true)
-	else:
-		set_all_doors_open(true)
 
 
 func _physics_process(delta: float) -> void:
@@ -171,8 +176,7 @@ func _respawn_player(player: Node2D) -> void:
 
 	# Void fall undoes button progress unless it was committed by leaving the room.
 	reset_unlock_buttons()
-	if keep_exit_closed and exit_door != null and not _button_unlock_committed:
-		exit_door.set_open(false)
+	_apply_exit_state()
 
 
 func _force_dream_and_lock() -> void:
