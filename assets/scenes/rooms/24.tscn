@@ -5,6 +5,7 @@
 [ext_resource type="TileSet" uid="uid://mo5sa42ii37l" path="res://assets/resources/tilesets/tileset_pesadilla_red.tres" id="3_6q5ra"]
 [ext_resource type="TileSet" uid="uid://bk7uacfb2knda" path="res://assets/resources/tilesets/tileset_vigilia_red.tres" id="4_jkuap"]
 [ext_resource type="PackedScene" uid="uid://cb5rvks5i5aea" path="res://assets/scenes/props/vigilia/interactive/doorVigilia.tscn" id="5_ob0b1"]
+[ext_resource type="PackedScene" uid="uid://biuk4fta6kx8k" path="res://assets/scenes/props/pickups/pickup_heal.tscn" id="6_6q5ra"]
 
 [node name="24" type="Node2D" unique_id=1556955998]
 script = ExtResource("1_cmo6r")
@@ -78,3 +79,9 @@ polygon = PackedVector2Array(-602.7216, -159, -607.3402, -123, -538.0618, -122, 
 position = Vector2(188, -21)
 scale = Vector2(0.43303573, 1)
 polygon = PackedVector2Array(-729.73193, -212, -718.18555, -172, -90.06186, -179, -101.608246, -213)
+
+[node name="PickupHeal" parent="." unique_id=1245818749 instance=ExtResource("6_6q5ra")]
+position = Vector2(-1, 256)
+
+[node name="PickupHeal2" parent="." unique_id=420492566 instance=ExtResource("6_6q5ra")]
+position = Vector2(59, -127)

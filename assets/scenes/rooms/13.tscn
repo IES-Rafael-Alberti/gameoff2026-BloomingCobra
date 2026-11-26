@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" uid="uid://b41468s5i5aea" path="res://assets/scenes/props/pesadilla/interactive/doorPesadilla.tscn" id="5_6aa4c"]
 [ext_resource type="TileSet" uid="uid://cod5hqlj1hrki" path="res://assets/resources/tilesets/tileset_spikes_pesadilla.tres" id="6_2r3hs"]
 [ext_resource type="TileSet" uid="uid://rrdpge4ki82b" path="res://assets/resources/tilesets/barreraVigilia.tres" id="6_j6eud"]
+[ext_resource type="PackedScene" uid="uid://dhsch6rnimlsn" path="res://assets/scenes/props/pickups/pickup_shield.tscn" id="7_le2t2"]
 [ext_resource type="PackedScene" uid="uid://cb5rvks5i5aea" path="res://assets/scenes/props/vigilia/interactive/doorVigilia.tscn" id="8_wmfoq"]
 [ext_resource type="Script" uid="uid://cgr461snah57y" path="res://assets/scripts/rooms/enemy_spawn_point.gd" id="9_1rckp"]
 [ext_resource type="PackedScene" uid="uid://bxk5iodhcl1y1" path="res://assets/scenes/enemies/bouncer.tscn" id="10_2r3hs"]
@@ -63,10 +64,14 @@ tile_set = ExtResource("4_j6eud")
 
 [node name="SpikeVigilia" type="TileMapLayer" parent="Switchable/Pesadilla" unique_id=1075114026]
 scale = Vector2(0.3, 0.3)
-tile_map_data = PackedByteArray("AAAAAP7/AAAAAAAAAAD7//3/AAAAAAAAAAD8//3/AAAAAAAAAAD8//z/AAAAAAAAAAD//wIAAAAAAAAAAAD//wEAAAAAAAAAAAAAAAEAAAAAAAAAAAA=")
+tile_map_data = PackedByteArray("AAD7//3/AAAAAAAAAAD8//3/AAAAAAAAAAD8//z/AAAAAAAAAAD//wIAAAAAAAAAAAD//wEAAAAAAAAAAAAAAAEAAAAAAAAAAAA=")
 tile_set = ExtResource("6_2r3hs")
 
+[node name="PickupShield" parent="Switchable/Pesadilla" unique_id=2141312564 instance=ExtResource("7_le2t2")]
+position = Vector2(15, -52)
+
 [node name="Sueño" type="Node2D" parent="Switchable" unique_id=2001537024]
+visible = false
 
 [node name="Tiles" type="TileMapLayer" parent="Switchable/Sueño" unique_id=327047739]
 position = Vector2(35.6, 6)

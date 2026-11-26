@@ -8,6 +8,32 @@
 [ext_resource type="TileSet" uid="uid://cod5hqlj1hrki" path="res://assets/resources/tilesets/tileset_spikes_pesadilla.tres" id="5_cqude"]
 [ext_resource type="PackedScene" uid="uid://cb5rvks5i5aea" path="res://assets/scenes/props/vigilia/interactive/doorVigilia.tscn" id="6_yl8s8"]
 [ext_resource type="Script" uid="uid://cgr461snah57y" path="res://assets/scripts/rooms/enemy_spawn_point.gd" id="7_yl8s8"]
+[ext_resource type="Texture2D" uid="uid://chy5pa84snsoq" path="res://assets/sprittesheets/props/definitivo/Vigil props.png" id="8_1yjae"]
+[ext_resource type="PackedScene" uid="uid://d12fgvm4yareu" path="res://assets/scenes/props/pickups/pickup_projectile_boost.tscn" id="9_edfwl"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_jgn0e"]
+texture = ExtResource("8_1yjae")
+texture_region_size = Vector2i(675, 675)
+0:1/0 = 0
+0:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-46.70331, -269.10013, -43.93802, 320.1198, 13.809082, 307.5661, 11.119873, 162.34967, 295.78778, 126.766174, 309.1316, -126.766174, 51.151306, -122.31824, 28.911621, -255.75632)
+1:1/0 = 0
+1:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-350.88895, -138.22897, -59.240997, -144.30496, -72.65704, -277.17313, 79.03357, -262.83255, 45.74701, -137.24109, 309.46515, -153.38708, 340.02814, 170.93307, -347.38007, 170.93307)
+2:1/0 = 0
+2:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-353.6109, -149.00586, -73.39093, -149.00586, -82.286804, -260.20425, 64.32965, -255.48059, 68.35501, 356.96497, -59.240997, 347.85095, -53.164978, 147.34302, -358.40802, 145.2012)
+1:2/0 = 0
+1:2/0/physics_layer_0/polygon_0/points = PackedVector2Array(-86.38553, 163.58115, -86.38553, -277.53647, 86.38556, -251.80461, 101.08948, 156.22916)
+0:2/0 = 0
+0:2/0/physics_layer_0/polygon_0/points = PackedVector2Array(-73.39093, -335.81915, -46.70331, 362.50677, 60.04718, 358.05884, 46.70337, -344.71503)
+0:3/0 = 0
+0:3/0/physics_layer_0/polygon_0/points = PackedVector2Array(-60.653656, 189.31296, 329.00018, 156.22916, 351.0561, -137.84924, 56.977722, -148.87717, 15.56781, -340.2671, -55.599182, -340.2671)
+2:3/0 = 0
+2:3/0/physics_layer_0/polygon_0/points = PackedVector2Array(66.5347, 179.51816, -347.38007, 141.52524, -347.38007, -141.5252, -71.68161, -137.84924, -78.039, -357.90317, 40.36505, -352.52118)
+
+[sub_resource type="TileSet" id="TileSet_vyrsi"]
+tile_size = Vector2i(675, 675)
+physics_layer_0/collision_layer = 1
+physics_layer_0/collision_mask = 0
+sources/0 = SubResource("TileSetAtlasSource_jgn0e")
 
 [node name="20" type="Node2D" unique_id=1556955998]
 script = ExtResource("1_usnps")
@@ -48,7 +74,6 @@ tile_map_data = PackedByteArray("AAD///3/AAAAAAAAAAD///7/AAAAAAAAAAACAAEAAAAAAAA
 tile_set = ExtResource("5_cqude")
 
 [node name="Sueño" type="Node2D" parent="Switchable" unique_id=1018947006]
-visible = false
 
 [node name="Tiles" type="TileMapLayer" parent="Switchable/Sueño" unique_id=1715976387]
 position = Vector2(35.6, 6)
@@ -77,6 +102,14 @@ target_room = "uid://d1p801glf6dm4"
 target_door_id = &"25N"
 starts_open = true
 orientation = 2
+
+[node name="BarreraVigila" type="TileMapLayer" parent="Switchable/Sueño" unique_id=1516738234]
+scale = Vector2(0.05, 0.05)
+tile_map_data = PackedByteArray("AAD///3/AAAAAAEAAAAAAP3/AAABAAEAAAABAP3/AAACAAEAAAD///7/AAAAAAIAAAABAP7/AAAAAAIAAAA=")
+tile_set = SubResource("TileSet_vyrsi")
+
+[node name="PickupProjectileBoost" parent="Switchable/Sueño" unique_id=1175823970 instance=ExtResource("9_edfwl")]
+position = Vector2(16, -53)
 
 [node name="Walls" type="StaticBody2D" parent="." unique_id=1872382948]
 

@@ -16,8 +16,11 @@
 [ext_resource type="PackedScene" uid="uid://dw3rcxopoegnt" path="res://assets/scenes/props/pesadilla/static/breakable/box2.tscn" id="12_pxdiy"]
 [ext_resource type="PackedScene" uid="uid://cak7kwxdxkomd" path="res://assets/scenes/props/vigilia/static/breakable/box1.tscn" id="13_p8xls"]
 [ext_resource type="PackedScene" uid="uid://bv020hxmjok3d" path="res://assets/scenes/props/vigilia/static/breakable/box2.tscn" id="14_874d6"]
+[ext_resource type="TileSet" uid="uid://rrdpge4ki82b" path="res://assets/resources/tilesets/barreraVigilia.tres" id="15_ua6v4"]
 [ext_resource type="PackedScene" uid="uid://qt0m0d8adih7" path="res://assets/scenes/props/pesadilla/static/decorative/cone.tscn" id="17_8j6vf"]
 [ext_resource type="PackedScene" uid="uid://cy3nwj5nh10n6" path="res://assets/scenes/props/pesadilla/static/decorative/bottles.tscn" id="18_ua6v4"]
+[ext_resource type="PackedScene" uid="uid://d12fgvm4yareu" path="res://assets/scenes/props/pickups/pickup_projectile_boost.tscn" id="20_jt5qg"]
+[ext_resource type="PackedScene" uid="uid://biuk4fta6kx8k" path="res://assets/scenes/props/pickups/pickup_heal.tscn" id="21_lwd1r"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_rihe3"]
 size = Vector2(208, 16)
@@ -149,8 +152,18 @@ position = Vector2(-164, 86)
 position = Vector2(179, 62)
 scale = Vector2(1.5, 1.5)
 
+[node name="BarreraVigila" type="TileMapLayer" parent="Switchable/Sueño" unique_id=524462093]
+scale = Vector2(0.05, 0.05)
+tile_map_data = PackedByteArray("AAD7//z/AAABAAEAAAAFAPz/AAABAAEAAAA=")
+tile_set = ExtResource("15_ua6v4")
+
+[node name="PickupProjectileBoost" parent="Switchable/Sueño" unique_id=1175823970 instance=ExtResource("20_jt5qg")]
+position = Vector2(-158, -145)
+
+[node name="PickupHeal" parent="Switchable/Sueño" unique_id=1245818749 instance=ExtResource("21_lwd1r")]
+position = Vector2(190, -149)
+
 [node name="Walls" type="StaticBody2D" parent="." unique_id=1872382948]
-visible = false
 
 [node name="CollisionShape2D2" type="CollisionShape2D" parent="Walls" unique_id=1454824898]
 position = Vector2(-71, 151)

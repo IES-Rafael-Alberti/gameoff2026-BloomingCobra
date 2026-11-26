@@ -5,6 +5,7 @@
 [ext_resource type="TileSet" uid="uid://mo5sa42ii37l" path="res://assets/resources/tilesets/tileset_pesadilla_red.tres" id="3_3lci5"]
 [ext_resource type="TileSet" uid="uid://bk7uacfb2knda" path="res://assets/resources/tilesets/tileset_vigilia_red.tres" id="4_bph3e"]
 [ext_resource type="PackedScene" uid="uid://cb5rvks5i5aea" path="res://assets/scenes/props/vigilia/interactive/doorVigilia.tscn" id="5_k6ovj"]
+[ext_resource type="PackedScene" uid="uid://biuk4fta6kx8k" path="res://assets/scenes/props/pickups/pickup_heal.tscn" id="6_3lci5"]
 
 [node name="10" type="Node2D" unique_id=1556955998]
 script = ExtResource("1_61tni")
@@ -52,6 +53,9 @@ door_id = &"10N"
 target_room = "uid://bkfy8bmovgeq0"
 target_door_id = &"6S"
 starts_open = true
+
+[node name="PickupHeal" parent="Switchable/Sueño" unique_id=1245818749 instance=ExtResource("6_3lci5")]
+position = Vector2(45, -16)
 
 [node name="Walls" type="StaticBody2D" parent="." unique_id=1872382948]
 

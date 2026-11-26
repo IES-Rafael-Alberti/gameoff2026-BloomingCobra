@@ -9,6 +9,7 @@
 [ext_resource type="PackedScene" uid="uid://dw3rcxopoegnt" path="res://assets/scenes/props/pesadilla/static/breakable/box2.tscn" id="6_dqovt"]
 [ext_resource type="PackedScene" uid="uid://cb5rvks5i5aea" path="res://assets/scenes/props/vigilia/interactive/doorVigilia.tscn" id="6_ng6g8"]
 [ext_resource type="PackedScene" uid="uid://b307o8qw1clqg" path="res://assets/scenes/props/pesadilla/static/breakable/box1.tscn" id="7_80qtr"]
+[ext_resource type="PackedScene" uid="uid://d12fgvm4yareu" path="res://assets/scenes/props/pickups/pickup_projectile_boost.tscn" id="8_80qtr"]
 [ext_resource type="PackedScene" uid="uid://cak7kwxdxkomd" path="res://assets/scenes/props/vigilia/static/breakable/box1.tscn" id="8_stoy8"]
 [ext_resource type="PackedScene" uid="uid://bv020hxmjok3d" path="res://assets/scenes/props/vigilia/static/breakable/box2.tscn" id="9_dqovt"]
 [ext_resource type="Script" uid="uid://cgr461snah57y" path="res://assets/scripts/rooms/enemy_spawn_point.gd" id="10_80qtr"]
@@ -72,8 +73,10 @@ position = Vector2(-58, 117)
 [node name="BreakableProp4" parent="Switchable/Pesadilla" unique_id=1611613385 instance=ExtResource("7_80qtr")]
 position = Vector2(92, -67)
 
+[node name="PickupProjectileBoost" parent="Switchable/Pesadilla" unique_id=1175823970 instance=ExtResource("8_80qtr")]
+position = Vector2(186, -34)
+
 [node name="Sueño" type="Node2D" parent="Switchable" unique_id=1018947006]
-visible = false
 
 [node name="Tiles" type="TileMapLayer" parent="Switchable/Sueño" unique_id=1715976387]
 position = Vector2(35.6, 6)

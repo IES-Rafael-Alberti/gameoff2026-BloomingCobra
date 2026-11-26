@@ -11,6 +11,7 @@
 [ext_resource type="Texture2D" uid="uid://chy5pa84snsoq" path="res://assets/sprittesheets/props/definitivo/Vigil props.png" id="9_g538i"]
 [ext_resource type="TileSet" uid="uid://cod5hqrnop0ki" path="res://assets/resources/tilesets/tileset_spikes_vigilia.tres" id="10_yqmih"]
 [ext_resource type="Script" uid="uid://cgr461snah57y" path="res://assets/scripts/rooms/enemy_spawn_point.gd" id="11_dskna"]
+[ext_resource type="PackedScene" uid="uid://biuk4fta6kx8k" path="res://assets/scenes/props/pickups/pickup_heal.tscn" id="11_g538i"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_1uf8m"]
 texture = ExtResource("9_g538i")
@@ -81,7 +82,7 @@ tile_set = ExtResource("5_ldia3")
 
 [node name="Spike" type="TileMapLayer" parent="Switchable/Pesadilla" unique_id=915639019]
 scale = Vector2(0.3, 0.3)
-tile_map_data = PackedByteArray("AAD8//z/AAAAAAAAAAD8//7/AAAAAAAAAAD8/wAAAAAAAAAAAAD8/wIAAAAAAAAAAAADAPz/AAAAAAAAAAADAP7/AAAAAAAAAAADAAAAAAAAAAAAAAADAAIAAAAAAAAAAAD+//z/AAAAAAAAAAABAPz/AAAAAAAAAAD1//r/AAAAAAAAAAD1//v/AAAAAAAAAAD1//z/AAAAAAAAAAD2//r/AAAAAAAAAAD2//v/AAAAAAAAAAD2//z/AAAAAAAAAAA=")
+tile_map_data = PackedByteArray("AAD8//7/AAAAAAAAAAD8/wAAAAAAAAAAAAD8/wIAAAAAAAAAAAADAPz/AAAAAAAAAAADAP7/AAAAAAAAAAADAAAAAAAAAAAAAAADAAIAAAAAAAAAAAD+//z/AAAAAAAAAAABAPz/AAAAAAAAAAA=")
 tile_set = ExtResource("6_dskna")
 
 [node name="Sueño" type="Node2D" parent="Switchable" unique_id=1018947006]
@@ -115,12 +116,15 @@ starts_open = true
 
 [node name="BarreraVigila" type="TileMapLayer" parent="Switchable/Sueño" unique_id=471385310]
 scale = Vector2(0.05, 0.05)
-tile_map_data = PackedByteArray("AAD9//7/AAAAAAEAAAD///7/AAABAAEAAAD+//7/AAABAAEAAAAAAP7/AAABAAEAAAABAP7/AAACAAEAAAD9////AAAAAAIAAAD9/wAAAAAAAAIAAAD9/wEAAAAAAAIAAAD9/wIAAAAAAAIAAAD9/wMAAAAAAAMAAAD//wMAAAABAAEAAAAAAAMAAAABAAEAAAABAAMAAAACAAMAAAABAP//AAAAAAIAAAABAAAAAAAAAAIAAAABAAEAAAAAAAIAAAABAAIAAAAAAAIAAAA=")
+tile_map_data = PackedByteArray("AAD9//7/AAAAAAEAAAD///7/AAABAAEAAAD+//7/AAABAAEAAAAAAP7/AAABAAEAAAABAP7/AAACAAEAAAD9////AAAAAAIAAAD9/wAAAAAAAAIAAAD9/wEAAAAAAAIAAAD9/wIAAAAAAAIAAAD9/wMAAAAAAAMAAAD//wMAAAABAAEAAAAAAAMAAAABAAEAAAABAAMAAAACAAMAAAABAP//AAAAAAIAAAABAAAAAAAAAAIAAAABAAEAAAAAAAIAAAABAAIAAAAAAAIAAAADAPv/AAAAAAEAAAAEAPv/AAABAAEAAAAFAPv/AAACAAEAAAADAPz/AAAAAAIAAAAFAPz/AAAAAAIAAAA=")
 tile_set = SubResource("TileSet_w3ctd")
 
 [node name="SpikeVigilia" type="TileMapLayer" parent="Switchable/Sueño" unique_id=161030912]
 scale = Vector2(0.3, 0.3)
 tile_set = ExtResource("10_yqmih")
+
+[node name="PickupHeal" parent="Switchable" unique_id=1245818749 instance=ExtResource("11_g538i")]
+position = Vector2(151, -125)
 
 [node name="Walls" type="StaticBody2D" parent="." unique_id=1872382948]
 
