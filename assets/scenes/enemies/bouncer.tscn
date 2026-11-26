@@ -60,18 +60,20 @@ move_speed = 60.0
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1304020782]
 position = Vector2(0, -9.999999)
-scale = Vector2(0.06, 0.06)
+scale = Vector2(0.09, 0.09)
 sprite_frames = SubResource("SpriteFrames_akui1")
 animation = &"dead"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=2010100391]
 position = Vector2(0, -10)
+scale = Vector2(1.325, 1.325)
 shape = SubResource("CircleShape2D_xwrwn")
 
 [node name="Hurtbox" type="Area2D" parent="." unique_id=1699306316]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox" unique_id=1533888870]
 position = Vector2(0, -10)
+scale = Vector2(2.355, 2.355)
 shape = SubResource("CircleShape2D_bwm3p")
 
 [node name="Damageable" type="Node2D" parent="." unique_id=1847440650]
