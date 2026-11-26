@@ -45,6 +45,7 @@ var _wired: bool = false
 var _grid: Dictionary = {} # room_id(String) -> Vector2i
 var _shapes_by_id: Dictionary = {} # room_id -> Room.MapShape as int
 var _scene_by_id: Dictionary = {} # room_id -> scene path
+var _id_by_scene_ref: Dictionary = {} # res:// path or uid:// -> room_id
 var _links_by_id: Dictionary = {} # room_id -> Array of link dicts
 var _icons: Dictionary = {} # room_id -> Array[Control]
 ## Debug: show every catalogued room on the map (undiscovered style if not found).
@@ -166,13 +167,6 @@ func _build_ui() -> void:
 	_panel.visible = false
 	_root.add_child(_panel)
 
-	_connectors_layer = Control.new()
-	_connectors_layer.name = "ConnectorsLayer"
-	_connectors_layer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	_connectors_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_connectors_layer.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	_root.add_child(_connectors_layer)
-
 	_rooms_layer = Control.new()
 	_rooms_layer.name = "RoomsLayer"
 	_rooms_layer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -180,6 +174,14 @@ func _build_ui() -> void:
 	_rooms_layer.modulate = rooms_modulate
 	_rooms_layer.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	_root.add_child(_rooms_layer)
+
+	# Draw door links above room icons so corridors stay visible in the gaps.
+	_connectors_layer = Control.new()
+	_connectors_layer.name = "ConnectorsLayer"
+	_connectors_layer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_connectors_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_connectors_layer.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	_root.add_child(_connectors_layer)
 
 	_marker_layer = Control.new()
 	_marker_layer.name = "MarkerLayer"
@@ -231,6 +233,7 @@ func _scan_room_catalog() -> void:
 	_grid.clear()
 	_shapes_by_id.clear()
 	_scene_by_id.clear()
+	_id_by_scene_ref.clear()
 	_links_by_id.clear()
 	_scan_dir(ROOMS_DIR)
 
@@ -282,6 +285,7 @@ func _ingest_room_scene(scene_path: String) -> void:
 
 	var key := String(room_id)
 	_scene_by_id[key] = scene_path
+	_register_scene_ref(key, scene_path)
 	_shapes_by_id[key] = map_shape
 	if has_cell:
 		_grid[key] = map_cell
@@ -289,16 +293,27 @@ func _ingest_room_scene(scene_path: String) -> void:
 		_grid[key] = Vector2i.ZERO
 
 	var links: Array = []
+	var seen_targets: Dictionary = {} # raw target_room -> true (dedupe Sueño/Pesadilla twin doors)
 	for node_idx in state.get_node_count():
 		var node_name := String(state.get_node_name(node_idx))
 		var type_name := String(state.get_node_type(node_idx))
-		var is_door := type_name == "StaticBody2D" or node_name.begins_with("Door")
+		var instance_path := ""
+		var packed_instance: PackedScene = state.get_node_instance(node_idx)
+		if packed_instance != null:
+			instance_path = packed_instance.resource_path
+		var is_door := (
+			type_name == "StaticBody2D"
+			or node_name.begins_with("Door")
+			or instance_path.ends_with("doorPesadilla.tscn")
+			or instance_path.ends_with("doorVigilia.tscn")
+			or instance_path.get_file().begins_with("door")
+		)
 		if not is_door:
 			continue
 		var door_id := StringName(node_name.to_lower())
 		var target_room := ""
 		var target_door_id: StringName = &""
-		var looks_like_door := false
+		var looks_like_door := not instance_path.is_empty() and instance_path.get_file().begins_with("door")
 		for p in state.get_node_property_count(node_idx):
 			var pname := String(state.get_node_property_name(node_idx, p))
 			var pval: Variant = state.get_node_property_value(node_idx, p)
@@ -325,6 +340,9 @@ func _ingest_room_scene(scene_path: String) -> void:
 			continue
 		if target_room.is_empty():
 			continue
+		if seen_targets.has(target_room):
+			continue
+		seen_targets[target_room] = true
 		links.append({
 			"door_id": door_id,
 			"target_room": target_room,
@@ -341,9 +359,73 @@ func _merge_run_state() -> void:
 	for key in RunState.room_shapes.keys():
 		_shapes_by_id[String(key)] = int(RunState.room_shapes[key])
 	for key in RunState.room_scenes.keys():
-		_scene_by_id[String(key)] = RunState.room_scenes[key]
+		var scene_path := String(RunState.room_scenes[key])
+		_scene_by_id[String(key)] = scene_path
+		_register_scene_ref(String(key), scene_path)
 	for key in RunState.room_links.keys():
 		_links_by_id[String(key)] = RunState.room_links[key]
+
+
+func _register_scene_ref(room_key: String, scene_path: String) -> void:
+	if room_key.is_empty() or scene_path.is_empty():
+		return
+	_id_by_scene_ref[scene_path] = room_key
+	var uid := ResourceLoader.get_resource_uid(scene_path)
+	if uid != ResourceUID.INVALID_ID:
+		_id_by_scene_ref[ResourceUID.id_to_text(uid)] = room_key
+	# Fallback: parse uid from the .tscn header so links resolve even if the
+	# ResourceUID cache is incomplete during a fresh scan.
+	if scene_path.ends_with(".tscn"):
+		var file := FileAccess.open(scene_path, FileAccess.READ)
+		if file != null:
+			var header := file.get_line()
+			file.close()
+			var marker := "uid=\""
+			var idx := header.find(marker)
+			if idx >= 0:
+				var start := idx + marker.length()
+				var end := header.find("\"", start)
+				if end > start:
+					_id_by_scene_ref[header.substr(start, end - start)] = room_key
+
+
+func _resolve_room_ref(target: String) -> String:
+	## Accepts room id, res:// path, or uid:// reference.
+	if target.is_empty():
+		return ""
+	if _scene_by_id.has(target):
+		return target
+	if _id_by_scene_ref.has(target):
+		return String(_id_by_scene_ref[target])
+
+	var path := target
+	if target.begins_with("uid://"):
+		var uid := ResourceUID.text_to_id(target)
+		if uid != ResourceUID.INVALID_ID and ResourceUID.has_id(uid):
+			var resolved := ResourceUID.get_id_path(uid)
+			if not resolved.is_empty():
+				path = resolved
+	elif not target.begins_with("res://"):
+		# Bare id we don't know yet.
+		return ""
+
+	if _id_by_scene_ref.has(path):
+		var found := String(_id_by_scene_ref[path])
+		_id_by_scene_ref[target] = found
+		return found
+
+	for id in _scene_by_id.keys():
+		if String(_scene_by_id[id]) == path:
+			_id_by_scene_ref[path] = String(id)
+			_id_by_scene_ref[target] = String(id)
+			return String(id)
+
+	var basename := path.get_file().get_basename()
+	if _scene_by_id.has(basename):
+		_id_by_scene_ref[path] = basename
+		_id_by_scene_ref[target] = basename
+		return basename
+	return ""
 
 
 func _footprint_for(room_key: String) -> Array[Vector2i]:
@@ -647,7 +729,7 @@ func _draw_connectors(
 	for id in visible_ids:
 		visible_set[id] = true
 
-	var drawn: Dictionary = {} # "x1,y1|x2,y2" -> true
+	var drawn_pairs: Dictionary = {} # "idA|idB" -> true
 
 	for id in visible_ids:
 		var links: Array = _links_by_id.get(id, [])
@@ -657,31 +739,46 @@ func _draw_connectors(
 			var target_id := _resolve_link_target_id(link)
 			if target_id.is_empty() or not visible_set.has(target_id):
 				continue
-			for from_cell in _footprint_for(id):
-				for to_cell in _footprint_for(target_id):
-					var delta := to_cell - from_cell
-					if absi(delta.x) + absi(delta.y) != 1:
-						continue
-					var a := from_cell
-					var b := to_cell
-					if a.x > b.x or (a.x == b.x and a.y > b.y):
-						var tmp := a
-						a = b
-						b = tmp
-					var key := "%d,%d|%d,%d" % [a.x, a.y, b.x, b.y]
-					if drawn.has(key):
-						continue
-					drawn[key] = true
+			var pair_key := id if id < target_id else target_id
+			var pair_key_b := target_id if id < target_id else id
+			var drawn_key := "%s|%s" % [pair_key, pair_key_b]
+			if drawn_pairs.has(drawn_key):
+				continue
+			drawn_pairs[drawn_key] = true
 
-					var from_center := origin + Vector2(
-						float(from_cell.x - min_g.x) * step.x + icon_size.x * 0.5,
-						float(from_cell.y - min_g.y) * step.y + icon_size.y * 0.5
-					)
-					var to_center := origin + Vector2(
-						float(to_cell.x - min_g.x) * step.x + icon_size.x * 0.5,
-						float(to_cell.y - min_g.y) * step.y + icon_size.y * 0.5
-					)
-					_add_connector(from_center, to_center, delta)
+			var pair: Array = _best_connector_cells(id, target_id)
+			if pair.is_empty():
+				continue
+			var from_cell: Vector2i = pair[0]
+			var to_cell: Vector2i = pair[1]
+			var delta := to_cell - from_cell
+			# Only draw when rooms share an edge; skips diagonal-only / distant pairs.
+			if absi(delta.x) + absi(delta.y) != 1:
+				continue
+
+			var from_center := origin + Vector2(
+				float(from_cell.x - min_g.x) * step.x + icon_size.x * 0.5,
+				float(from_cell.y - min_g.y) * step.y + icon_size.y * 0.5
+			)
+			var to_center := origin + Vector2(
+				float(to_cell.x - min_g.x) * step.x + icon_size.x * 0.5,
+				float(to_cell.y - min_g.y) * step.y + icon_size.y * 0.5
+			)
+			_add_connector(from_center, to_center, delta)
+
+
+func _best_connector_cells(from_id: String, to_id: String) -> Array:
+	## Returns [from_cell, to_cell] for an orthogonal shared edge when present.
+	var from_cells := _footprint_for(from_id)
+	var to_cells := _footprint_for(to_id)
+	if from_cells.is_empty() or to_cells.is_empty():
+		return []
+
+	for a in from_cells:
+		for b in to_cells:
+			if absi(a.x - b.x) + absi(a.y - b.y) == 1:
+				return [a, b]
+	return []
 
 
 func _add_connector(from_center: Vector2, to_center: Vector2, delta: Vector2i) -> void:
@@ -693,24 +790,25 @@ func _add_connector(from_center: Vector2, to_center: Vector2, delta: Vector2i) -
 	conn.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	conn.stretch_mode = TextureRect.STRETCH_SCALE
 	conn.texture = connector_texture
+	# Keep the corridor mark readable on the dim overlay.
+	conn.modulate = Color(1.0, 1.0, 1.0, 0.95)
 
 	var tex_w := float(connector_texture.get_width())
 	var tex_h := float(connector_texture.get_height())
+	# Span most of the cell gap so doors read clearly between rooms.
+	var span := maxf(cell_gap + 6.0, tex_w * icon_scale * 0.65)
+	var thickness := maxf(tex_h * icon_scale * 0.65, 6.0)
 	if horizontal:
-		var width := maxf(cell_gap + 4.0, tex_w * icon_scale * 0.5)
-		var height := maxf(tex_h * icon_scale * 0.5, 4.0)
-		conn.size = Vector2(width, height)
+		conn.size = Vector2(span, thickness)
 		conn.custom_minimum_size = conn.size
-		conn.position = Vector2(roundf(mid.x - width * 0.5), roundf(mid.y - height * 0.5))
+		conn.position = Vector2(roundf(mid.x - span * 0.5), roundf(mid.y - thickness * 0.5))
 	else:
 		# Vertical: rotate the horizontal bar 90 degrees around its center.
-		var width := maxf(cell_gap + 4.0, tex_w * icon_scale * 0.5)
-		var height := maxf(tex_h * icon_scale * 0.5, 4.0)
-		conn.size = Vector2(width, height)
+		conn.size = Vector2(span, thickness)
 		conn.custom_minimum_size = conn.size
-		conn.pivot_offset = Vector2(width * 0.5, height * 0.5)
+		conn.pivot_offset = Vector2(span * 0.5, thickness * 0.5)
 		conn.rotation_degrees = 90.0
-		conn.position = Vector2(roundf(mid.x - width * 0.5), roundf(mid.y - height * 0.5))
+		conn.position = Vector2(roundf(mid.x - span * 0.5), roundf(mid.y - thickness * 0.5))
 
 	_connectors_layer.add_child(conn)
 
@@ -738,16 +836,7 @@ func _place_player_marker(current_id: String, marker_points: Dictionary) -> void
 
 
 func _resolve_link_target_id(link: Dictionary) -> String:
-	var target: String = String(link.get("target_room", ""))
-	if target.is_empty():
-		return ""
-	var target_id := target.get_file().get_basename()
-	if _scene_by_id.has(target_id):
-		return target_id
-	for id in _scene_by_id.keys():
-		if String(_scene_by_id[id]) == target:
-			return String(id)
-	return target_id
+	return _resolve_room_ref(String(link.get("target_room", "")))
 
 
 func _is_main_map_room(room_key: String) -> bool:
@@ -793,22 +882,19 @@ func _collect_visible_room_ids() -> Array[String]:
 
 
 func _rooms_linked(a_id: String, b_id: String) -> bool:
-	var b_scene: String = String(_scene_by_id.get(b_id, ""))
 	var links: Array = _links_by_id.get(a_id, [])
 	for link in links:
 		if typeof(link) != TYPE_DICTIONARY:
 			continue
-		var target: String = String(link.get("target_room", ""))
-		if target.is_empty():
+		if _resolve_link_target_id(link) == b_id:
+			return true
+	# Also accept reverse door authorship (only one side may list the link).
+	var reverse: Array = _links_by_id.get(b_id, [])
+	for link in reverse:
+		if typeof(link) != TYPE_DICTIONARY:
 			continue
-		if not b_scene.is_empty() and target == b_scene:
+		if _resolve_link_target_id(link) == a_id:
 			return true
-		var target_id := target.get_file().get_basename()
-		if target_id == b_id:
-			return true
-		for id in _scene_by_id.keys():
-			if String(_scene_by_id[id]) == target and String(id) == b_id:
-				return true
 	return false
 
 
