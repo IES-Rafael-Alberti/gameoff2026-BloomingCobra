@@ -14,7 +14,7 @@ size = Vector2(208, 16)
 size = Vector2(12.5, 167.5)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_73wj3"]
-shader = ExtResource("4_mfnce")
+shader = ExtResource("3_pool")
 shader_parameter/rect_half_size = Vector2(26, 9)
 shader_parameter/glow_color = Color(1, 0.91, 0.68, 1)
 shader_parameter/intensity = 0.55
@@ -60,7 +60,7 @@ scale_max = 0.22
 color_ramp = SubResource("GradientTexture1D_mote")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_51e0d"]
-shader = ExtResource("5_rc4bc")
+shader = ExtResource("4_beam")
 shader_parameter/rect_half_size = Vector2(70, 110)
 shader_parameter/beam_color = Color(1, 0.93, 0.74, 1)
 shader_parameter/intensity = 0.42
@@ -76,7 +76,7 @@ shader_parameter/flicker_speed = 0.45
 shader_parameter/dust_amount = 0.35
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_i02a7"]
-shader = ExtResource("4_mfnce")
+shader = ExtResource("3_pool")
 shader_parameter/rect_half_size = Vector2(65, 35)
 shader_parameter/glow_color = Color(1, 0.91, 0.68, 1)
 shader_parameter/intensity = 0.55
@@ -95,10 +95,11 @@ gradient = SubResource("Gradient_c4bcj")
 [node name="19" type="Node2D" unique_id=1556955998]
 script = ExtResource("1_c4bcj")
 
-[node name="Memoria" type="Node2D" parent="." unique_id=985697552]
+[node name="2" type="Node2D" parent="."]
 script = ExtResource("2_ll5gr")
+room_id = &"2"
 
-[node name="DoorEste" parent="Memoria" unique_id=1585883758 instance=ExtResource("3_ll5gr")]
+[node name="DoorEste" parent="." instance=ExtResource("2_door")]
 process_mode = 3
 visible = false
 position = Vector2(137, -15)
@@ -110,7 +111,7 @@ target_door_id = &"3O"
 starts_open = true
 orientation = 1
 
-[node name="Polygon2D" type="Polygon2D" parent="Memoria" unique_id=476589656]
+[node name="Polygon2D" type="Polygon2D" parent="."]
 color = Color(0.012617188, 0.012617188, 0.012617188, 1)
 polygon = PackedVector2Array(250, -684, 942, -353, 1154, 656, -1131, 712, -959, -653, -54, -714, 135, -700)
 
@@ -126,35 +127,35 @@ orientation = 1
 
 [node name="Walls" type="StaticBody2D" parent="." unique_id=1849972134]
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls" unique_id=1824123698]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls"]
 position = Vector2(-67, -107)
 shape = SubResource("RectangleShape2D_kd6bk")
 
-[node name="CollisionShape2D2" type="CollisionShape2D" parent="Walls" unique_id=547708080]
+[node name="CollisionShape2D2" type="CollisionShape2D" parent="Walls"]
 position = Vector2(-140, 75)
 shape = SubResource("RectangleShape2D_kd6bk")
 
 [node name="CollisionShape2D3" type="CollisionShape2D" parent="Walls" unique_id=1773625081]
-position = Vector2(68, 75)
+position = Vector2(69, 74)
 shape = SubResource("RectangleShape2D_kd6bk")
 
-[node name="CollisionShape2D4" type="CollisionShape2D" parent="Walls" unique_id=1492901975]
+[node name="CollisionShape2D4" type="CollisionShape2D" parent="Walls"]
 position = Vector2(141, -107)
 shape = SubResource("RectangleShape2D_kd6bk")
 
-[node name="CollisionShape2D5" type="CollisionShape2D" parent="Walls" unique_id=1415527853]
+[node name="CollisionShape2D5" type="CollisionShape2D" parent="Walls"]
 position = Vector2(-117, -74)
 shape = SubResource("RectangleShape2D_b6h2t")
 
-[node name="CollisionShape2D6" type="CollisionShape2D" parent="Walls" unique_id=1384213315]
+[node name="CollisionShape2D6" type="CollisionShape2D" parent="Walls"]
 position = Vector2(-117, 93)
 shape = SubResource("RectangleShape2D_b6h2t")
 
-[node name="CollisionShape2D9" type="CollisionShape2D" parent="Walls" unique_id=485911941]
+[node name="CollisionShape2D9" type="CollisionShape2D" parent="Walls"]
 position = Vector2(146, -13)
 shape = SubResource("RectangleShape2D_b6h2t")
 
-[node name="CelestialSource" type="Polygon2D" parent="." unique_id=875299893]
+[node name="CelestialSource" type="Polygon2D" parent="."]
 visible = false
 z_index = 1
 material = SubResource("ShaderMaterial_73wj3")
@@ -162,7 +163,7 @@ position = Vector2(16, -184)
 polygon = PackedVector2Array(-26, -9, 26, -9, 26, 9, -26, 9)
 uv = PackedVector2Array(0, 0, 1, 0, 1, 1, 0, 1)
 
-[node name="CelestialMotes" type="GPUParticles2D" parent="." unique_id=1001718005]
+[node name="CelestialMotes" type="GPUParticles2D" parent="."]
 z_index = 1
 material = SubResource("CanvasItemMaterial_w0mo3")
 position = Vector2(16, -80)
@@ -174,7 +175,7 @@ randomness = 0.7
 visibility_rect = Rect2(-80, -120, 160, 240)
 process_material = SubResource("ParticleProcessMaterial_j8731")
 
-[node name="CelestialBeam" type="Polygon2D" parent="." unique_id=1241409810]
+[node name="CelestialBeam" type="Polygon2D" parent="."]
 z_index = 3
 material = SubResource("ShaderMaterial_51e0d")
 position = Vector2(24, -50)
@@ -182,7 +183,7 @@ scale = Vector2(0.92, 0.92)
 polygon = PackedVector2Array(-70, -176, 70, -176, 70, 44, -1.086956, 85.86956, -70, 44)
 uv = PackedVector2Array(0, 0, 1, 0, 1, 1, 0, 1)
 
-[node name="CelestialPool" type="Polygon2D" parent="." unique_id=1820506251]
+[node name="CelestialPool" type="Polygon2D" parent="."]
 z_index = 3
 material = SubResource("ShaderMaterial_i02a7")
 position = Vector2(23.999998, -18)
