@@ -84,8 +84,9 @@ shader_parameter/core_size = 0.12
 shader_parameter/core_softness = 0.26
 shader_parameter/pulse_speed = 0.55
 
-[node name="2" type="Node2D" unique_id=1650967006]
+[node name="2" type="Node2D" unique_id=1650967006 node_paths=PackedStringArray("memory")]
 script = ExtResource("1_icgw8")
+memory = NodePath("Memory")
 room_id = &"2"
 map_cell = Vector2i(1, 0)
 
