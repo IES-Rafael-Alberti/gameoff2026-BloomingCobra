@@ -92,6 +92,7 @@ tile_set = ExtResource("7_5ssbs")
 position = Vector2(63, 405)
 
 [node name="Sueño" type="Node2D" parent="Switchable" unique_id=1018947006]
+visible = false
 
 [node name="Tiles" type="TileMapLayer" parent="Switchable/Sueño" unique_id=1715976387]
 position = Vector2(35.6, 6)
