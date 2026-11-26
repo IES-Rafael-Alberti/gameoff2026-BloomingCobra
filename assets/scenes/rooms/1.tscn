@@ -7,6 +7,8 @@
 [ext_resource type="TileSet" uid="uid://bk7uacfb2knda" path="res://assets/resources/tilesets/tileset_vigilia_red.tres" id="4_wau77"]
 [ext_resource type="PackedScene" uid="uid://cb5rvks5i5aea" path="res://assets/scenes/props/vigilia/interactive/doorVigilia.tscn" id="6_wau77"]
 [ext_resource type="PackedScene" uid="uid://cxga68f10just" path="res://assets/scenes/props/vigilia/dynamic/pusher_prop.tscn" id="7_wau77"]
+[ext_resource type="PackedScene" uid="uid://belkw4urryhch" path="res://assets/scenes/props/pickups/pickup_max_health.tscn" id="8_xsx5g"]
+[ext_resource type="PackedScene" uid="uid://biuk4fta6kx8k" path="res://assets/scenes/props/pickups/pickup_heal.tscn" id="9_r1pe7"]
 
 [node name="1" type="Node2D" unique_id=1556955998 node_paths=PackedStringArray("respawn_point")]
 script = ExtResource("1_ecge7")
@@ -117,3 +119,12 @@ position = Vector2(13, 460)
 [node name="PusherProp" parent="." unique_id=1623427499 instance=ExtResource("7_wau77")]
 position = Vector2(112.00001, 349)
 scale = Vector2(1.25, 1.25)
+
+[node name="PickupMaxHealth" parent="." unique_id=464626054 instance=ExtResource("8_xsx5g")]
+position = Vector2(-62, -170)
+
+[node name="PickupHeal" parent="." unique_id=1245818749 instance=ExtResource("9_r1pe7")]
+position = Vector2(-20, 176)
+
+[node name="PickupHeal2" parent="." unique_id=1766567702 instance=ExtResource("9_r1pe7")]
+position = Vector2(171, 255)

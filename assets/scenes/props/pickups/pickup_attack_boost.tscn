@@ -2,13 +2,17 @@
 
 [ext_resource type="Script" uid="uid://6ov7vfpjbehn" path="res://assets/scripts/props/pickups/pickup_prop.gd" id="1_pickup"]
 [ext_resource type="Resource" path="res://assets/resources/props/pickup_attack_boost.tres" id="2_def"]
+[ext_resource type="Texture2D" uid="uid://d3u3mtucfac6j" path="res://assets/sprittesheets/HUD/definitivo/drops.png" id="3_12440"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jv2i5"]
+atlas = ExtResource("3_12440")
+region = Rect2(0, 0, 125, 125)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_pickup"]
 size = Vector2(14, 14)
 
 [node name="PickupAttackBoost" type="Area2D" unique_id=1610691848]
 z_index = 1
-scale = Vector2(0.7, 0.7)
 collision_layer = 0
 collision_mask = 2
 monitorable = false
@@ -17,6 +21,8 @@ definition = ExtResource("2_def")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=1414947949]
 texture_filter = 1
+scale = Vector2(0.145, 0.145)
+texture = SubResource("AtlasTexture_jv2i5")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=717987880]
 shape = SubResource("RectangleShape2D_pickup")
