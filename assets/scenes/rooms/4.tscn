@@ -5,11 +5,11 @@
 [ext_resource type="TileSet" uid="uid://mo5sa42ii37l" path="res://assets/resources/tilesets/tileset_pesadilla_red.tres" id="3_geaiu"]
 [ext_resource type="TileSet" uid="uid://bk7uacfb2knda" path="res://assets/resources/tilesets/tileset_vigilia_red.tres" id="4_1gwah"]
 [ext_resource type="PackedScene" uid="uid://b41468s5i5aea" path="res://assets/scenes/props/pesadilla/interactive/doorPesadilla.tscn" id="4_geaiu"]
-[ext_resource type="TileSet" uid="uid://cod5hqlj1hrki" path="res://assets/resources/tilesets/tileset_spikes_pesadilla.tres" id="4_mpfgx"]
-[ext_resource type="Script" uid="uid://b5iyhww45wsuu" path="res://assets/scripts/props/static/spikes_tile_layer.gd" id="4_spikes_scr"]
 [ext_resource type="TileSet" uid="uid://ca112a4s4rpwe" path="res://assets/resources/tilesets/barreraPesadilla.tres" id="5_cd2y3"]
 [ext_resource type="PackedScene" uid="uid://cb5rvks5i5aea" path="res://assets/scenes/props/vigilia/interactive/doorVigilia.tscn" id="6_1gwah"]
+[ext_resource type="PackedScene" uid="uid://dhsch6rnimlsn" path="res://assets/scenes/props/pickups/pickup_shield.tscn" id="6_mpfgx"]
 [ext_resource type="TileSet" uid="uid://rrdpge4ki82b" path="res://assets/resources/tilesets/barreraVigilia.tres" id="8_mpfgx"]
+[ext_resource type="Script" uid="uid://cgr461snah57y" path="res://assets/scripts/rooms/enemy_spawn_point.gd" id="10_4j001"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_rihe3"]
 size = Vector2(208, 16)
@@ -45,7 +45,7 @@ orientation = 3
 position = Vector2(198.415, -18)
 collision_layer = 8
 door_id = &"4E"
-target_room = "uid://bwkaa8ycbdfuy"
+target_room = "uid://chprvm6r3s76p"
 target_door_id = &"5O1"
 starts_open = true
 orientation = 1
@@ -65,6 +65,10 @@ tile_map_data = PackedByteArray("AAD8//v/AAABAAEAAAD9//v/AAACAAEAAAD9//z/AAAAAAI
 tile_set = ExtResource("5_cd2y3")
 
 [node name="Sueño" type="Node2D" parent="Switchable" unique_id=1018947006]
+visible = false
+
+[node name="PickupShield" parent="Switchable/Sueño" unique_id=2141312564 instance=ExtResource("6_mpfgx")]
+position = Vector2(17.005, 8.475)
 
 [node name="Tiles" type="TileMapLayer" parent="Switchable/Sueño" unique_id=1715976387]
 position = Vector2(35.6, 6)
@@ -89,7 +93,7 @@ position = Vector2(199, -18)
 disable_mode = 2
 collision_layer = 8
 door_id = &"4E"
-target_room = "uid://bwkaa8ycbdfuy"
+target_room = "uid://chprvm6r3s76p"
 target_door_id = &"5O1"
 starts_open = true
 orientation = 1
@@ -107,6 +111,7 @@ orientation = 2
 
 [node name="BarreraVigila" type="TileMapLayer" parent="Switchable/Sueño" unique_id=500641600]
 scale = Vector2(0.05, 0.05)
+tile_map_data = PackedByteArray("AAD/////AAAAAAEAAAABAP//AAACAAEAAAD//wAAAAAAAAIAAAABAAAAAAAAAAIAAAAAAP//AAABAAEAAAA=")
 tile_set = ExtResource("8_mpfgx")
 
 [node name="Walls" type="StaticBody2D" parent="." unique_id=1872382948]
@@ -137,3 +142,38 @@ shape = SubResource("RectangleShape2D_p81wj")
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Walls" unique_id=1818993534]
 polygon = PackedVector2Array(-170, -179, -58, -173, -58, -138, 11, -136, 17, -98, 168, -97, 170, -171, 243, -170, 235, -212, -198, -211, -199, -170)
+
+[node name="EnemySpawnpoint" type="Marker2D" parent="." unique_id=1424909731]
+position = Vector2(150, 54)
+script = ExtResource("10_4j001")
+enemy_type = 1
+
+[node name="EnemySpawnpoint7" type="Marker2D" parent="." unique_id=451540076]
+position = Vector2(-76, -25)
+script = ExtResource("10_4j001")
+enemy_type = 1
+
+[node name="EnemySpawnpoint2" type="Marker2D" parent="." unique_id=1557434257]
+position = Vector2(103, -57)
+script = ExtResource("10_4j001")
+enemy_type = 6
+
+[node name="EnemySpawnpoint5" type="Marker2D" parent="." unique_id=676241602]
+position = Vector2(-140, -104)
+script = ExtResource("10_4j001")
+enemy_type = 6
+
+[node name="EnemySpawnpoint6" type="Marker2D" parent="." unique_id=359015540]
+position = Vector2(-136, 67)
+script = ExtResource("10_4j001")
+enemy_type = 6
+
+[node name="EnemySpawnpoint3" type="Marker2D" parent="." unique_id=85932391]
+position = Vector2(30, -33)
+script = ExtResource("10_4j001")
+enemy_type = 6
+
+[node name="EnemySpawnpoint4" type="Marker2D" parent="." unique_id=1547936822]
+position = Vector2(-33, -95)
+script = ExtResource("10_4j001")
+enemy_type = 1

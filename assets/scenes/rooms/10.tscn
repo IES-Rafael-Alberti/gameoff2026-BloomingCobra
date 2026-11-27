@@ -5,9 +5,12 @@
 [ext_resource type="TileSet" uid="uid://mo5sa42ii37l" path="res://assets/resources/tilesets/tileset_pesadilla_red.tres" id="3_3lci5"]
 [ext_resource type="TileSet" uid="uid://bk7uacfb2knda" path="res://assets/resources/tilesets/tileset_vigilia_red.tres" id="4_bph3e"]
 [ext_resource type="PackedScene" uid="uid://cb5rvks5i5aea" path="res://assets/scenes/props/vigilia/interactive/doorVigilia.tscn" id="5_k6ovj"]
+[ext_resource type="PackedScene" uid="uid://biuk4fta6kx8k" path="res://assets/scenes/props/pickups/pickup_heal.tscn" id="6_3lci5"]
 
-[node name="10" type="Node2D" unique_id=1556955998]
+[node name="10" type="Node2D" unique_id=1556955998 node_paths=PackedStringArray("exit_door", "respawn_point")]
 script = ExtResource("1_61tni")
+exit_door = NodePath("Switchable/Sueño/DoorNorte")
+respawn_point = NodePath("SpawnPoint")
 void_coyote_time = 0.5
 room_id = &"10"
 map_cell = Vector2i(6, 1)
@@ -53,6 +56,9 @@ target_room = "uid://bkfy8bmovgeq0"
 target_door_id = &"6S"
 starts_open = true
 
+[node name="PickupHeal" parent="Switchable/Sueño" unique_id=1245818749 instance=ExtResource("6_3lci5")]
+position = Vector2(45, -16)
+
 [node name="Walls" type="StaticBody2D" parent="." unique_id=1872382948]
 
 [node name="Void" type="Area2D" parent="." unique_id=1134166259]
@@ -65,3 +71,6 @@ polygon = PackedVector2Array(0, 187, 36, 187, 33, 113, 224, 113, 222, 50, -85, 5
 
 [node name="CollisionPolygon2D2" type="CollisionPolygon2D" parent="Void" unique_id=1819713153]
 polygon = PackedVector2Array(-33, 216, 1, 213, 0, 90, 198, 91, 198, 75, -109, 76, -108, 14, 235, 15, 236, -38, 146, -38, 147, 1, -149, 2, -150, -104, -45, -105, -46, -63, 80, -62, 82, -76, 3, -77, 1, -198, 16, -190, 24, -223, -179, -201, -178, 150)
+
+[node name="SpawnPoint" type="Marker2D" parent="." unique_id=547061849]
+position = Vector2(20, 102)
