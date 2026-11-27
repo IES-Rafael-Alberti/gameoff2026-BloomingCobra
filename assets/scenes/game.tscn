@@ -7,6 +7,7 @@
 [ext_resource type="AudioStream" uid="uid://dviqet6e1useg" path="res://assets/audio/music/NightmareMusic.ogg" id="4_fx2rd"]
 [ext_resource type="AudioStream" uid="uid://bdcadx6n05irx" path="res://assets/audio/music/safe_zone.ogg" id="5_i358u"]
 [ext_resource type="AudioStream" uid="uid://hf5f1tea50hi" path="res://assets/audio/music/Memory_Ambient.ogg" id="6_s2rys"]
+[ext_resource type="AudioStream" uid="uid://nut44bhy45sf" path="res://assets/audio/music/Final_Boss.ogg" id="7_fc420"]
 [ext_resource type="PackedScene" path="res://assets/scenes/HUD/map_overlay.tscn" id="16_map"]
 [ext_resource type="PackedScene" path="res://assets/scenes/HUD/health_bar.tscn" id="17_hp"]
 [ext_resource type="Script" uid="uid://cubeh2wh4qdcc" path="res://assets/scripts/sfx/general_sfx.gd" id="18_sfx"]
@@ -26,6 +27,7 @@ music_vigil = ExtResource("3_pnywb")
 music_nightmare = ExtResource("4_fx2rd")
 music_safe_zone = ExtResource("5_i358u")
 music_memories = ExtResource("6_s2rys")
+music_boss = ExtResource("7_fc420")
 switch_sfx = ExtResource("19_shift")
 
 [node name="RoomManager" type="Node" parent="." unique_id=633446856]
