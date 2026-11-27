@@ -99,6 +99,15 @@ tile_set = ExtResource("5_844ai")
 scale = Vector2(0.3, 0.3)
 tile_set = ExtResource("6_0ufbw")
 
+[node name="PickupAttackBoost" parent="Switchable/Pesadilla" unique_id=1610691848 instance=ExtResource("13_6rgmr")]
+position = Vector2(-31, -75)
+
+[node name="PickupHeal" parent="Switchable/Pesadilla" unique_id=1245818749 instance=ExtResource("14_o2lhi")]
+position = Vector2(34, -132)
+
+[node name="PickupMaxHealth" parent="Switchable/Pesadilla" unique_id=464626054 instance=ExtResource("12_miwsv")]
+position = Vector2(455, -360)
+
 [node name="Sueño" type="Node2D" parent="Switchable" unique_id=1018947006]
 visible = false
 
@@ -207,12 +216,3 @@ enemy_type = 3
 position = Vector2(468, -374)
 script = ExtResource("11_0ufbw")
 enemy_type = 5
-
-[node name="PickupMaxHealth" parent="." unique_id=464626054 instance=ExtResource("12_miwsv")]
-position = Vector2(455, -360)
-
-[node name="PickupAttackBoost" parent="." unique_id=1610691848 instance=ExtResource("13_6rgmr")]
-position = Vector2(-31, -75)
-
-[node name="PickupHeal" parent="." unique_id=1245818749 instance=ExtResource("14_o2lhi")]
-position = Vector2(34, -132)
