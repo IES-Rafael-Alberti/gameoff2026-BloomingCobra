@@ -44,6 +44,7 @@ var _door_close_token: int = 0
 var _button_unlock_done: bool = false
 var _button_unlock_committed: bool = false
 var _buttons_wired: bool = false
+var _buttons_persist_wired: bool = false
 var _bounds_cached: bool = false
 var _cached_bounds: Rect2 = Rect2()
 var _state_cleared: bool = false
@@ -67,6 +68,7 @@ func _ready() -> void:
 	_register_preplaced_residents()
 	call_deferred("_install_spike_tile_damage")
 	call_deferred("_setup_button_unlock")
+	call_deferred("_setup_button_persistence")
 	call_deferred("_seal_unlinked_doors")
 	call_deferred("_register_links_with_run_state")
 
@@ -283,7 +285,7 @@ func save_state(_run_state: Node = null) -> void:
 	# Per-button pressed state (partial puzzle progress), keyed by path relative to the room.
 	var buttons_state := {}
 	for button in get_buttons():
-		if button.is_pressed():
+		if button.permanent_press and button.is_pressed():
 			buttons_state[String(get_path_to(button))] = true
 	state["buttons"] = buttons_state
 	_register_links_with_run_state()
@@ -301,6 +303,8 @@ func load_state(_run_state: Node = null) -> void:
 	# Restore individually pressed buttons (partial puzzle progress).
 	var buttons_state: Dictionary = state.get("buttons", {})
 	for button in get_buttons():
+		if not button.permanent_press:
+			continue
 		var key := String(get_path_to(button))
 		if buttons_state.has(key) and bool(buttons_state[key]):
 			button.force_pressed(false)
@@ -741,6 +745,24 @@ func _on_door_button_unlocked() -> void:
 	call_deferred("on_button_unlock")
 
 
+## Persist permanent buttons the moment they are pressed, so the press survives
+## death (the room is not re-saved on exit until then).
+func _setup_button_persistence() -> void:
+	if _buttons_persist_wired:
+		return
+	_buttons_persist_wired = true
+	for button in get_buttons():
+		if not button.permanent_press:
+			continue
+		if button.has_signal("pressed") and not button.pressed.is_connected(_on_button_pressed_persist):
+			button.pressed.connect(_on_button_pressed_persist)
+
+
+func _on_button_pressed_persist() -> void:
+	# Deferred: pressed arrives during a physics callback.
+	call_deferred("save_state", RunState)
+
+
 ## Call when leaving the room successfully so pressed buttons stay down forever.
 ## Commits every door whose buttons are currently pressed.
 func commit_unlock_buttons() -> void:
@@ -761,7 +783,7 @@ func reset_unlock_buttons() -> void:
 		return
 	for door in doors:
 		door.reset_buttons()
-	_button_unlock_done = false
+	_button_unlock_done = _are_all_button_doors_unlocked(doors)
 	_button_unlock_committed = _are_all_button_doors_committed(doors)
 
 

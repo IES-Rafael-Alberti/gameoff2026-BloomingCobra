@@ -208,6 +208,9 @@ func _ensure_button() -> void:
 		_button.stay_pressed = true
 	if "one_shot" in _button:
 		_button.one_shot = true
+	if "permanent_press" in _button:
+		# Weak point resets every phase; do not make presses permanent across the run.
+		_button.permanent_press = false
 	add_child(_button)
 	if _button.has_signal("pressed") and not _button.pressed.is_connected(_on_button_pressed):
 		_button.pressed.connect(_on_button_pressed)

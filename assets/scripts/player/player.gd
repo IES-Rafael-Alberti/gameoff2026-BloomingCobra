@@ -254,10 +254,6 @@ func _on_vitality_depleted() -> void:
 	# Brief death beat, then restart the run.
 	play_hurt_animation(facing)
 	await get_tree().create_timer(0.35).timeout
-	# Revert button/door progress to the last SafeRoom; with no SafeRoom visited
-	# the empty snapshot un-presses every button.
-	if RunState != null and RunState.has_method("restore_to_checkpoint"):
-		RunState.restore_to_checkpoint()
 	get_tree().reload_current_scene()
 
 

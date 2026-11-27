@@ -196,7 +196,10 @@ func reset_buttons() -> void:
 	for button in unlock_buttons:
 		if button != null and button.has_method("reset"):
 			button.call("reset")
-	if not starts_open:
+	# Permanent buttons stay pressed after reset(); keep the door open if still satisfied.
+	if are_buttons_satisfied():
+		refresh_button_state()
+	elif not starts_open:
 		set_open(false)
 
 
