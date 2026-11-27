@@ -95,13 +95,19 @@ func _handle_hit(body: Object) -> void:
 			return
 		_hit[id] = true
 		_play_hit_sfx()
+		# Consume one projectile charge on impact and add its bonus.
+		var bonus := 0
+		var buffs: Variant = get_meta("buffs", null)
+		if buffs != null and is_instance_valid(buffs) and buffs.has_method("consume_projectile_charge"):
+			bonus = int(buffs.call("consume_projectile_charge"))
+		var total_damage := damage + bonus
 		var origin := global_position
 		if node.has_method("try_receive_hit"):
-			node.call("try_receive_hit", damage, origin)
+			node.call("try_receive_hit", total_damage, origin)
 		else:
 			var dmg := node.get_node_or_null("Damageable")
 			if dmg != null and dmg.has_method("take_damage"):
-				dmg.take_damage(damage)
+				dmg.take_damage(total_damage)
 	_expire()
 
 

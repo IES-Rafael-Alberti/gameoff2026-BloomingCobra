@@ -25,6 +25,8 @@ var room_links: Dictionary = {}
 ## SafeRoom checkpoint: where the player respawns on Continue.
 var checkpoint_room_id: String = ""
 var checkpoint_scene: String = ""
+## Deep copy of `rooms` at the last SafeRoom — buttons/doors revert here on death.
+var checkpoint_rooms_snapshot: Dictionary = {}
 ## Memory ids collected during this run (flushed to disk on SafeRoom enter).
 var collected_memories: Array = []
 
@@ -39,6 +41,7 @@ func reset() -> void:
 	start_room = DEFAULT_START_ROOM
 	checkpoint_room_id = ""
 	checkpoint_scene = ""
+	checkpoint_rooms_snapshot.clear()
 	collected_memories.clear()
 
 
@@ -50,6 +53,7 @@ func ensure_room(room_id: StringName) -> Dictionary:
 			"cleared": false,
 			"buttons_committed": false,
 			"committed_doors": [],
+			"buttons": {},
 			"collected_pickups": [],
 			"dead_residents": [],
 		}
@@ -157,6 +161,9 @@ func save_checkpoint(room: Node = null) -> bool:
 			collected_memories.size(),
 		]
 	)
+	# Snapshot the current progress so death can revert buttons/doors to this point.
+	checkpoint_rooms_snapshot = rooms.duplicate(true)
+	start_room = checkpoint_scene
 	return true
 
 
@@ -198,12 +205,33 @@ func load_save() -> bool:
 		push_warning("RunState.load_save: missing checkpoint scene")
 		return false
 	start_room = checkpoint_scene
+	# Disk save == checkpoint state; death reverts buttons/doors to this snapshot.
+	checkpoint_rooms_snapshot = rooms.duplicate(true)
 	return true
 
 
 func begin_new_run() -> void:
 	reset()
 	clear_save()
+
+
+## Revert button/door puzzle progress to the last SafeRoom snapshot (in memory).
+## Death calls this before reloading: if no SafeRoom was reached, the empty
+## snapshot un-presses every button; otherwise rooms solved after the checkpoint
+## are reverted while earlier progress is kept.
+func restore_to_checkpoint() -> void:
+	for key in rooms.keys():
+		var entry: Variant = rooms[key]
+		if typeof(entry) != TYPE_DICTIONARY:
+			continue
+		var dst := entry as Dictionary
+		var snap: Dictionary = {}
+		if checkpoint_rooms_snapshot.has(key) and typeof(checkpoint_rooms_snapshot[key]) == TYPE_DICTIONARY:
+			snap = checkpoint_rooms_snapshot[key] as Dictionary
+		dst["cleared"] = bool(snap.get("cleared", false))
+		dst["buttons"] = (snap.get("buttons", {}) as Dictionary).duplicate(true)
+		dst["committed_doors"] = _to_string_array(snap.get("committed_doors", []))
+		dst["buttons_committed"] = bool(snap.get("buttons_committed", false))
 
 
 # --- Serialization helpers --------------------------------------------------
@@ -233,6 +261,8 @@ func _merge_rooms_dict(source: Variant) -> void:
 		dst["cleared"] = bool(src.get("cleared", false))
 		dst["buttons_committed"] = bool(src.get("buttons_committed", false))
 		dst["committed_doors"] = _to_string_array(src.get("committed_doors", []))
+		var src_buttons: Variant = src.get("buttons", {})
+		dst["buttons"] = (src_buttons as Dictionary).duplicate(true) if typeof(src_buttons) == TYPE_DICTIONARY else {}
 		dst["collected_pickups"] = _to_string_array(src.get("collected_pickups", []))
 		dst["dead_residents"] = _to_string_array(src.get("dead_residents", []))
 
