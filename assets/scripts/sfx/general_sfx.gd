@@ -6,12 +6,15 @@ extends SfxPlayer
 const ROOM_NONE := &""
 const ROOM_SAFE_ZONE := &"safe_zone"
 const ROOM_MEMORIES := &"memories"
+const ROOM_BOSS := &"boss"
 
 @export_group("Music")
 @export var music_vigil: AudioStream
 @export var music_nightmare: AudioStream
 @export var music_safe_zone: AudioStream
 @export var music_memories: AudioStream
+## Boss theme. Left unset until the track exists: the mode beds keep playing.
+@export var music_boss: AudioStream
 @export var music_fade_sec: float = 0.12
 
 @export_group("Switch")
@@ -21,6 +24,7 @@ var _music_vigil: AudioStreamPlayer
 var _music_nightmare: AudioStreamPlayer
 var _music_safe_zone: AudioStreamPlayer
 var _music_memories: AudioStreamPlayer
+var _music_boss: AudioStreamPlayer
 var _mode: int = 0
 var _room_music: StringName = ROOM_NONE
 var _bound: bool = false
@@ -34,6 +38,7 @@ func _ready() -> void:
 	_music_nightmare = _make_music_voice("MusicNightmare")
 	_music_safe_zone = _make_music_voice("MusicSafeZone")
 	_music_memories = _make_music_voice("MusicMemories")
+	_music_boss = _make_music_voice("MusicBoss")
 	call_deferred("_bind_mode_source")
 
 
@@ -86,6 +91,7 @@ func _ensure_beds_playing() -> void:
 	_start_bed(_music_nightmare, music_nightmare)
 	_start_bed(_music_safe_zone, music_safe_zone)
 	_start_bed(_music_memories, music_memories)
+	_start_bed(_music_boss, music_boss)
 
 
 func _start_bed(voice: AudioStreamPlayer, stream: AudioStream) -> void:
@@ -112,12 +118,20 @@ func _refresh_music() -> void:
 	var night_db := -80.0
 	var safe_db := -80.0
 	var mem_db := -80.0
+	var boss_db := -80.0
 
 	match _room_music:
 		ROOM_SAFE_ZONE:
 			safe_db = 0.0
 		ROOM_MEMORIES:
 			mem_db = 0.0
+		ROOM_BOSS:
+			if music_boss != null:
+				boss_db = 0.0
+			else:
+				# Track not delivered yet: keep the regular beds instead of silence.
+				vigil_db = 0.0 if _mode == 1 else -80.0
+				night_db = 0.0 if _mode == 0 else -80.0
 		_:
 			vigil_db = 0.0 if _mode == 1 else -80.0
 			night_db = 0.0 if _mode == 0 else -80.0
@@ -127,7 +141,7 @@ func _refresh_music() -> void:
 
 	var fade := maxf(music_fade_sec, 0.0)
 	if fade <= 0.0:
-		_apply_volumes(vigil_db, night_db, safe_db, mem_db)
+		_apply_volumes(vigil_db, night_db, safe_db, mem_db, boss_db)
 		return
 
 	_fade_tween = create_tween()
@@ -136,9 +150,10 @@ func _refresh_music() -> void:
 	_tween_voice(_music_nightmare, night_db, fade)
 	_tween_voice(_music_safe_zone, safe_db, fade)
 	_tween_voice(_music_memories, mem_db, fade)
+	_tween_voice(_music_boss, boss_db, fade)
 
 
-func _apply_volumes(vigil_db: float, night_db: float, safe_db: float, mem_db: float) -> void:
+func _apply_volumes(vigil_db: float, night_db: float, safe_db: float, mem_db: float, boss_db: float) -> void:
 	if _music_vigil != null:
 		_music_vigil.volume_db = vigil_db
 	if _music_nightmare != null:
@@ -147,6 +162,8 @@ func _apply_volumes(vigil_db: float, night_db: float, safe_db: float, mem_db: fl
 		_music_safe_zone.volume_db = safe_db
 	if _music_memories != null:
 		_music_memories.volume_db = mem_db
+	if _music_boss != null:
+		_music_boss.volume_db = boss_db
 
 
 func _tween_voice(voice: AudioStreamPlayer, target_db: float, fade: float) -> void:

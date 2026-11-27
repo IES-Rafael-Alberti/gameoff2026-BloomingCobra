@@ -90,5 +90,6 @@ shape = SubResource("CircleShape2D_hurt")
 
 [node name="Shadow" type="Sprite2D" parent="." unique_id=2067992626]
 visible = false
-z_index = -1
+z_as_relative = false
+z_index = 1
 texture = SubResource("GradientTexture2D_shadow")

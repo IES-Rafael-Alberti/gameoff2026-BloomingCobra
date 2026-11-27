@@ -35,7 +35,10 @@ func _ready() -> void:
 	if shadow != null:
 		shadow.visible = false
 		shadow.top_level = true
-		shadow.z_index = -1
+		# Absolute z keeps the tell above the floor but below the player/hands,
+		# regardless of the hand's own z_index (raised to 3 by BossPart).
+		shadow.z_as_relative = false
+		shadow.z_index = 1
 	play_anim(&"Idle")
 
 

@@ -1,7 +1,7 @@
 class_name Boss
 extends Node2D
 
-## Orchestrates the three-part boss: phases, attack patterns, button, heal drops.
+## Orchestrates the three-part boss: phases, attack patterns, button, cat spawns.
 
 signal weakpoint_broken(phase: int)
 signal defeated
@@ -11,12 +11,19 @@ enum State { IDLE, FIGHTING, WEAKPOINT_EXPOSED, DEAD }
 @export var total_phases: int = 3
 @export var attack_cooldown: float = 2.6
 @export var phase_cooldown_multipliers: PackedFloat32Array = PackedFloat32Array([1.0, 0.9, 0.8])
-@export var heal_drop_scene: PackedScene = preload("res://assets/scenes/props/pickups/pickup_heal.tscn")
 @export var button_scene: PackedScene = preload("res://assets/scenes/props/vigilia/interactive/buttonVigilia.tscn")
 @export var button_only_in_vigilia: bool = true
 ## When false the room owns the weak-point button (boss room vigilia layouts) and
 ## calls trigger_weakpoint() on press, so the boss must not spawn its own.
 @export var manage_button: bool = true
+
+@export_group("Nightmare Cats")
+@export var cat_scene: PackedScene = preload("res://assets/scenes/enemies/cat.tscn")
+## Seconds between cat spawns while fighting in nightmare mode.
+@export var cat_spawn_interval: float = 12.0
+## Minimum wait after a cat is caught before another can appear.
+@export var cat_respawn_delay: float = 10.0
+@export var cat_spawn_margin: float = 32.0
 
 @onready var head: BossHead = get_node_or_null("BossCabeza") as BossHead
 @onready var left_hand: BossHand = get_node_or_null("BossManoIzquierda") as BossHand
@@ -32,6 +39,7 @@ var _button_slots: Array[Marker2D] = []
 var _last_slot_index: int = -1
 var _arena: Rect2 = Rect2()
 var _overlap_chance: float = 0.0
+var _cat_spawn_timer: float = 0.0
 
 
 func _ready() -> void:
@@ -50,6 +58,7 @@ func _physics_process(delta: float) -> void:
 	_attack_cd = maxf(_attack_cd - delta, 0.0)
 	if _state == State.FIGHTING and _attack_cd <= 0.0:
 		_schedule_attack()
+	_tick_cat_spawn(delta)
 
 
 func start_fight(arena: Rect2 = Rect2(), button_slots: Array = []) -> void:
@@ -65,6 +74,7 @@ func start_fight(arena: Rect2 = Rect2(), button_slots: Array = []) -> void:
 	_overlap_chance = 0.0
 	_state = State.FIGHTING
 	_attack_cd = 1.4
+	_cat_spawn_timer = maxf(cat_spawn_interval, 0.1)
 	_ensure_button()
 	_place_button()
 	_sync_button_mode(WorldMode.get_mode())
@@ -75,6 +85,12 @@ func start_fight(arena: Rect2 = Rect2(), button_slots: Array = []) -> void:
 
 func is_fighting() -> bool:
 	return _state == State.FIGHTING or _state == State.WEAKPOINT_EXPOSED
+
+
+## The layout button uses this so re-entering vigilia with an exposed weakpoint
+## returns to nightmare without re-triggering (and without getting stuck).
+func can_trigger_weakpoint() -> bool:
+	return _state == State.FIGHTING
 
 
 func get_phase() -> int:
@@ -264,8 +280,7 @@ func _on_weakpoint_broken() -> void:
 		return
 	_phase += 1
 	weakpoint_broken.emit(_phase)
-	# Defer: this often runs inside a physics hit callback.
-	call_deferred("_spawn_heal_drop")
+	# No heal drop on a phase break: the boss fight must not refill the player.
 	if _phase >= total_phases:
 		if head != null:
 			head.hide_weakpoint()
@@ -282,21 +297,65 @@ func _on_weakpoint_broken() -> void:
 	_sync_button_mode(WorldMode.get_mode())
 
 
-func _spawn_heal_drop() -> void:
-	if heal_drop_scene == null:
+## One cat at a time, only in nightmare. The timer pauses in vigilia so the
+## delay after a catch is respected in active play time, not wall-clock time.
+func _tick_cat_spawn(delta: float) -> void:
+	if WorldMode.get_mode() != WorldMode.MODE_PESADILLA:
 		return
-	var drop := heal_drop_scene.instantiate()
+	_cat_spawn_timer = maxf(_cat_spawn_timer - delta, 0.0)
+	if _cat_spawn_timer > 0.0:
+		return
+	if _has_live_cat():
+		# Check again shortly in case the existing cat is caught in the meantime.
+		_cat_spawn_timer = 0.5
+		return
+	_spawn_cat()
+	_cat_spawn_timer = maxf(cat_spawn_interval, 0.1)
+
+
+func _has_live_cat() -> bool:
+	if get_tree() == null:
+		return false
+	for cat in get_tree().get_nodes_in_group(&"cat"):
+		if is_instance_valid(cat):
+			return true
+	return false
+
+
+func _spawn_cat() -> void:
+	if cat_scene == null:
+		return
+	var cat := cat_scene.instantiate()
+	if cat == null or not (cat is Node2D):
+		return
+	# Boss-spawned cats are not registered by the room, so make them follow the
+	# global mode directly (otherwise they would stay active in vigilia).
+	var switchable := cat.get_node_or_null("Switchable")
+	if switchable != null and "follow_world" in switchable:
+		switchable.set("follow_world", true)
+	if cat.has_signal(&"caught") and not cat.is_connected(&"caught", Callable(self, "_on_cat_caught")):
+		cat.connect(&"caught", Callable(self, "_on_cat_caught"))
 	var parent := get_parent()
 	if parent == null:
 		parent = self
-	parent.add_child(drop)
-	var pos := global_position
-	if head != null:
-		pos = head.global_position + Vector2(0, 36)
-	elif _arena.size != Vector2.ZERO:
-		pos = _arena.get_center()
-	if drop is Node2D:
-		(drop as Node2D).global_position = pos
+	parent.add_child(cat)
+	(cat as Node2D).global_position = _random_cat_spawn_point()
+
+
+func _random_cat_spawn_point() -> Vector2:
+	if _arena.size == Vector2.ZERO:
+		return global_position + Vector2(randf_range(-64.0, 64.0), randf_range(-32.0, 32.0))
+	var inner := _arena.grow(-minf(cat_spawn_margin, minf(_arena.size.x, _arena.size.y) * 0.25))
+	if inner.size.x <= 1.0 or inner.size.y <= 1.0:
+		inner = _arena
+	return Vector2(
+		randf_range(inner.position.x, inner.end.x),
+		randf_range(inner.position.y, inner.end.y)
+	)
+
+
+func _on_cat_caught() -> void:
+	_cat_spawn_timer = maxf(_cat_spawn_timer, maxf(cat_respawn_delay, 0.0))
 
 
 func _on_world_mode_changed(index: int) -> void:
