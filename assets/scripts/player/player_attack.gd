@@ -87,6 +87,11 @@ func is_busy() -> bool:
 	return _busy or _charging
 
 
+## True from arrow/stick press until release, used to slow the player mid-charge.
+func is_charging() -> bool:
+	return _charging
+
+
 func _physics_process(delta: float) -> void:
 	if _player == null:
 		return
@@ -571,18 +576,20 @@ func _is_attack_just_pressed() -> bool:
 
 
 func _is_attack_just_released() -> bool:
-	# Mouse release always ends a mouse charge; stick returns to center too.
-	# Avoid releasing while the other input is still held.
-	var mouse_released := Input.is_action_just_released("attack")
+	# Releasing the arrow / stick ends the charge; avoid releasing while another
+	# attack direction is still held.
+	var attack_released := Input.is_action_just_released("attack")
 	var aim_released := _aim_held and not _is_aim_held()
-	if not mouse_released and not aim_released:
+	if not attack_released and not aim_released:
 		return false
 	return not _is_attack_held()
 
 
 func _cardinal_facing() -> Vector2:
 	var facing := Vector2.DOWN
-	if "facing" in _player and _player.facing is Vector2:
+	if _player != null and _player.has_method("get_attack_facing"):
+		facing = _player.call("get_attack_facing") as Vector2
+	elif _player != null and "facing" in _player and _player.facing is Vector2:
 		facing = _player.facing as Vector2
 	if facing == Vector2.ZERO:
 		return Vector2.DOWN
