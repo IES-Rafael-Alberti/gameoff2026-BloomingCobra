@@ -129,9 +129,8 @@ shader_parameter/pulse_speed = 0.55
 
 [node name="22" type="Node2D" unique_id=1556955998]
 script = ExtResource("1_k74wi")
-map_shape = 0
-map_cell = Vector2i(1, 4)
 room_id = &"22"
+map_cell = Vector2i(1, 4)
 
 [node name="SafeRoom" type="Node2D" parent="." unique_id=1167923288]
 script = ExtResource("1_k74wi")
@@ -154,8 +153,8 @@ position = Vector2(-102, -18)
 disable_mode = 2
 collision_layer = 8
 door_id = &"22O"
-target_room = "uid://c2ee6wvop3dtf"
-target_door_id = &"23E"
+target_room = "uid://c8w45x2138cho"
+target_door_id = &"21E"
 starts_open = true
 orientation = 3
 
