@@ -3,14 +3,17 @@ extends Area2D
 
 ## Collectible prop. Heal / buff / shield / max-health pickups.
 
-@export var definition: PropPickupDef
+@export var definition: PropPickupDef:
+	set(value):
+		definition = value
+		notify_property_list_changed()
 ## Stacks for attack / projectile / shield. -1 = use definition.stacks.
 @export_range(-1, 99) var stacks: int = -1
 ## Heal amount override (heal pickups only). -1 = use the definition amount.
 @export_range(-1, 999) var heal_amount: int = -1
-## Damage added per attack stack. -1 = use the player's default bonus.
+## Damage added per attack stack to any hit (melee or projectile). -1 = player default.
 @export_range(-1, 999) var attack_damage: int = -1
-## Damage added per projectile stack. -1 = use the player's default bonus.
+## Damage of the extra projectile each attack launches. -1 = attack's own projectile damage.
 @export_range(-1, 999) var projectile_damage: int = -1
 ## Vertical float amplitude in pixels.
 @export var float_amplitude: float = 2.5
@@ -73,6 +76,30 @@ func get_pickup_type() -> StringName:
 	if definition != null:
 		return definition.pickup_type
 	return &"heal"
+
+
+func _validate_property(property: Dictionary) -> void:
+	var kind := get_pickup_type()
+	match property.name:
+		&"heal_amount":
+			if kind != &"heal":
+				property["usage"] = PROPERTY_USAGE_NO_EDITOR
+		&"attack_damage":
+			if kind != &"attack_boost" and kind != &"attack":
+				property["usage"] = PROPERTY_USAGE_NO_EDITOR
+		&"projectile_damage":
+			if kind != &"projectile_boost" and kind != &"projectile":
+				property["usage"] = PROPERTY_USAGE_NO_EDITOR
+		&"stacks":
+			var is_stack := (
+				kind == &"attack_boost"
+				or kind == &"attack"
+				or kind == &"projectile_boost"
+				or kind == &"projectile"
+				or kind == &"shield"
+			)
+			if not is_stack:
+				property["usage"] = PROPERTY_USAGE_NO_EDITOR
 
 
 func get_pickup_amount() -> int:
