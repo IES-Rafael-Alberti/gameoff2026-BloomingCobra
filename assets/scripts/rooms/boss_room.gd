@@ -8,12 +8,12 @@ extends Room
 @export var auto_start_fight: bool = true
 ## Extra margin around wall collision when computing camera bounds.
 @export var camera_bounds_padding: float = 8.0
-## Extra padding when fitting the framed view (below 1.0 zooms in and crops the sides).
-@export var camera_fit_padding: float = 1.04
+## Extra padding when fitting the framed view (above 1.0 keeps a small margin).
+@export var camera_fit_padding: float = 1.02
 ## Space above the boss's top-most sprite so the head never touches the edge.
-@export var camera_head_padding: float = 24.0
+@export var camera_head_padding: float = 16.0
 ## Space below the arena floor so the player is never cut at the bottom edge.
-@export var camera_floor_margin: float = 24.0
+@export var camera_floor_margin: float = 12.0
 ## Fine nudge for the locked view (negative Y = raise the camera).
 @export var camera_center_offset: Vector2 = Vector2.ZERO
 @export_group("Intro")
