@@ -17,7 +17,8 @@
 
 [node name="Game" type="Node2D" unique_id=1003574173]
 script = ExtResource("1_game")
-shift_cooldown = 3.0
+shift_cooldown_to_vigilia = 5.0
+shift_cooldown_to_pesadilla = 5.0
 
 [node name="SfxGeneral" type="Node2D" parent="." unique_id=1190624796]
 script = ExtResource("18_sfx")

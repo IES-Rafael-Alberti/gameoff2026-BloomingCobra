@@ -6,8 +6,10 @@ extends Node2D
 @export var background_base_scale: float = 0.12
 ## Multiplicador sobre el viewport: deja margen para parallax antes de clampear.
 @export_range(1.0, 2.0, 0.01) var background_cover_margin: float = 1.2
-## Seconds before the player can shift again after a successful switch.
-@export_range(0.0, 10.0, 0.05) var shift_cooldown: float = 1.5
+## Seconds before the player can shift again after switching into vigilia.
+@export_range(0.0, 10.0, 0.05) var shift_cooldown_to_vigilia: float = 1.5
+## Seconds before the player can shift again after switching into pesadilla.
+@export_range(0.0, 10.0, 0.05) var shift_cooldown_to_pesadilla: float = 1.5
 
 const BOSS_ROOM_SCENE := "res://assets/scenes/rooms/boss/bossRoom.tscn"
 const ROOMS_DIR := "res://assets/scenes/rooms/"
@@ -238,8 +240,8 @@ func _debug_teleport_to_boss() -> void:
 
 
 func _sync_shift_cooldown() -> void:
-	if WorldMode != null and WorldMode.has_method("set_switch_cooldown"):
-		WorldMode.set_switch_cooldown(shift_cooldown)
+	if WorldMode != null and WorldMode.has_method("set_switch_cooldowns"):
+		WorldMode.set_switch_cooldowns(shift_cooldown_to_vigilia, shift_cooldown_to_pesadilla)
 
 
 func _toggle_fullscreen() -> void:

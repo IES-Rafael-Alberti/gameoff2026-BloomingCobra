@@ -288,12 +288,16 @@ func _apply_bounds(room: Room) -> void:
 		if room.has_method("get_camera_limit_bounds")
 		else room.get_camera_bounds()
 	)
+	_playable_bounds = bounds
+	# Arena locks (boss room) zoom out past the room limits on purpose; re-applying
+	# them mid-lock would clamp the view and cut the boss. `unlock_world_point`
+	# recomputes the limits.
+	if _world_lock_active:
+		return
 	if bounds.size == Vector2.ZERO:
 		# Never keep the previous room's limits — that traps the camera in a smaller box.
-		_playable_bounds = Rect2()
 		limit_enabled = false
 		return
-	_playable_bounds = bounds
 	# Camera2D keeps the *visible* rect inside limit_*. Grow by half the view so the
 	# camera can stay centered on the player anywhere inside the playable room
 	# (otherwise it "hits the map edge" and stops while the player keeps walking).
@@ -416,6 +420,8 @@ func _clamp_look_at(center: Vector2) -> Vector2:
 
 
 func _reset_look_at_for_room(_room: Room) -> void:
+	if _world_lock_active:
+		return
 	var player := get_parent() as Node2D
 	if player == null:
 		_has_look_at = false

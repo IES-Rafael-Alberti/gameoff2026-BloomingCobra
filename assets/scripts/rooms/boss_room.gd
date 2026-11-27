@@ -8,12 +8,14 @@ extends Room
 @export var auto_start_fight: bool = true
 ## Extra margin around wall collision when computing camera bounds.
 @export var camera_bounds_padding: float = 8.0
-## Extra padding when fitting the whole arena into view.
-@export var camera_fit_padding: float = 1.08
-## Extra space north of the playable floor so the external head stays on screen.
-@export var camera_north_margin: float = 280.0
-## Nudge the locked view (negative Y = raise camera, more headroom above the boss).
-@export var camera_center_offset: Vector2 = Vector2(0, -52)
+## Extra padding when fitting the framed view (below 1.0 zooms in and crops the sides).
+@export var camera_fit_padding: float = 1.04
+## Space above the boss's top-most sprite so the head never touches the edge.
+@export var camera_head_padding: float = 24.0
+## Space below the arena floor so the player is never cut at the bottom edge.
+@export var camera_floor_margin: float = 24.0
+## Fine nudge for the locked view (negative Y = raise the camera).
+@export var camera_center_offset: Vector2 = Vector2.ZERO
 @export_group("Intro")
 ## Camera pullback from player view to the full arena before the fight starts.
 @export var intro_camera_duration: float = 1.7
@@ -130,16 +132,59 @@ func _play_camera_intro(arena: Rect2) -> void:
 
 
 func _framed_boss_view(arena: Rect2) -> Rect2:
-	var view := arena
-	if view.size != Vector2.ZERO and camera_north_margin > 0.0:
-		# Include the head parked above the north wall in the framed view.
-		view = Rect2(
-			view.position.x,
-			view.position.y - camera_north_margin,
-			view.size.x,
-			view.size.y + camera_north_margin
-		)
-	return view
+	if arena.size == Vector2.ZERO:
+		return arena
+	# Frame from the boss's real top sprite down to just above the floor instead of
+	# a fixed strip of sky. That strip forced the zoom far out, so the fight looked
+	# tiny and the empty void below the arena stayed on screen.
+	var top := arena.position.y - camera_head_padding
+	var boss_rect := _boss_visual_bounds()
+	if boss_rect.size != Vector2.ZERO:
+		top = minf(top, boss_rect.position.y - camera_head_padding)
+	var bottom := arena.end.y + camera_floor_margin
+	return Rect2(arena.position.x, top, arena.size.x, bottom - top)
+
+
+## Merged world-space rect of every visible sprite under the boss.
+func _boss_visual_bounds() -> Rect2:
+	var boss := get_node_or_null(boss_path) as Node2D
+	if boss == null:
+		return Rect2()
+	var rects: Array[Rect2] = []
+	_collect_sprite_rects(boss, rects)
+	if rects.is_empty():
+		return Rect2()
+	var merged := rects[0]
+	for i in range(1, rects.size()):
+		merged = merged.merge(rects[i])
+	return merged
+
+
+func _collect_sprite_rects(node: Node, out: Array[Rect2]) -> void:
+	for child in node.get_children():
+		if child is AnimatedSprite2D:
+			var anim := child as AnimatedSprite2D
+			if anim.is_visible_in_tree() and anim.sprite_frames != null:
+				var frame_tex := anim.sprite_frames.get_frame_texture(anim.animation, anim.frame)
+				if frame_tex != null:
+					out.append(_sprite_global_rect(anim, frame_tex.get_size(), anim.centered, anim.offset))
+		elif child is Sprite2D:
+			var sprite := child as Sprite2D
+			if sprite.is_visible_in_tree() and sprite.texture != null:
+				out.append(_sprite_global_rect(sprite, sprite.texture.get_size(), sprite.centered, sprite.offset))
+		_collect_sprite_rects(child, out)
+
+
+func _sprite_global_rect(sprite: Node2D, tex_size: Vector2, centered: bool, offset: Vector2) -> Rect2:
+	var local := Rect2(offset, tex_size)
+	if centered:
+		local.position -= tex_size * 0.5
+	var xform := sprite.global_transform
+	var rect := Rect2(xform * local.position, Vector2.ZERO)
+	rect = rect.expand(xform * Vector2(local.end.x, local.position.y))
+	rect = rect.expand(xform * local.end)
+	rect = rect.expand(xform * Vector2(local.position.x, local.end.y))
+	return rect
 
 
 func _cancel_intro(player: Node2D = null) -> void:

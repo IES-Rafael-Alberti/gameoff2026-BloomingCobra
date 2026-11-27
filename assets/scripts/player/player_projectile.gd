@@ -95,11 +95,11 @@ func _handle_hit(body: Object) -> void:
 			return
 		_hit[id] = true
 		_play_hit_sfx()
-		# Consume one projectile charge on impact and add its bonus.
+		# Attack charges add damage to any landed hit (melee or projectile).
 		var bonus := 0
 		var buffs: Variant = get_meta("buffs", null)
-		if buffs != null and is_instance_valid(buffs) and buffs.has_method("consume_projectile_charge"):
-			bonus = int(buffs.call("consume_projectile_charge"))
+		if buffs != null and is_instance_valid(buffs) and buffs.has_method("consume_attack_charge"):
+			bonus = int(buffs.call("consume_attack_charge"))
 		var total_damage := damage + bonus
 		var origin := global_position
 		if node.has_method("try_receive_hit"):
