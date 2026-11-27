@@ -15,8 +15,11 @@ const IDLE_CONTENT_RECT := Rect2(245, 153, 509, 720)
 @export var dream_max_speed: float = 95.0
 @export var dream_friction: float = 140.0
 @export var dream_brake: float = 280.0
+## Nightmare-only upward offset of the body hitbox (it otherwise sits at the feet).
+@export_range(0.0, 16.0, 0.5) var nightmare_hitbox_lift: float = 3.0
 
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
+@onready var collision_shape: CollisionShape2D = $CollisionShape2D
 @onready var bubble: Node2D = $Bubble
 @onready var switchable: Node2D = $Switchable
 @onready var damageable: Node2D = $Damageable
@@ -50,6 +53,7 @@ var _charging_attack: bool = false
 var _charge_shake: bool = false
 var _charge_flash: float = 0.0
 var _sprite_base_pos: Vector2 = Vector2.ZERO
+var _collision_base_pos: Vector2 = Vector2.ZERO
 var _flash_mat: ShaderMaterial
 var _dead: bool = false
 var _void_falling: bool = false
@@ -69,6 +73,7 @@ func _ready() -> void:
 	collision_layer = 1 << 1
 	collision_mask = (1 << 0) | (1 << 2) | (1 << 4)
 	_sprite_base_pos = animated_sprite.position
+	_collision_base_pos = collision_shape.position
 	_ensure_audio_listener()
 	_setup_white_flash_material()
 	if switchable.has_signal("mode_changed"):
@@ -552,6 +557,7 @@ func _on_mode_changed(index: int) -> void:
 	_in_dream = index == 1
 	if not _in_dream:
 		velocity = Vector2.ZERO
+	_apply_hitbox_mode_offset()
 	# Attacks only in nightmare (index 0).
 	if attack != null and attack.has_method("set_enabled"):
 		attack.set_enabled(not _in_dream)
@@ -560,6 +566,14 @@ func _on_mode_changed(index: int) -> void:
 		_play_idle_animation()
 	else:
 		_sync_bubble_visible()
+
+
+## Nightmare body hitbox sits a bit higher so it isn't glued to the feet.
+func _apply_hitbox_mode_offset() -> void:
+	if collision_shape == null:
+		return
+	var lift := nightmare_hitbox_lift if not _in_dream else 0.0
+	collision_shape.position = _collision_base_pos + Vector2(0.0, -lift)
 
 
 func _facing_suffix(cardinal: Vector2) -> StringName:

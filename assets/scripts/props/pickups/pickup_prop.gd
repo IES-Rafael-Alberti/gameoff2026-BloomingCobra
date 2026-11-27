@@ -1,3 +1,4 @@
+@tool
 class_name PickupProp
 extends Area2D
 
@@ -6,7 +7,8 @@ extends Area2D
 @export var definition: PropPickupDef:
 	set(value):
 		definition = value
-		notify_property_list_changed()
+		if Engine.is_editor_hint():
+			notify_property_list_changed()
 ## Stacks for attack / projectile / shield. -1 = use definition.stacks.
 @export_range(-1, 99) var stacks: int = -1
 ## Heal amount override (heal pickups only). -1 = use the definition amount.
@@ -31,13 +33,15 @@ var _sprite_base_pos: Vector2 = Vector2.ZERO
 
 
 func _ready() -> void:
+	if Engine.is_editor_hint():
+		return
+	apply_definition()
 	add_to_group("prop_pickup")
 	collision_layer = 0
 	collision_mask = 1 << 1 # player
 	# Deferred: pickups may spawn during physics callbacks (boss heal drop, etc.).
 	set_deferred("monitoring", true)
 	set_deferred("monitorable", false)
-	apply_definition()
 	_sprite_base_pos = sprite.position
 	_float_phase = randf() * TAU
 	if not body_entered.is_connected(_on_body_entered):
@@ -47,6 +51,8 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
+	if Engine.is_editor_hint():
+		return
 	if _collected or sprite == null or float_amplitude <= 0.0:
 		return
 	_float_phase += delta * float_speed * TAU
@@ -80,16 +86,14 @@ func get_pickup_type() -> StringName:
 
 func _validate_property(property: Dictionary) -> void:
 	var kind := get_pickup_type()
+	var hide := false
 	match property.name:
 		&"heal_amount":
-			if kind != &"heal":
-				property["usage"] = PROPERTY_USAGE_NO_EDITOR
+			hide = kind != &"heal"
 		&"attack_damage":
-			if kind != &"attack_boost" and kind != &"attack":
-				property["usage"] = PROPERTY_USAGE_NO_EDITOR
+			hide = kind != &"attack_boost" and kind != &"attack"
 		&"projectile_damage":
-			if kind != &"projectile_boost" and kind != &"projectile":
-				property["usage"] = PROPERTY_USAGE_NO_EDITOR
+			hide = kind != &"projectile_boost" and kind != &"projectile"
 		&"stacks":
 			var is_stack := (
 				kind == &"attack_boost"
@@ -98,8 +102,9 @@ func _validate_property(property: Dictionary) -> void:
 				or kind == &"projectile"
 				or kind == &"shield"
 			)
-			if not is_stack:
-				property["usage"] = PROPERTY_USAGE_NO_EDITOR
+			hide = not is_stack
+	if hide:
+		property["usage"] = int(property["usage"]) & ~PROPERTY_USAGE_EDITOR
 
 
 func get_pickup_amount() -> int:
