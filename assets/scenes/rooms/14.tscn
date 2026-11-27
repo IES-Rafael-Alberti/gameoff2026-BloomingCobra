@@ -5,6 +5,8 @@
 [ext_resource type="Shader" uid="uid://6p4fxek8qx0s" path="res://assets/shaders/celestial_pool.gdshader" id="3_kohoq"]
 [ext_resource type="Shader" uid="uid://dql88870gaqc8" path="res://assets/shaders/celestial_beam.gdshader" id="4_fvtu3"]
 [ext_resource type="Texture2D" uid="uid://bofmusj07iwon" path="res://assets/scenary/tilesetsafezoneRed.png" id="5_n43g8"]
+[ext_resource type="Script" uid="uid://ombqja0khso4" path="res://assets/scripts/rooms/memories_gate.gd" id="6_gate"]
+[ext_resource type="Texture2D" uid="uid://bvda4wo4oerd1" path="res://assets/scenary/portón.png" id="7_porton"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_75ji7"]
 texture = ExtResource("5_n43g8")
@@ -48,6 +50,9 @@ texture_region_size = Vector2i(128, 128)
 [sub_resource type="TileSet" id="TileSet_om7lw"]
 tile_size = Vector2i(128, 128)
 sources/0 = SubResource("TileSetAtlasSource_75ji7")
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_gate_approach"]
+size = Vector2(96, 64)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_rihe3"]
 size = Vector2(208, 16)
@@ -188,6 +193,29 @@ door_id = &"14N "
 target_room = "uid://coibogjaxjonl"
 target_door_id = &"9S"
 starts_open = true
+
+[node name="FinalGate" type="Node2D" parent="SafeRoom" unique_id=1238962065]
+process_mode = 3
+z_index = 4
+position = Vector2(14, 133)
+script = ExtResource("6_gate")
+
+[node name="Sprite2D" type="Sprite2D" parent="SafeRoom/FinalGate" unique_id=436359685]
+texture_filter = 1
+position = Vector2(0, -12)
+scale = Vector2(0.18, 0.18)
+texture = ExtResource("7_porton")
+
+[node name="ApproachArea" type="Area2D" parent="SafeRoom/FinalGate" unique_id=49039491]
+process_mode = 3
+disable_mode = 2
+collision_layer = 0
+collision_mask = 2
+monitorable = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SafeRoom/FinalGate/ApproachArea" unique_id=385426806]
+position = Vector2(0, -32)
+shape = SubResource("RectangleShape2D_gate_approach")
 
 [node name="Walls" type="StaticBody2D" parent="." unique_id=1872382948]
 
