@@ -17,6 +17,8 @@ const IDLE_CONTENT_RECT := Rect2(245, 153, 509, 720)
 @export var dream_brake: float = 280.0
 ## Nightmare-only upward offset of the body hitbox (it otherwise sits at the feet).
 @export_range(0.0, 16.0, 0.5) var nightmare_hitbox_lift: float = 3.0
+## Movement speed multiplier while charging an attack (commit to a read / commit).
+@export_range(0.1, 1.0, 0.05) var charge_move_speed_multiplier: float = 0.55
 
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var collision_shape: CollisionShape2D = $CollisionShape2D
@@ -43,6 +45,8 @@ const AIM_DEADZONE := 0.35
 
 ## Last non-zero move/aim facing used by attacks.
 var facing: Vector2 = Vector2.DOWN
+## Kept through the release frame so the strike keeps the direction you aimed.
+var _attack_aim_facing: Vector2 = Vector2.DOWN
 var _in_dream: bool = false
 var _knockback: Vector2 = Vector2.ZERO
 var _hurt_lock: float = 0.0
@@ -52,6 +56,8 @@ var _playing_before_hurt: bool = false
 var _charging_attack: bool = false
 var _charge_shake: bool = false
 var _charge_flash: float = 0.0
+## Held arrow keys in press order: the newest one wins while several are down.
+var _arrow_aim_stack: Array[StringName] = []
 var _sprite_base_pos: Vector2 = Vector2.ZERO
 var _collision_base_pos: Vector2 = Vector2.ZERO
 var _flash_mat: ShaderMaterial
@@ -123,6 +129,29 @@ func is_cutscene_locked() -> bool:
 	return _cutscene_locked
 
 
+func _input(event: InputEvent) -> void:
+	# Every arrow is bound to Attack. Track press order so the newest held arrow
+	# decides the aim, and releasing it falls back to the previous one.
+	if not (event is InputEventKey) or (event as InputEventKey).echo:
+		return
+	for action_name in ["aim_left", "aim_right", "aim_up", "aim_down"]:
+		var action := StringName(action_name)
+		if not InputMap.has_action(action) or not InputMap.event_is_action(event, action):
+			continue
+		if event.is_pressed():
+			_arrow_aim_stack.erase(action)
+			_arrow_aim_stack.append(action)
+		else:
+			_arrow_aim_stack.erase(action)
+		return
+
+
+func _notification(what: int) -> void:
+	# No key-up arrives when the window loses focus; don't leave a stuck aim.
+	if what == NOTIFICATION_WM_WINDOW_FOCUS_OUT:
+		_arrow_aim_stack.clear()
+
+
 func _physics_process(delta: float) -> void:
 	_sync_iframe_duration()
 	if _dead or _void_falling or _cutscene_locked:
@@ -134,11 +163,16 @@ func _physics_process(delta: float) -> void:
 
 	var direction := Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	var aim := get_aim_vector()
-	# Right stick aims (and charges); otherwise facing follows movement.
+	# Arrow keys / right stick aim (and charge); otherwise facing follows movement.
 	if aim != Vector2.ZERO:
 		facing = _cardinal_from(aim)
+		_attack_aim_facing = facing
 	elif direction != Vector2.ZERO:
 		facing = _cardinal_from(direction)
+	# Charging roots you down a little so committing to a read costs mobility.
+	var move_direction := direction
+	if attack != null and attack.has_method("is_charging") and bool(attack.call("is_charging")):
+		move_direction *= charge_move_speed_multiplier
 
 	if _hurt_lock > 0.0:
 		_hurt_lock = maxf(_hurt_lock - delta, 0.0)
@@ -149,9 +183,9 @@ func _physics_process(delta: float) -> void:
 		velocity = _knockback
 		_knockback = _knockback.move_toward(Vector2.ZERO, 600.0 * delta)
 	elif _in_dream:
-		_move_dream(direction, delta)
+		_move_dream(move_direction, delta)
 	else:
-		_move_nightmare(direction)
+		_move_nightmare(move_direction)
 
 	var attacking: bool = attack != null and attack.has_method("is_busy") and bool(attack.call("is_busy"))
 	var walking := false
@@ -669,10 +703,29 @@ func _sync_sprite_visual() -> void:
 		animated_sprite.offset = Vector2.ZERO
 
 
-## Right-stick aim; Vector2.ZERO when under the deadzone.
+## Arrow keys (newest held wins) or right stick; ZERO when under the deadzone.
 func get_aim_vector() -> Vector2:
+	if not _arrow_aim_stack.is_empty():
+		return _aim_direction(_arrow_aim_stack[_arrow_aim_stack.size() - 1])
 	var aim := Input.get_vector("aim_left", "aim_right", "aim_up", "aim_down")
 	return aim if aim.length() >= AIM_DEADZONE else Vector2.ZERO
+
+
+func _aim_direction(action: StringName) -> Vector2:
+	if action == &"aim_left":
+		return Vector2.LEFT
+	if action == &"aim_right":
+		return Vector2.RIGHT
+	if action == &"aim_up":
+		return Vector2.UP
+	if action == &"aim_down":
+		return Vector2.DOWN
+	return Vector2.ZERO
+
+
+## While charging, keep the last aim through the release frame; otherwise follow movement.
+func get_attack_facing() -> Vector2:
+	return _attack_aim_facing if _charging_attack else facing
 
 
 func _cardinal_from(direction: Vector2) -> Vector2:

@@ -6,6 +6,8 @@ signal closed
 
 const FONT_PATH := "res://assets/fonts/Poppins-SemiBold.ttf"
 const MenuNavGate := preload("res://assets/scripts/hud/menu_nav_gate.gd")
+## Special row: restores the bindings declared in project.godot.
+const RESET_ACTION := &"__reset_defaults__"
 
 @export var font_size: int = 22
 @export var text_color: Color = Color(0.96, 0.92, 0.86, 1.0)
@@ -88,6 +90,7 @@ func _build_rows() -> void:
 	if GameSettings != null:
 		for entry in GameSettings.REMAPPABLE_ACTIONS:
 			_rows.append(entry)
+	_rows.append({&"action": RESET_ACTION, &"label": "Reset to defaults"})
 	_rows.append({&"action": &"", &"label": "Back"})
 
 
@@ -186,7 +189,7 @@ func _try_capture(event: InputEvent) -> bool:
 		return true
 
 	var action: StringName = _rows[_index][&"action"]
-	if action == &"":
+	if action == &"" or action == RESET_ACTION:
 		_listening = false
 		return true
 	GameSettings.rebind_action(action, usable, _gamepad_scheme)
@@ -401,6 +404,12 @@ func _activate_selection() -> void:
 	if action == &"":
 		close()
 		return
+	if action == RESET_ACTION:
+		if GameSettings != null and GameSettings.has_method("reset_bindings_to_defaults"):
+			GameSettings.call("reset_bindings_to_defaults")
+		_refresh_values()
+		_update_visuals()
+		return
 	_listening = true
 	_refresh_values()
 	_update_visuals()
@@ -411,6 +420,8 @@ func _refresh_values() -> void:
 	if _hint_label != null:
 		if _listening:
 			_hint_label.text = "Press a new %s binding… (B to cancel)" % ("gamepad" if _gamepad_scheme else "keyboard/mouse")
+		elif _index >= 0 and _index < _rows.size() and _rows[_index][&"action"] == RESET_ACTION:
+			_hint_label.text = "Confirm to restore the default bindings."
 		else:
 			_hint_label.text = "Confirm to rebind. Device view switches automatically."
 	for i in _rows.size():
@@ -419,6 +430,8 @@ func _refresh_values() -> void:
 		var action: StringName = _rows[i][&"action"]
 		if action == &"":
 			_value_labels[i].text = ""
+		elif action == RESET_ACTION:
+			_value_labels[i].text = "A / Enter"
 		elif _listening and i == _index:
 			_value_labels[i].text = "…"
 		elif GameSettings != null:

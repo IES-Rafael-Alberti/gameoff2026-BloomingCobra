@@ -5,6 +5,11 @@ extends Node
 const CONFIG_PATH := "user://settings.cfg"
 const SECTION := "settings"
 const SECTION_INPUT := "input_bindings"
+## Bump when project.godot defaults change incompatibly (arrows moved to attack).
+const INPUT_BINDINGS_VERSION := 2
+const _ARROW_BINDINGS := [
+	"key:4194319", "key:4194321", "key:4194320", "key:4194322"
+]
 const BUS_MASTER := &"Master"
 
 enum DisplayMode {
@@ -67,6 +72,7 @@ func load_settings() -> void:
 	master_volume = clampf(float(cfg.get_value(SECTION, "master_volume", master_volume)), 0.0, 1.0)
 	display_mode = clampi(int(cfg.get_value(SECTION, "display_mode", display_mode)), 0, DisplayMode.FULLSCREEN)
 	camera_mode = clampi(int(cfg.get_value(SECTION, "camera_mode", camera_mode)), 0, CameraMode.DEAD_ZONE)
+	_migrate_input_bindings(cfg)
 	_load_input_bindings(cfg)
 
 
@@ -77,6 +83,7 @@ func save_settings() -> void:
 	cfg.set_value(SECTION, "master_volume", master_volume)
 	cfg.set_value(SECTION, "display_mode", display_mode)
 	cfg.set_value(SECTION, "camera_mode", camera_mode)
+	cfg.set_value(SECTION, "input_bindings_version", INPUT_BINDINGS_VERSION)
 	_save_input_bindings(cfg)
 	cfg.save(CONFIG_PATH)
 
@@ -245,6 +252,39 @@ func event_to_label(event: InputEvent) -> String:
 	return "?"
 
 
+## Restore the bindings declared in project.godot and drop saved overrides.
+func reset_bindings_to_defaults() -> void:
+	for entry in REMAPPABLE_ACTIONS:
+		var action: StringName = entry[&"action"]
+		var setting_path := "input/%s" % String(action)
+		if not ProjectSettings.has_setting(setting_path):
+			continue
+		if not InputMap.has_action(action):
+			InputMap.add_action(action)
+		InputMap.action_erase_events(action)
+		var setting: Variant = ProjectSettings.get_setting(setting_path)
+		if typeof(setting) != TYPE_DICTIONARY:
+			continue
+		var events: Variant = (setting as Dictionary).get("events", [])
+		for event in events:
+			if event is InputEvent:
+				InputMap.action_add_event(action, event)
+
+	# Keep other preferences, but remove every saved binding override so the
+	# project defaults are used again on the next launch.
+	var cfg := ConfigFile.new()
+	cfg.load(CONFIG_PATH)
+	cfg.set_value(SECTION, "master_volume", master_volume)
+	cfg.set_value(SECTION, "display_mode", display_mode)
+	cfg.set_value(SECTION, "camera_mode", camera_mode)
+	cfg.set_value(SECTION, "input_bindings_version", INPUT_BINDINGS_VERSION)
+	for entry in REMAPPABLE_ACTIONS:
+		var action: StringName = entry[&"action"]
+		if cfg.has_section_key(SECTION_INPUT, String(action)):
+			cfg.erase_section_key(SECTION_INPUT, String(action))
+	cfg.save(CONFIG_PATH)
+
+
 func rebind_action(action: StringName, event: InputEvent, gamepad: bool) -> bool:
 	if not InputMap.has_action(action):
 		InputMap.add_action(action)
@@ -366,6 +406,42 @@ func _save_input_bindings(cfg: ConfigFile) -> void:
 			if not s.is_empty():
 				encoded.append(s)
 		cfg.set_value(SECTION_INPUT, String(action), encoded)
+
+
+## Old saves bound the mouse to Attack and the arrows to movement. Strip just
+## those events once, keeping any custom binds the player also configured.
+func _migrate_input_bindings(cfg: ConfigFile) -> void:
+	var version := int(cfg.get_value(SECTION, "input_bindings_version", 1))
+	if version >= INPUT_BINDINGS_VERSION:
+		return
+	for action in [&"attack", &"move_left", &"move_right", &"move_up", &"move_down"]:
+		var key := String(action)
+		if not cfg.has_section_key(SECTION_INPUT, key):
+			continue
+		var raw: Variant = cfg.get_value(SECTION_INPUT, key, PackedStringArray())
+		if typeof(raw) != TYPE_PACKED_STRING_ARRAY and typeof(raw) != TYPE_ARRAY:
+			continue
+		var kept := PackedStringArray()
+		var had_mouse_attack := false
+		for item in raw:
+			var binding := String(item)
+			if action == &"attack" and binding.begins_with("mouse:"):
+				had_mouse_attack = true
+				continue
+			if String(action).begins_with("move_") and _ARROW_BINDINGS.has(binding):
+				continue
+			kept.append(binding)
+		if action == &"attack" and had_mouse_attack:
+			for arrow in _ARROW_BINDINGS:
+				if not kept.has(arrow):
+					kept.append(arrow)
+		if kept.is_empty():
+			# No usable bind left: fall back to the new project.godot defaults.
+			cfg.erase_section_key(SECTION_INPUT, key)
+		else:
+			cfg.set_value(SECTION_INPUT, key, kept)
+	cfg.set_value(SECTION, "input_bindings_version", INPUT_BINDINGS_VERSION)
+	cfg.save(CONFIG_PATH)
 
 
 func _load_input_bindings(cfg: ConfigFile) -> void:
