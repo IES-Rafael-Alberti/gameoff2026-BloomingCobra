@@ -5,6 +5,8 @@ extends Node
 ## Attack charges add damage to ANY hit (melee or projectile).
 ## Projectile charges make each attack also launch a projectile.
 ## Shield charges absorb hits. None of them expire by time.
+## Stacks cap at their max; picking one up beyond the cap does nothing.
+## A max of 0 means "no cap".
 
 signal buffs_changed
 
@@ -13,6 +15,10 @@ signal buffs_changed
 @export var default_shield_hits: int = 3
 ## Damage added by each consumed attack charge (to melee or projectile hits).
 @export var attack_bonus_per_charge: int = 1
+@export_group("Max Charges")
+@export var max_attack_stacks: int = 5
+@export var max_projectile_stacks: int = 5
+@export var max_shield_hits: int = 5
 
 var _attack_stacks: int = 0
 var _projectile_stacks: int = 0
@@ -27,8 +33,13 @@ func apply_attack_boost(stacks: int = -1, damage_per_charge: int = -1) -> void:
 	var add := stacks if stacks > 0 else default_attack_stacks
 	add = maxi(add, 1)
 	var dmg := damage_per_charge if damage_per_charge >= 0 else attack_bonus_per_charge
-	_attack_stacks = maxi(_attack_stacks, 0) + add
-	for _i in add:
+	var current := maxi(_attack_stacks, 0)
+	var target := current + add
+	if max_attack_stacks > 0:
+		target = mini(target, max_attack_stacks)
+	var actual := target - current
+	_attack_stacks = target
+	for _i in actual:
 		_attack_charge_damage.append(maxi(dmg, 0))
 	buffs_changed.emit()
 
@@ -36,15 +47,23 @@ func apply_attack_boost(stacks: int = -1, damage_per_charge: int = -1) -> void:
 func apply_projectile_boost(stacks: int = -1, shot_damage: int = -1) -> void:
 	var add := stacks if stacks > 0 else default_projectile_stacks
 	add = maxi(add, 1)
-	_projectile_stacks = maxi(_projectile_stacks, 0) + add
-	for _i in add:
+	var current := maxi(_projectile_stacks, 0)
+	var target := current + add
+	if max_projectile_stacks > 0:
+		target = mini(target, max_projectile_stacks)
+	var actual := target - current
+	_projectile_stacks = target
+	for _i in actual:
 		_projectile_shot_damage.append(shot_damage)
 	buffs_changed.emit()
 
 
 func apply_shield(hits: int = -1) -> void:
 	var h := hits if hits > 0 else default_shield_hits
-	_shield_hits = maxi(_shield_hits, 0) + maxi(h, 1)
+	var target := maxi(_shield_hits, 0) + maxi(h, 1)
+	if max_shield_hits > 0:
+		target = mini(target, max_shield_hits)
+	_shield_hits = target
 	buffs_changed.emit()
 
 
