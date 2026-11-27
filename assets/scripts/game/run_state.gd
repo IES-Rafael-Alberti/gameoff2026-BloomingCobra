@@ -27,6 +27,8 @@ var checkpoint_room_id: String = ""
 var checkpoint_scene: String = ""
 ## Memory ids collected during this run (flushed to disk on SafeRoom enter).
 var collected_memories: Array = []
+## Permanent upgrades: survive death / scene reload, cleared only on a new run.
+var permanent_max_vitality_bonus: float = 0.0
 
 
 func reset() -> void:
@@ -40,6 +42,7 @@ func reset() -> void:
 	checkpoint_room_id = ""
 	checkpoint_scene = ""
 	collected_memories.clear()
+	permanent_max_vitality_bonus = 0.0
 
 
 func ensure_room(room_id: StringName) -> Dictionary:
@@ -109,6 +112,40 @@ func has_collected_memory(memory_id: StringName) -> bool:
 	return collected_memories.has(String(memory_id))
 
 
+# --- Permanent pickups -------------------------------------------------------
+
+## Returns false when this one-time pickup was already consumed in this room.
+func collect_pickup_once(room_id: StringName, pickup_key: String) -> bool:
+	var key := String(pickup_key)
+	if key.is_empty():
+		return false
+	var state := ensure_room(room_id)
+	var collected: Array = state.get("collected_pickups", [])
+	if collected.has(key):
+		return false
+	collected.append(key)
+	state["collected_pickups"] = collected
+	return true
+
+
+func has_collected_pickup(room_id: StringName, pickup_key: String) -> bool:
+	var key := String(pickup_key)
+	if key.is_empty():
+		return false
+	return bool(ensure_room(room_id).get("collected_pickups", []).has(key))
+
+
+func add_permanent_max_vitality(amount: float) -> float:
+	if amount <= 0.0:
+		return 0.0
+	permanent_max_vitality_bonus += amount
+	return amount
+
+
+func get_permanent_max_vitality_bonus() -> float:
+	return permanent_max_vitality_bonus
+
+
 # --- Checkpoint save / load -------------------------------------------------
 
 ## Snapshot progress at a SafeRoom and write it to disk.
@@ -138,6 +175,7 @@ func save_checkpoint(room: Node = null) -> bool:
 		"checkpoint_scene": checkpoint_scene,
 		"rooms": rooms.duplicate(true),
 		"collected_memories": collected_memories.duplicate(),
+		"permanent_max_vitality_bonus": permanent_max_vitality_bonus,
 		"room_scenes": room_scenes.duplicate(true),
 		"room_cells": _serialize_cells(room_cells),
 		"room_shapes": room_shapes.duplicate(true),
@@ -190,6 +228,7 @@ func load_save() -> bool:
 	checkpoint_scene = String(data.get("checkpoint_scene", ""))
 	_merge_rooms_dict(data.get("rooms", {}))
 	_merge_string_array(data.get("collected_memories", []), collected_memories)
+	permanent_max_vitality_bonus = maxf(float(data.get("permanent_max_vitality_bonus", 0.0)), 0.0)
 	_merge_string_dict(data.get("room_scenes", {}), room_scenes)
 	_merge_cells(data.get("room_cells", {}), room_cells)
 	_merge_int_dict(data.get("room_shapes", {}), room_shapes)

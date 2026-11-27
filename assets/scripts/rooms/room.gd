@@ -288,6 +288,17 @@ func save_state(_run_state: Node = null) -> void:
 		if button.permanent_press and button.is_pressed():
 			buttons_state[String(get_path_to(button))] = true
 	state["buttons"] = buttons_state
+	# One-time upgrades stay consumed even if their pickup node is already freed.
+	var collected_pickups: Array = state.get("collected_pickups", [])
+	for pickup in find_children("*", "PickupProp", true, false):
+		if not pickup.has_method("is_permanent_upgrade") or not pickup.has_method("was_consumed"):
+			continue
+		if not bool(pickup.call("is_permanent_upgrade")) or not bool(pickup.call("was_consumed")):
+			continue
+		var key := String(get_path_to(pickup))
+		if not collected_pickups.has(key):
+			collected_pickups.append(key)
+	state["collected_pickups"] = collected_pickups
 	_register_links_with_run_state()
 	RunState.register_room_meta(room_id, scene_file_path, map_cell, int(map_shape))
 
@@ -308,6 +319,15 @@ func load_state(_run_state: Node = null) -> void:
 		var key := String(get_path_to(button))
 		if buttons_state.has(key) and bool(buttons_state[key]):
 			button.force_pressed(false)
+	# Consumed one-time upgrades stay gone when the room scene is re-instantiated.
+	var collected_pickups: Array = state.get("collected_pickups", [])
+	for pickup in find_children("*", "PickupProp", true, false):
+		if not pickup.has_method("is_permanent_upgrade") or not pickup.has_method("consume_silently"):
+			continue
+		if not bool(pickup.call("is_permanent_upgrade")):
+			continue
+		if collected_pickups.has(String(get_path_to(pickup))):
+			pickup.call("consume_silently")
 	_button_unlock_committed = _are_all_button_doors_committed(get_button_unlock_doors())
 	_button_unlock_done = _are_all_button_doors_unlocked(get_button_unlock_doors())
 

@@ -46,6 +46,11 @@ func _ready() -> void:
 	_float_phase = randf() * TAU
 	if not body_entered.is_connected(_on_body_entered):
 		body_entered.connect(_on_body_entered)
+	# A consumed one-time upgrade must not pop back up on room reload.
+	if is_permanent_upgrade() and RunState != null and RunState.has_method("has_collected_pickup"):
+		var room := _find_room()
+		if room != null and bool(RunState.call("has_collected_pickup", room.get("room_id"), _permanent_key())):
+			consume_silently()
 	# Drops that spawn on top of the player (cat catch) still collect.
 	call_deferred("_collect_if_already_overlapping")
 
@@ -82,6 +87,48 @@ func get_pickup_type() -> StringName:
 	if definition != null:
 		return definition.pickup_type
 	return &"heal"
+
+
+## One-time upgrades (currently max health) are consumed permanently and never
+## respawn. Ordinary heals / charges keep their existing behaviour.
+func is_permanent_upgrade() -> bool:
+	var kind := get_pickup_type()
+	return kind == &"max_health" or kind == &"maxhealth"
+
+
+func was_consumed() -> bool:
+	return _collected
+
+
+## Hide without playing the collect FX. Used when restoring a room where the
+## upgrade was already picked up.
+func consume_silently() -> void:
+	if _collected:
+		return
+	_collected = true
+	set_deferred("monitoring", false)
+	if collision_shape != null:
+		collision_shape.set_deferred("disabled", true)
+	if sprite != null:
+		sprite.visible = false
+	visible = false
+	queue_free()
+
+
+func _find_room() -> Node:
+	var node: Node = self
+	while node != null:
+		if node is Room:
+			return node
+		node = node.get_parent()
+	return null
+
+
+func _permanent_key() -> String:
+	var room := _find_room()
+	if room == null:
+		return ""
+	return String(room.get_path_to(self))
 
 
 func _validate_property(property: Dictionary) -> void:
@@ -147,6 +194,13 @@ func _on_body_entered(body: Node2D) -> void:
 	set_deferred("monitoring", false)
 	if collision_shape != null:
 		collision_shape.set_deferred("disabled", true)
+	if is_permanent_upgrade():
+		var room := _find_room()
+		if room != null and RunState != null and RunState.has_method("collect_pickup_once"):
+			if not bool(RunState.call("collect_pickup_once", room.get("room_id"), _permanent_key())):
+				# Already owned from an earlier visit: consume but do not stack again.
+				_play_collect_fade()
+				return
 	_apply_pickup(body)
 	play_collect_sfx()
 	_play_collect_fade()
@@ -210,6 +264,9 @@ func _apply_cat_heal(player: Node) -> void:
 
 
 func _apply_max_health(player: Node, amount: float) -> void:
+	# Remember the bonus so a fresh player (death / scene reload) gets it back.
+	if RunState != null and RunState.has_method("add_permanent_max_vitality"):
+		RunState.call("add_permanent_max_vitality", amount)
 	if player.has_method("increase_max_vitality"):
 		player.call("increase_max_vitality", amount)
 		return

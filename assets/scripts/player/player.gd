@@ -88,11 +88,21 @@ func _ready() -> void:
 		damageable.damaged.connect(_on_damaged)
 	if vitality != null and vitality.has_signal("depleted"):
 		vitality.depleted.connect(_on_vitality_depleted)
+	_apply_permanent_upgrades()
 	if not animated_sprite.animation_finished.is_connected(_on_animation_finished):
 		animated_sprite.animation_finished.connect(_on_animation_finished)
 	_ensure_attack_anims_once()
 	_ensure_hurt_anims_once()
 	_sync_sprite_visual()
+
+
+## Restores permanent upgrades after death / a fresh game.tscn load.
+func _apply_permanent_upgrades() -> void:
+	if vitality == null or RunState == null or not RunState.has_method("get_permanent_max_vitality_bonus"):
+		return
+	var bonus := float(RunState.call("get_permanent_max_vitality_bonus"))
+	if bonus > 0.0:
+		vitality.call("increase_max", bonus)
 
 
 func set_cutscene_locked(locked: bool) -> void:
