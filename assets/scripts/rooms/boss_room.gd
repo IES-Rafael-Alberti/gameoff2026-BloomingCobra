@@ -10,10 +10,12 @@ extends Room
 @export var camera_bounds_padding: float = 8.0
 ## Extra padding when fitting the whole arena into view.
 @export var camera_fit_padding: float = 1.08
-## Extra space north of the playable floor so the external head stays on screen.
-@export var camera_north_margin: float = 280.0
+## Padding above the boss's top-most sprite so the head never touches the edge.
+@export var camera_head_padding: float = 28.0
+## Padding below the playable floor. The empty void under the arena is not shown.
+@export var camera_south_margin: float = 0.0
 ## Nudge the locked view (negative Y = raise camera, more headroom above the boss).
-@export var camera_center_offset: Vector2 = Vector2(0, -52)
+@export var camera_center_offset: Vector2 = Vector2(0, -16)
 @export_group("Intro")
 ## Camera pullback from player view to the full arena before the fight starts.
 @export var intro_camera_duration: float = 1.7

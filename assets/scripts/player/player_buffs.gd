@@ -16,17 +16,28 @@ signal buffs_changed
 var _attack_stacks: int = 0
 var _projectile_stacks: int = 0
 var _shield_hits: int = 0
+## Damage carried by each individual charge (parallel to the stack counts).
+var _attack_charge_damage: Array[int] = []
+var _projectile_charge_damage: Array[int] = []
 
 
-func apply_attack_boost(stacks: int = -1) -> void:
+func apply_attack_boost(stacks: int = -1, damage_per_charge: int = -1) -> void:
 	var add := stacks if stacks > 0 else default_attack_stacks
-	_attack_stacks = maxi(_attack_stacks, 0) + maxi(add, 1)
+	add = maxi(add, 1)
+	var dmg := damage_per_charge if damage_per_charge >= 0 else melee_bonus_per_charge
+	_attack_stacks = maxi(_attack_stacks, 0) + add
+	for _i in add:
+		_attack_charge_damage.append(maxi(dmg, 0))
 	buffs_changed.emit()
 
 
-func apply_projectile_boost(stacks: int = -1) -> void:
+func apply_projectile_boost(stacks: int = -1, damage_per_charge: int = -1) -> void:
 	var add := stacks if stacks > 0 else default_projectile_stacks
-	_projectile_stacks = maxi(_projectile_stacks, 0) + maxi(add, 1)
+	add = maxi(add, 1)
+	var dmg := damage_per_charge if damage_per_charge >= 0 else projectile_bonus_per_charge
+	_projectile_stacks = maxi(_projectile_stacks, 0) + add
+	for _i in add:
+		_projectile_charge_damage.append(maxi(dmg, 0))
 	buffs_changed.emit()
 
 
@@ -78,8 +89,11 @@ func consume_melee_charge() -> int:
 	if _attack_stacks <= 0:
 		return 0
 	_attack_stacks -= 1
+	var bonus := maxi(melee_bonus_per_charge, 0)
+	if not _attack_charge_damage.is_empty():
+		bonus = _attack_charge_damage.pop_back()
 	buffs_changed.emit()
-	return maxi(melee_bonus_per_charge, 0)
+	return bonus
 
 
 ## Consumes one projectile charge on a landed hit. Returns the damage bonus to add (0 if none).
@@ -87,5 +101,8 @@ func consume_projectile_charge() -> int:
 	if _projectile_stacks <= 0:
 		return 0
 	_projectile_stacks -= 1
+	var bonus := maxi(projectile_bonus_per_charge, 0)
+	if not _projectile_charge_damage.is_empty():
+		bonus = _projectile_charge_damage.pop_back()
 	buffs_changed.emit()
-	return maxi(projectile_bonus_per_charge, 0)
+	return bonus

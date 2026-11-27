@@ -6,6 +6,12 @@ extends Area2D
 @export var definition: PropPickupDef
 ## Stacks for attack / projectile / shield. -1 = use definition.stacks.
 @export_range(-1, 99) var stacks: int = -1
+## Heal amount override (heal pickups only). -1 = use the definition amount.
+@export_range(-1, 999) var heal_amount: int = -1
+## Damage added per attack stack. -1 = use the player's default bonus.
+@export_range(-1, 999) var attack_damage: int = -1
+## Damage added per projectile stack. -1 = use the player's default bonus.
+@export_range(-1, 999) var projectile_damage: int = -1
 ## Vertical float amplitude in pixels.
 @export var float_amplitude: float = 2.5
 ## Full up-down cycles per second.
@@ -75,6 +81,20 @@ func get_pickup_amount() -> int:
 	return 1
 
 
+func get_heal_amount() -> int:
+	if heal_amount >= 0:
+		return heal_amount
+	return get_pickup_amount()
+
+
+func get_attack_damage_override() -> int:
+	return attack_damage
+
+
+func get_projectile_damage_override() -> int:
+	return projectile_damage
+
+
 func get_pickup_stacks() -> int:
 	if stacks > 0:
 		return stacks
@@ -121,7 +141,7 @@ func _apply_pickup(player: Node) -> void:
 		&"cat_heal":
 			_apply_cat_heal(player)
 		&"heal":
-			_apply_heal(player, float(amount))
+			_apply_heal(player, float(get_heal_amount()))
 		&"max_health", &"maxhealth":
 			_apply_max_health(player, float(amount))
 		&"attack_boost", &"attack":
@@ -169,13 +189,13 @@ func _apply_max_health(player: Node, amount: float) -> void:
 func _apply_attack_boost(player: Node, stacks: int) -> void:
 	var buffs := _get_buffs(player)
 	if buffs != null and buffs.has_method("apply_attack_boost"):
-		buffs.call("apply_attack_boost", stacks)
+		buffs.call("apply_attack_boost", stacks, get_attack_damage_override())
 
 
 func _apply_projectile_boost(player: Node, stacks: int) -> void:
 	var buffs := _get_buffs(player)
 	if buffs != null and buffs.has_method("apply_projectile_boost"):
-		buffs.call("apply_projectile_boost", stacks)
+		buffs.call("apply_projectile_boost", stacks, get_projectile_damage_override())
 
 
 func _apply_shield(player: Node, hits: int) -> void:

@@ -27,4 +27,4 @@ mono_crash.*.json
 builds/
 # Uncomment if your project does not version PCK files as runtime dependencies.
 # *.pck
-.commandcode/taste/taste.md
+.commandcode/
