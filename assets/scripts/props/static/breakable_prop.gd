@@ -10,6 +10,10 @@ const LAYER_PROP_BREAKABLE := 1 << 6 # physics layer 7
 const DEFAULT_DEFINITION := preload("res://assets/resources/props/breakable_crate.tres")
 
 @export var definition: PropBreakableDef = DEFAULT_DEFINITION
+## When set, the prop stays in the scene showing this sprite after breaking
+## instead of being freed. Region/scale should match the intact sprite.
+@export var broken_texture: Texture2D
+@export var broken_sprite_offset: Vector2 = Vector2.ZERO
 
 @onready var sprite: Sprite2D = $Sprite2D
 @onready var collision_shape: CollisionShape2D = $CollisionShape2D
@@ -76,9 +80,35 @@ func try_receive_hit(amount: int, _hit_origin: Vector2) -> bool:
 
 func _on_died() -> void:
 	_try_spawn_loot()
+	if broken_texture != null:
+		_show_broken_state()
+		return
 	var def: PropBreakableDef = definition if definition != null else DEFAULT_DEFINITION
 	if def.destroy_on_death:
 		queue_free()
+
+
+## Leaves the debris on the floor and makes the prop non-interactive.
+func _show_broken_state() -> void:
+	if sprite != null:
+		sprite.texture = broken_texture
+		sprite.position += broken_sprite_offset
+	if damageable != null and "immortal" in damageable:
+		damageable.immortal = true
+	collision_layer = 0
+	collision_mask = 0
+	if collision_shape != null:
+		collision_shape.disabled = true
+	if hurtbox != null:
+		hurtbox.collision_layer = 0
+		hurtbox.collision_mask = 0
+		hurtbox.monitoring = false
+		hurtbox.remove_from_group("hurtbox")
+		var shape := hurtbox.get_node_or_null("CollisionShape2D") as CollisionShape2D
+		if shape != null:
+			shape.disabled = true
+	remove_from_group("prop_breakable")
+	remove_from_group("prop_hittable")
 
 
 func _try_spawn_loot() -> void:

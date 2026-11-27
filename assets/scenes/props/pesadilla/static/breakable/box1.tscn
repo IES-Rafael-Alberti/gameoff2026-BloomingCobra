@@ -3,9 +3,14 @@
 [ext_resource type="Script" uid="uid://c4lqggjndetxi" path="res://assets/scripts/props/static/breakable_prop.gd" id="1_hfl4u"]
 [ext_resource type="Texture2D" uid="uid://c0x0c5ptiyqno" path="res://assets/sprittesheets/props/definitivo/Nightmare Props.png" id="2_oacm0"]
 [ext_resource type="Script" uid="uid://bgh2aslom8hdu" path="res://assets/scripts/common/damageable.gd" id="3_7fn38"]
+[ext_resource type="Texture2D" uid="uid://dbd81fo6apha6" path="res://assets/sprittesheets/props/definitivo/Nightmare Props rompe.png" id="4_broken"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_cmuqu"]
 atlas = ExtResource("2_oacm0")
+region = Rect2(661, 55, 689, 691)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_broken"]
+atlas = ExtResource("4_broken")
 region = Rect2(661, 55, 689, 691)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_break"]
@@ -21,6 +26,7 @@ collision_layer = 69
 collision_mask = 0
 motion_mode = 1
 script = ExtResource("1_hfl4u")
+broken_texture = SubResource("AtlasTexture_broken")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=1569744862]
 texture_filter = 1

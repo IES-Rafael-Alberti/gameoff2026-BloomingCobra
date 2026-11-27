@@ -482,7 +482,7 @@ func _build_hitboxes() -> void:
 	_thrust_hitbox = _make_hitbox("ThrustHitbox")
 	var thrust_shape := CollisionShape2D.new()
 	var rect := RectangleShape2D.new()
-	rect.size = Vector2(36, 10)
+	rect.size = Vector2(42, 10)
 	thrust_shape.shape = rect
 	thrust_shape.position = Vector2(18, 0)
 	_thrust_hitbox.add_child(thrust_shape)

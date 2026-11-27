@@ -45,6 +45,7 @@ script = ExtResource("20_room_mgr")
 light_mask = 3
 visibility_layer = 3
 z_index = 2
+charge_move_speed_multiplier = 1.0
 
 [node name="Camera2D" type="Camera2D" parent="Player" unique_id=1973695649]
 zoom = Vector2(4, 4)
