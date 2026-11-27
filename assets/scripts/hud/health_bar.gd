@@ -19,6 +19,8 @@ const MODE_SWITCH_STRIDE := 321
 const MODE_SWITCH_CELL := Vector2i(212, 321)
 const MODE_SWITCH_FRAME_VIGILIA := 0
 const MODE_SWITCH_FRAME_PESADILLA := 1
+## Left edge of the red body inside each cell (round cap sits left of this, x 0..34).
+const RED_LEFT := 34.0
 ## Right edge of the red fill per frame (measured from the sheet).
 const RED_RIGHT := [
 	[197, 155, 154, 94, 93, 81],
@@ -258,10 +260,10 @@ func _size_tier(max_vitality: float) -> int:
 
 func _fill_ratio_for_col(row: int, col: int) -> float:
 	var tips: Array = RED_RIGHT[row]
-	var full := float(tips[0])
-	if full <= 0.0:
+	var span := float(tips[0]) - RED_LEFT
+	if span <= 0.0:
 		return 0.0
-	return clampf(float(tips[col]) / full, 0.0, 1.0)
+	return clampf((float(tips[col]) - RED_LEFT) / span, 0.0, 1.0)
 
 
 func _pair_for_ratio(row: int, ratio: float) -> Dictionary:
@@ -316,9 +318,11 @@ func _set_visual(ratio: float, max_vitality: float, force: bool = false) -> void
 		_under.texture = _frame(row, under_col)
 
 	## Continuous tip in sheet pixels — independent of cell padding.
+	## The round cap (x 0..RED_LEFT) always stays; only the red body shrinks.
 	var full_tip := float(RED_RIGHT[row][0])
-	var tip_px := maxf(full_tip * r, 0.0)
-	if tip_px <= 0.5:
+	var span := full_tip - RED_LEFT
+	var tip_px := RED_LEFT + span * r
+	if r <= 0.0 or span <= 0.0:
 		_fill.visible = false
 		return
 	_fill.visible = true
