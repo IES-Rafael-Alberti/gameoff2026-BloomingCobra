@@ -38,12 +38,50 @@ tile_set = ExtResource("3_quqxi")
 
 [node name="Sueño" type="Node2D" parent="Switchable" unique_id=1522624834]
 
-[node name="Spikes" type="TileMapLayer" parent="Switchable/Sueño" unique_id=2082357055]
+[node name="Layout1" type="Node2D" parent="Switchable/Sueño" unique_id=1733288233]
 visible = false
+
+[node name="Spikes" type="TileMapLayer" parent="Switchable/Sueño/Layout1" unique_id=2082357055]
 z_index = 1
-tile_map_data = PackedByteArray("AAD+////AAAAAAAAAAD+/wAAAAAAAAAAAAAAAP//AAAAAAAAAAAAAAAAAAAAAAAAAAD//wAAAAAAAAAAAAA=")
+scale = Vector2(0.2, 0.2)
+tile_map_data = PackedByteArray("AAD4////AAAAAAAAAAD5////AAAAAAAAAAD5/wAAAAAAAAAAAAD4/wAAAAAAAAAAAAD4/wEAAAAAAAAAAAD4/wIAAAAAAAAAAAD5/wIAAAAAAAAAAAD5/wEAAAAAAAAAAAD6//3/AAAAAAAAAAD7//3/AAAAAAAAAAD8//3/AAAAAAAAAAD9//3/AAAAAAAAAAD+//3/AAAAAAAAAAD///3/AAAAAAAAAAAAAP3/AAAAAAAAAAABAP3/AAAAAAAAAAACAP3/AAAAAAAAAAADAP3/AAAAAAAAAAAEAP3/AAAAAAAAAAAEAP7/AAAAAAAAAAAEAP//AAAAAAAAAAAEAAAAAAAAAAAAAAAEAAEAAAAAAAAAAAAEAAIAAAAAAAAAAAADAAIAAAAAAAAAAAACAAIAAAAAAAAAAAABAAIAAAAAAAAAAAAAAAIAAAAAAAAAAAD//wIAAAAAAAAAAAD+/wIAAAAAAAAAAAD9/wIAAAAAAAAAAAD8/wIAAAAAAAAAAAD7/wIAAAAAAAAAAAD6/wIAAAAAAAAAAAA=")
 tile_set = ExtResource("7_spikes_ts")
 script = ExtResource("7_spikes_scr")
+
+[node name="Button1" type="Marker2D" parent="Switchable/Sueño/Layout1" unique_id=1539037382]
+position = Vector2(-177, -57)
+
+[node name="Layout2" type="Node2D" parent="Switchable/Sueño" unique_id=1787450856]
+
+[node name="Spikes2" type="TileMapLayer" parent="Switchable/Sueño/Layout2" unique_id=1589380968]
+z_index = 1
+scale = Vector2(0.2, 0.2)
+tile_map_data = PackedByteArray("AAD8//3/AAAAAAAAAAAAAP3/AAAAAAAAAAD7//3/AAAAAAAAAAD6//3/AAAAAAAAAAD5//3/AAAAAAAAAAD4//3/AAAAAAAAAAABAP3/AAAAAAAAAAACAP3/AAAAAAAAAAADAP3/AAAAAAAAAAAEAP3/AAAAAAAAAAD8//7/AAAAAAAAAAD8////AAAAAAAAAAD8/wAAAAAAAAAAAAD9/wAAAAAAAAAAAAD+/wAAAAAAAAAAAAD//wAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAACAAAAAAAAAAAAAAACAAEAAAAAAAAAAAABAAEAAAAAAAAAAAAAAAEAAAAAAAAAAAD//wEAAAAAAAAAAAD+/wEAAAAAAAAAAAD9/wEAAAAAAAAAAAD8/wEAAAAAAAAAAAD7/wEAAAAAAAAAAAD7/wAAAAAAAAAAAAD7////AAAAAAAAAAD7//7/AAAAAAAAAAD6//7/AAAAAAAAAAD6////AAAAAAAAAAD6/wAAAAAAAAAAAAD6/wEAAAAAAAAAAAAAAP7/AAAAAAAAAAABAP7/AAAAAAAAAAACAP7/AAAAAAAAAAADAP7/AAAAAAAAAAAEAP7/AAAAAAAAAAADAAEAAAAAAAAAAAADAAAAAAAAAAAAAAD4/wMAAAAAAAAAAAD5/wMAAAAAAAAAAAD6/wMAAAAAAAAAAAD7/wMAAAAAAAAAAAD8/wMAAAAAAAAAAAD9/wMAAAAAAAAAAAD+/wMAAAAAAAAAAAD//wMAAAAAAAAAAAAAAAMAAAAAAAAAAAABAAMAAAAAAAAAAAACAAMAAAAAAAAAAAADAAMAAAAAAAAAAAAEAAMAAAAAAAAAAAD4/wIAAAAAAAAAAAD4/wEAAAAAAAAAAAD4/wAAAAAAAAAAAAD4////AAAAAAAAAAD4//7/AAAAAAAAAAD///7/AAAAAAAAAAD///3/AAAAAAAAAAA=")
+tile_set = ExtResource("7_spikes_ts")
+script = ExtResource("7_spikes_scr")
+
+[node name="Button2" type="Marker2D" parent="Switchable/Sueño/Layout2" unique_id=1672688517]
+position = Vector2(-52, -58)
+
+[node name="Teleport2" type="Marker2D" parent="Switchable/Sueño/Layout2" unique_id=464140476]
+position = Vector2(-166, -30)
+
+[node name="Layout3" type="Node2D" parent="Switchable/Sueño" unique_id=232830767]
+visible = false
+
+[node name="Spikes3" type="TileMapLayer" parent="Switchable/Sueño/Layout3" unique_id=88264107]
+z_index = 1
+scale = Vector2(0.2, 0.2)
+tile_map_data = PackedByteArray("AAD6//3/AAAAAAAAAAD6//7/AAAAAAAAAAD6////AAAAAAAAAAD6/wAAAAAAAAAAAAD6/wEAAAAAAAAAAAD7/wEAAAAAAAAAAAD7/wAAAAAAAAAAAAD7////AAAAAAAAAAD7//7/AAAAAAAAAAD7//3/AAAAAAAAAAD+/wMAAAAAAAAAAAD+/wIAAAAAAAAAAAD+/wEAAAAAAAAAAAD+/wAAAAAAAAAAAAD+////AAAAAAAAAAD+//7/AAAAAAAAAAD///7/AAAAAAAAAAD/////AAAAAAAAAAD//wAAAAAAAAAAAAD//wEAAAAAAAAAAAD//wIAAAAAAAAAAAD//wMAAAAAAAAAAAACAP3/AAAAAAAAAAACAP7/AAAAAAAAAAACAP//AAAAAAAAAAACAAAAAAAAAAAAAAACAAEAAAAAAAAAAAACAAIAAAAAAAAAAAACAPz/AAAAAAAAAAA=")
+tile_set = ExtResource("7_spikes_ts")
+script = ExtResource("7_spikes_scr")
+
+[node name="Button" type="Marker2D" parent="Switchable/Sueño/Layout3" unique_id=1785788385]
+position = Vector2(100.99999, -65.99999)
+scale = Vector2(0.99999994, 0.99999994)
+
+[node name="Teleport3" type="Marker2D" parent="Switchable/Sueño/Layout3" unique_id=1398498191]
+position = Vector2(-184, -61)
 
 [node name="TileMapLayer" type="TileMapLayer" parent="Switchable/Sueño" unique_id=1176985573]
 scale = Vector2(0.3, 0.3)
@@ -91,17 +129,8 @@ shape = SubResource("RectangleShape2D_door")
 
 [node name="ButtonSlots" type="Node2D" parent="." unique_id=232522831]
 
-[node name="Slot1" type="Marker2D" parent="ButtonSlots" unique_id=1539037382]
-position = Vector2(-100, -30)
-
-[node name="Slot2" type="Marker2D" parent="ButtonSlots" unique_id=1672688517]
-position = Vector2(20, -30)
-
-[node name="Slot3" type="Marker2D" parent="ButtonSlots" unique_id=1785788385]
-position = Vector2(-100, 40)
-
-[node name="Slot4" type="Marker2D" parent="ButtonSlots" unique_id=1716444678]
-position = Vector2(20, 40)
-
 [node name="Boss" parent="." unique_id=754355959 instance=ExtResource("8_boss")]
 position = Vector2(-42, 0)
+
+[node name="Teleport" type="Marker2D" parent="." unique_id=1550064661]
+position = Vector2(89, 39)

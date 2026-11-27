@@ -8,6 +8,7 @@ const MenuNavGate := preload("res://assets/scripts/hud/menu_nav_gate.gd")
 
 const INTRO_SLIDE_SECONDS := 2.8
 const UI_FADE_SECONDS := 0.85
+const ANY_BUTTON_AXIS_DEADZONE := 0.5
 const MENU_LABELS: PackedStringArray = ["Play", "Options", "Exit"]
 
 @export var menu_font_size: int = 26
@@ -100,11 +101,24 @@ func _mark_input_handled() -> void:
 
 signal interacted
 
-# detect key pressed activating signal 'interacted'
+# detect any button pressed (keyboard, gamepad or mouse) activating signal 'interacted'
 # interacted is used to wait any key
 func _input(event: InputEvent) -> void:
-	if event is InputEventKey and event.pressed:
+	if _is_any_button_press(event):
 		interacted.emit()
+
+
+func _is_any_button_press(event: InputEvent) -> bool:
+	if event is InputEventKey:
+		var key := event as InputEventKey
+		return key.pressed and not key.echo
+	if event is InputEventJoypadButton:
+		return (event as InputEventJoypadButton).pressed
+	if event is InputEventMouseButton:
+		return (event as InputEventMouseButton).pressed
+	if event is InputEventJoypadMotion:
+		return absf((event as InputEventJoypadMotion).axis_value) >= ANY_BUTTON_AXIS_DEADZONE
+	return false
 
 # used for dissolve tween
 func shader_dissolve(value: float):

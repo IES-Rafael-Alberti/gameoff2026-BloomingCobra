@@ -14,6 +14,9 @@ enum State { IDLE, FIGHTING, WEAKPOINT_EXPOSED, DEAD }
 @export var heal_drop_scene: PackedScene = preload("res://assets/scenes/props/pickups/pickup_heal.tscn")
 @export var button_scene: PackedScene = preload("res://assets/scenes/props/vigilia/interactive/buttonVigilia.tscn")
 @export var button_only_in_vigilia: bool = true
+## When false the room owns the weak-point button (boss room vigilia layouts) and
+## calls trigger_weakpoint() on press, so the boss must not spawn its own.
+@export var manage_button: bool = true
 
 @onready var head: BossHead = get_node_or_null("BossCabeza") as BossHead
 @onready var left_hand: BossHand = get_node_or_null("BossManoIzquierda") as BossHand
@@ -196,6 +199,8 @@ func _run_attack(attack_id: String) -> void:
 
 
 func _ensure_button() -> void:
+	if not manage_button:
+		return
 	if _button != null and is_instance_valid(_button):
 		return
 	if button_scene == null:
@@ -238,6 +243,11 @@ func _place_button() -> void:
 
 
 func _on_button_pressed() -> void:
+	trigger_weakpoint()
+
+
+## Exposes the weak point. Used by the room-owned layout button.
+func trigger_weakpoint() -> void:
 	if _state != State.FIGHTING:
 		return
 	_state = State.WEAKPOINT_EXPOSED
