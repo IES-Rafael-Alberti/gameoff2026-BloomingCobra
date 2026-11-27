@@ -10,7 +10,7 @@ const INTRO_SLIDE_SECONDS := 2.8
 const UI_FADE_SECONDS := 0.85
 const MENU_LABELS: PackedStringArray = ["Play", "Options", "Exit"]
 
-@export var menu_font_size: int = 56
+@export var menu_font_size: int = 26
 @export var menu_color: Color = Color(0.96, 0.92, 0.86, 1.0)
 @export var logo_max_width_ratio: float = 0.48
 @export var colgantes_width_ratio: float = 0.92
@@ -18,11 +18,15 @@ const MENU_LABELS: PackedStringArray = ["Play", "Options", "Exit"]
 @onready var _scroll_bg: TextureRect = $Background/ScrollBackground
 @onready var _ui: Control = $UI
 @onready var _logo: TextureRect = $UI/Logo
-@onready var _colgantes: TextureRect = $UI/Colgantes
+@onready var _colgantes: Node = $UI/Colgantes
 @onready var _brand: TextureRect = $UI/BloomingCobra
 @onready var _menu_row: HBoxContainer = $UI/MenuRow
 @onready var _selector_left: TextureRect = $UI/SelectorLeft
 @onready var _selector_right: TextureRect = $UI/SelectorRight
+@onready var _welcome: TextureRect = $"Welcome title/Logoblanco"
+@onready var _welcome_text: Label = $"Welcome title/Label"
+@onready var bajan_colgantes: AnimationPlayer = $"UI/Colgantes/bajan colgantes"
+
 
 var _menu_items: Array[Label] = []
 var _selected_index: int = 0
@@ -34,6 +38,11 @@ var _exit_confirm: Control
 var _nav := MenuNavGate.new()
 
 
+
+# Voy a intentar que las estrellas bajen con el fondo con un await para que no empiecen hasta que presiones algun botón ("press any button")
+# No he sabido
+
+
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_menu_font = load(FONT_PATH) as Font
@@ -41,10 +50,14 @@ func _ready() -> void:
 	_setup_options()
 	_setup_exit_confirm()
 	_ui.modulate.a = 0.0
+	_welcome.modulate.a = 0.0
+	_welcome_text.modulate.a = 0.0
 	_selector_left.visible = false
 	_selector_right.visible = false
 	resized.connect(_on_resized)
 	_on_resized()
+	
+	
 	await _play_intro()
 	_input_enabled = true
 	_update_selection_visuals()
@@ -87,8 +100,52 @@ func _mark_input_handled() -> void:
 		viewport.set_input_as_handled()
 
 
+signal interacted
+
+# detect key pressed activating signal 'interacted'
+# interacted is used to wait any key
+func _input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed:
+		interacted.emit()
+
+# used for dissolve tween
+func shader_dissolve(value: float):
+	_welcome.material.set_shader_parameter("dissolve", value)
+
 func _play_intro() -> void:
 	await get_tree().process_frame
+	
+	# wait 2 seconds before logo fade in 
+	await get_tree().create_timer(1).timeout
+	
+	_welcome.modulate.a = 1.0
+	
+	# inverted dissolve for logo fade in
+	var fade_welcome := create_tween()
+	fade_welcome.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	fade_welcome.tween_method(shader_dissolve, 1.0, 0.0, 3.0)
+	await fade_welcome.finished
+
+	# fade in welcome text: 'Press any key'
+	var fade_welcome_text := create_tween()
+	fade_welcome_text.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	fade_welcome_text.tween_property(_welcome_text, "modulate:a", 1.5, 1.0)
+	await fade_welcome_text.finished
+	
+	# wait for any key pressed
+	await interacted
+	
+	# remove welcome text
+	#_welcome_text.modulate.a = 0.0
+	
+	#remove welcome text pero con un fade
+	var fadeout_welcome_text := create_tween()
+	fadeout_welcome_text.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	fadeout_welcome_text.tween_property(_welcome_text, "modulate:a", 0.0, 1.0)
+	
+	#me ha salío oleee :D
+	
+	
 	_layout_scroll_background(false)
 
 	var start_y := _scroll_start_y()
@@ -289,7 +346,7 @@ func _place_selectors() -> void:
 		if selector_size.x <= 1.0 and _selector_left.texture != null:
 			selector_size = _selector_left.texture.get_size()
 
-	var gap := 18.0
+	var gap := 5.0
 	var center_y := item_rect.position.y + item_rect.size.y * 0.5 - selector_size.y * 0.5
 	_selector_left.global_position = Vector2(item_rect.position.x - selector_size.x - gap, center_y)
 	_selector_right.global_position = Vector2(item_rect.position.x + item_rect.size.x + gap, center_y)
@@ -297,9 +354,9 @@ func _place_selectors() -> void:
 
 func _on_resized() -> void:
 	_layout_scroll_background(_intro_done)
-	_fit_logo()
-	_fit_colgantes()
-	_fit_brand()
+	#_fit_logo()
+	#_fit_colgantes()
+	#_fit_brand()
 	_fit_menu_row()
 	_fit_selectors()
 	if _input_enabled and not _is_options_open() and not _is_exit_confirm_open():
@@ -317,15 +374,15 @@ func _fit_logo() -> void:
 	_logo.position = Vector2((size.x - target_w) * 0.5, size.y * 0.12)
 
 
-func _fit_colgantes() -> void:
-	if _colgantes.texture == null:
-		return
-	var tex_size := _colgantes.texture.get_size()
-	var target_w := size.x * colgantes_width_ratio
-	var scale_factor := target_w / tex_size.x
-	var target_h := tex_size.y * scale_factor
-	_colgantes.size = Vector2(target_w, target_h)
-	_colgantes.position = Vector2((size.x - target_w) * 0.5, -size.y * 0.02)
+#func _fit_colgantes() -> void:
+	#if _colgantes.texture == null:
+		#return
+	#var tex_size := _colgantes.texture.get_size()
+	#var target_w := size.x * colgantes_width_ratio
+	#var scale_factor := target_w / tex_size.x
+	#var target_h := tex_size.y * scale_factor
+	#_colgantes.size = Vector2(target_w, target_h)
+	#_colgantes.position = Vector2((size.x - target_w) * 0.5, -size.y * 0.02)
 
 
 func _fit_brand() -> void:
@@ -349,7 +406,8 @@ func _fit_menu_row() -> void:
 
 
 func _fit_selectors() -> void:
-	var side := maxf(36.0, size.y * 0.045)
+	#var side := maxf(36.0, size.y * 0.045)
+	var side := 30.0
 	_selector_left.custom_minimum_size = Vector2(side, side)
 	_selector_right.custom_minimum_size = Vector2(side, side)
 	_selector_left.size = Vector2(side, side)
