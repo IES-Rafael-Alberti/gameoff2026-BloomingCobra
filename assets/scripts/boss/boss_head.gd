@@ -9,7 +9,8 @@ signal weakpoint_damaged(amount: int, current_health: int)
 @export var weakpoint_max_hp: int = 8
 @export var laser_damage: int = 3
 @export var aoe_damage: int = 2
-@export var laser_sweep_duration: float = 1.6
+## Slow enough to read the beam and step around it before it reaches you.
+@export var laser_sweep_duration: float = 2.8
 @export var laser_length: float = 260.0
 @export var laser_edge_margin: float = 18.0
 @export var laser_hit_cooldown: float = 0.35
@@ -38,6 +39,8 @@ signal weakpoint_damaged(amount: int, current_health: int)
 @export var laser_line_width: float = 18.0
 @export_group("Fall / Return")
 @export var fall_duration: float = 0.55
+## While the head is down, draw it below the player (hands stay above).
+@export var fallen_z_index: int = 1
 @export var impact_hold_time: float = 0.08
 @export var impact_tremble_time: float = 0.55
 @export var float_home_duration: float = 0.9
@@ -71,6 +74,9 @@ var _laser_line_b: Line2D = null
 var _charging_aoe: bool = false
 var _aoe_base_modulate: Color = Color.WHITE
 var _fallen_in_arena: bool = false
+var _solid_body: StaticBody2D = null
+var _solid_shape: CollisionShape2D = null
+var _base_z_index: int = 3
 var _sprite_base_scale: Vector2 = Vector2.ONE
 var _sprite_base_pos: Vector2 = Vector2.ZERO
 var _aoe_pulse_frames: int = 4
@@ -83,6 +89,9 @@ var _beam_tips: Array[AnimatedSprite2D] = []
 
 func _ready() -> void:
 	super._ready()
+	_base_z_index = z_index
+	_setup_fallen_body()
+	set_solid(false)
 	# Head can be hit by player attacks while weakpoint is exposed.
 	add_to_group("enemy")
 	_setup_white_flash_material()
@@ -163,6 +172,7 @@ func hide_weakpoint() -> void:
 ## After the weakpoint HP is depleted: float back to the northern perch.
 func retreat_to_perch() -> void:
 	_set_weakpoint_active(false)
+	set_solid(false)
 	_knockback = Vector2.ZERO
 	if animated_sprite != null:
 		animated_sprite.scale = _sprite_base_scale
@@ -170,6 +180,7 @@ func retreat_to_perch() -> void:
 	play_anim(&"Idle")
 	if _fallen_in_arena:
 		await _float_to_home()
+	_set_fallen_depth(false)
 	_fallen_in_arena = false
 
 
@@ -183,6 +194,38 @@ func _set_weakpoint_active(active: bool) -> void:
 		weakpoint_shape.set_deferred("disabled", not active)
 
 
+## Separate static collider so the fallen head blocks the player without
+## re-enabling the hurtboxes/hazard contact used by attacks.
+func _setup_fallen_body() -> void:
+	var source := get_node_or_null("CollisionShape2D") as CollisionShape2D
+	var shape: Shape2D = null
+	if source != null and source.shape != null:
+		shape = source.shape.duplicate()
+	else:
+		var circle := CircleShape2D.new()
+		circle.radius = 22.0
+		shape = circle
+	_solid_body = StaticBody2D.new()
+	_solid_body.name = "FallenBody"
+	_solid_body.collision_layer = 1 << 2
+	_solid_body.collision_mask = 1 << 1
+	_solid_shape = CollisionShape2D.new()
+	_solid_shape.name = "CollisionShape2D"
+	_solid_shape.shape = shape
+	_solid_body.add_child(_solid_shape)
+	add_child(_solid_body)
+
+
+func set_solid(enabled: bool) -> void:
+	if _solid_shape == null:
+		return
+	_solid_shape.set_deferred("disabled", not enabled)
+
+
+func _set_fallen_depth(fallen: bool) -> void:
+	z_index = fallen_z_index if fallen else _base_z_index
+
+
 func _arena_drop_position() -> Vector2:
 	var arena := get_arena()
 	if arena.size != Vector2.ZERO:
@@ -191,6 +234,8 @@ func _arena_drop_position() -> Vector2:
 
 
 func _fall_into_arena() -> void:
+	# Only the head drops below the player's draw layer; hands keep their z.
+	_set_fallen_depth(true)
 	var target := _arena_drop_position()
 	var tween := create_tween()
 	tween.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
@@ -199,6 +244,7 @@ func _fall_into_arena() -> void:
 	if not _can_await():
 		return
 	_fallen_in_arena = true
+	set_solid(true)
 	await _play_impact()
 
 

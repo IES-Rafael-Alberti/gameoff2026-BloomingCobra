@@ -29,6 +29,8 @@ var _mode: int = 0
 var _room_music: StringName = ROOM_NONE
 var _bound: bool = false
 var _fade_tween: Tween
+## Death / ending silence: mode or room changes must not restart the beds.
+var _music_muted: bool = false
 
 
 func _ready() -> void:
@@ -62,6 +64,36 @@ func set_room_music(kind: StringName) -> void:
 
 func clear_room_music() -> void:
 	set_room_music(ROOM_NONE)
+
+
+## Fade all beds out and keep them out until unmuted (used on player death).
+func mute_music(fade_sec: float = -1.0) -> void:
+	_music_muted = true
+	var fade := music_fade_sec if fade_sec < 0.0 else maxf(fade_sec, 0.0)
+	if _fade_tween != null and _fade_tween.is_valid():
+		_fade_tween.kill()
+	if fade <= 0.0:
+		_silence_voices()
+		return
+	_fade_tween = create_tween()
+	_fade_tween.set_parallel(true)
+	for voice in [_music_vigil, _music_nightmare, _music_safe_zone, _music_memories, _music_boss]:
+		_tween_voice(voice, -80.0, fade)
+	# Voices stay at -80 (silent) instead of being stopped, so the fade is clean.
+
+
+func unmute_music() -> void:
+	if not _music_muted:
+		return
+	_music_muted = false
+	_refresh_music()
+
+
+func _silence_voices() -> void:
+	for voice in [_music_vigil, _music_nightmare, _music_safe_zone, _music_memories, _music_boss]:
+		if voice != null:
+			voice.volume_db = -80.0
+			voice.stop()
 
 
 func _make_music_voice(voice_name: String) -> AudioStreamPlayer:
@@ -112,6 +144,8 @@ func _start_bed(voice: AudioStreamPlayer, stream: AudioStream) -> void:
 
 
 func _refresh_music() -> void:
+	if _music_muted:
+		return
 	_ensure_beds_playing()
 
 	var vigil_db := -80.0

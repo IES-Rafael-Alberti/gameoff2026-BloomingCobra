@@ -1,0 +1,58 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/hud/intro.gd" id="1_intro"]
+[ext_resource type="PackedScene" path="res://assets/scenes/HUD/libro.tscn" id="2_book"]
+[ext_resource type="Texture2D" path="res://assets/scenary/plano1.png" id="3_bg"]
+
+[node name="Intro" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_intro")
+
+[node name="BlackBg" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 1)
+
+[node name="Background" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("3_bg")
+expand_mode = 1
+stretch_mode = 5
+modulate = Color(1, 1, 1, 0)
+
+[node name="Book" parent="." instance=ExtResource("2_book")]
+
+[node name="FlashLayer" type="CanvasLayer" parent="."]
+layer = 10
+
+[node name="Flash" type="ColorRect" parent="FlashLayer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(1, 1, 1, 1)
+modulate = Color(1, 1, 1, 0)
+
+[node name="ThunderPlayer" type="AudioStreamPlayer" parent="."]
+
+[node name="ConfirmLayer" type="CanvasLayer" parent="."]
+layer = 20

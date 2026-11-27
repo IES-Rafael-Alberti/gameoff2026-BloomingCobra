@@ -300,6 +300,10 @@ func _on_vitality_depleted() -> void:
 	_stop_steps()
 	if attack != null and attack.has_method("set_enabled"):
 		attack.set_enabled(false)
+	# Don't let the music keep playing under the death freeze / reload.
+	for node in get_tree().get_nodes_in_group("sfx_general"):
+		if node.has_method("mute_music"):
+			node.call("mute_music", 0.25)
 	# Brief death beat, then restart the run.
 	play_hurt_animation(facing)
 	await get_tree().create_timer(0.35).timeout
@@ -322,6 +326,17 @@ func is_iframe_active() -> bool:
 
 func _is_iframe_active() -> bool:
 	return is_iframe_active()
+
+
+## Short protection after a forced teleport (e.g. boss-room shift return).
+func grant_spawn_iframes(duration: float) -> void:
+	if _dead or duration <= 0.0:
+		return
+	var saved := iframe_duration
+	iframe_duration = duration
+	_start_iframes()
+	iframe_duration = saved
+	_apply_iframe_blink_visual()
 
 
 func _start_iframes() -> void:
@@ -468,9 +483,13 @@ func update_attack_charge(ratio: float, half: float = 0.5) -> void:
 		return
 	var frame := 1 if ratio >= half else 0
 	_charge_shake = frame >= 1
-	var anim := _attack_anim_name(_cardinal_from(facing))
+	# Follow the held arrow directly: `facing` can still be stale on the first
+	# charge frame (or after a hit), which used to pin the pose to down.
+	var aim := get_aim_vector()
+	var pose_dir := _cardinal_from(aim) if aim != Vector2.ZERO else facing
+	var anim := _attack_anim_name(pose_dir)
 	if animated_sprite.animation != anim:
-		_set_attack_pose(facing, frame)
+		_set_attack_pose(pose_dir, frame)
 	elif animated_sprite.frame != frame:
 		animated_sprite.frame = frame
 		animated_sprite.pause()

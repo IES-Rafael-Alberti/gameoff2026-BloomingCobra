@@ -115,7 +115,7 @@ func _physics_process(delta: float) -> void:
 		_charge = 0.0
 		_charge_ready_flashed = false
 		if _player.has_method("begin_attack_charge"):
-			_player.call("begin_attack_charge", _cardinal_facing())
+			_player.call("begin_attack_charge", _current_aim_facing())
 
 	if _charging:
 		if attack_held:
@@ -156,7 +156,7 @@ func _perform(kind: AttackKind) -> void:
 	_busy = true
 	_hit_ids.clear()
 	_active_kind = kind
-	var facing := _cardinal_facing()
+	var facing := _current_aim_facing()
 
 	if _player.has_method("play_attack_release"):
 		_player.call("play_attack_release", facing)
@@ -586,16 +586,29 @@ func _is_attack_just_released() -> bool:
 
 
 func _cardinal_facing() -> Vector2:
-	var facing := Vector2.DOWN
+	var facing := Vector2.ZERO
 	if _player != null and _player.has_method("get_attack_facing"):
 		facing = _player.call("get_attack_facing") as Vector2
 	elif _player != null and "facing" in _player and _player.facing is Vector2:
 		facing = _player.facing as Vector2
-	if facing == Vector2.ZERO:
+	return _to_cardinal(facing)
+
+
+## Held arrow / stick wins over cached facing on the charge-start frame.
+func _current_aim_facing() -> Vector2:
+	if _player != null and _player.has_method("get_aim_vector"):
+		var aim := _player.call("get_aim_vector") as Vector2
+		if aim != Vector2.ZERO:
+			return _to_cardinal(aim)
+	return _cardinal_facing()
+
+
+func _to_cardinal(direction: Vector2) -> Vector2:
+	if direction == Vector2.ZERO:
 		return Vector2.DOWN
-	if absf(facing.x) >= absf(facing.y):
-		return Vector2.RIGHT if facing.x > 0.0 else Vector2.LEFT
-	return Vector2.DOWN if facing.y > 0.0 else Vector2.UP
+	if absf(direction.x) >= absf(direction.y):
+		return Vector2.RIGHT if direction.x > 0.0 else Vector2.LEFT
+	return Vector2.DOWN if direction.y > 0.0 else Vector2.UP
 
 
 func _apply_hit(target: Node, amount: int) -> void:

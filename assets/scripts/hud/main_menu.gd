@@ -2,7 +2,7 @@ extends Control
 
 ## Pantalla de inicio: la cámara sube por inicio_titulo_background y luego aparece la UI.
 
-const GAME_SCENE := "res://assets/scenes/game.tscn"
+const INTRO_SCENE := "res://assets/scenes/HUD/intro.tscn"
 const FONT_PATH := "res://assets/fonts/MagicalNeverlandRegular-JpRZ7.ttf"
 const MenuNavGate := preload("res://assets/scripts/hud/menu_nav_gate.gd")
 
@@ -292,16 +292,14 @@ func _activate_selection() -> void:
 
 func _start_game() -> void:
 	_input_enabled = false
-	if RunState != null and RunState.has_method("begin_new_run"):
-		RunState.begin_new_run()
-	elif RunState != null and RunState.has_method("reset"):
-		RunState.reset()
+	# Play shows the intro first. RunState.begin_new_run() is called by the intro
+	# only when the player confirms they want to go to sleep, so NO keeps saves.
 	# Call the autoload directly so the async transition survives change_scene.
 	# (Object.call on a freeing menu node can stall the loading overlay.)
 	if SceneTransition != null and SceneTransition.has_method("change_to"):
-		SceneTransition.change_to(GAME_SCENE)
+		SceneTransition.change_to(INTRO_SCENE)
 	else:
-		get_tree().change_scene_to_file(GAME_SCENE)
+		get_tree().change_scene_to_file(INTRO_SCENE)
 
 
 func _open_options() -> void:

@@ -1,0 +1,128 @@
+[gd_scene format=3 uid="uid://dlwpso74rwfdd"]
+
+[ext_resource type="Texture2D" uid="uid://2hhqujna2i17" path="res://assets/sprittesheets/libro/spritesheetred.png" id="1_c3x2t"]
+[ext_resource type="FontFile" uid="uid://brnbuey8wndyf" path="res://assets/fonts/MagicalNeverlandRegular-JpRZ7.ttf" id="2_font"]
+[ext_resource type="Script" path="res://assets/scripts/hud/book_page.gd" id="3_page"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_s6fcn"]
+atlas = ExtResource("1_c3x2t")
+region = Rect2(480, 270, 480, 270)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2fogk"]
+atlas = ExtResource("1_c3x2t")
+region = Rect2(960, 270, 480, 270)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5f603"]
+atlas = ExtResource("1_c3x2t")
+region = Rect2(0, 540, 480, 270)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_enxwt"]
+atlas = ExtResource("1_c3x2t")
+region = Rect2(0, 270, 480, 270)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_s3bmp"]
+atlas = ExtResource("1_c3x2t")
+region = Rect2(960, 0, 480, 270)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4uwip"]
+atlas = ExtResource("1_c3x2t")
+region = Rect2(480, 0, 480, 270)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qkdnr"]
+atlas = ExtResource("1_c3x2t")
+region = Rect2(0, 0, 480, 270)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_bhbtl"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_s6fcn")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2fogk")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5f603")
+}],
+"loop": 0,
+"name": &"NextPage",
+"speed": 9.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5f603")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2fogk")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_s6fcn")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_enxwt")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_s3bmp")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4uwip")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qkdnr")
+}],
+"loop": 0,
+"name": &"close",
+"speed": 9.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qkdnr")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4uwip")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_s3bmp")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_enxwt")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_s6fcn")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2fogk")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5f603")
+}],
+"loop": 0,
+"name": &"open",
+"speed": 9.0
+}]
+
+[node name="Libro" type="Node2D" unique_id=107881099]
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1690310099]
+sprite_frames = SubResource("SpriteFrames_bhbtl")
+animation = &"open"
+
+[node name="BookText" type="Control" parent="." unique_id=506602685]
+offset_left = -130.0
+offset_top = -46.0
+offset_right = -30.0
+offset_bottom = 102.0
+mouse_filter = 2
+script = ExtResource("3_page")
+font_size = 10
+default_text = "Some people say that dreams can come true; others say that there are infinite versions of you in equally infinite realities. If you believe these claims, you're already halfway through achieving your wishes. By SHIFTING, you can access these realities."
+
+[node name="BookTextRight" type="Control" parent="." unique_id=1444604264]
+offset_left = -10.0
+offset_top = -46.0
+offset_right = 100.0
+offset_bottom = 102.0
+mouse_filter = 2
+script = ExtResource("3_page")
+font_size = 10
+default_text = "Whenever you're in a deep slumber, you'll be able to reach into the depths of your mind, and if you're brave enough to conquer your fears, you'll be capable of shifting into the reality your heart desires. But be careful: if you stay too long in a light and beautiful dream, you'll eventually wake up."

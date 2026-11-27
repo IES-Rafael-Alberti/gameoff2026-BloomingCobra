@@ -225,6 +225,9 @@ func _ensure_button() -> void:
 	if _button == null:
 		return
 	_button.name = "BossWeakButton"
+	_button.z_index = 10
+	_button.z_as_relative = false
+	_button.add_to_group("boss_button")
 	if "stay_pressed" in _button:
 		_button.stay_pressed = true
 	if "one_shot" in _button:
@@ -309,6 +312,11 @@ func _tick_cat_spawn(delta: float) -> void:
 		# Check again shortly in case the existing cat is caught in the meantime.
 		_cat_spawn_timer = 0.5
 		return
+	if _has_pending_cat_heal():
+		# Don't queue another cat while its heal is still on the floor: otherwise
+		# the player can stack heals by ignoring the drop and waiting out the timer.
+		_cat_spawn_timer = maxf(_cat_spawn_timer, maxf(cat_respawn_delay, 0.0))
+		return
 	_spawn_cat()
 	_cat_spawn_timer = maxf(cat_spawn_interval, 0.1)
 
@@ -319,6 +327,21 @@ func _has_live_cat() -> bool:
 	for cat in get_tree().get_nodes_in_group(&"cat"):
 		if is_instance_valid(cat):
 			return true
+	return false
+
+
+## True while a cat-heal pickup from a previous catch is still there uncollected.
+func _has_pending_cat_heal() -> bool:
+	if get_tree() == null:
+		return false
+	for pickup in get_tree().get_nodes_in_group(&"prop_pickup"):
+		if not is_instance_valid(pickup) or not pickup.has_method("get_pickup_type"):
+			continue
+		if pickup.call("get_pickup_type") != &"cat_heal":
+			continue
+		if pickup.has_method("was_consumed") and bool(pickup.call("was_consumed")):
+			continue
+		return true
 	return false
 
 

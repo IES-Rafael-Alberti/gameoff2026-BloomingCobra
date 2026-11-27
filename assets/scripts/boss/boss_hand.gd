@@ -20,6 +20,8 @@ extends BossPart
 @export var slam_radius: float = 36.0
 @export var slam_shadow_start_scale: float = 0.35
 @export var slam_shadow_end_scale: float = 1.6
+## Hands never come to rest on a pressable boss button.
+@export var button_keepout_radius: float = 42.0
 
 @onready var shadow: Sprite2D = get_node_or_null("Shadow") as Sprite2D
 
@@ -47,7 +49,7 @@ func _physics_process(delta: float) -> void:
 	if _slam_shadow_active and shadow != null and not _slam_shadow_locked:
 		var player := get_player()
 		if player != null:
-			shadow.global_position = player.global_position
+			shadow.global_position = _keepout_point(player.global_position)
 
 
 func attack_swipe() -> void:
@@ -76,6 +78,8 @@ func attack_swipe() -> void:
 	else:
 		start_x = _home_position.x
 		end_x = _home_position.x + float(-side) * 180.0
+	# Don't finish a sweep sitting on top of the button.
+	end_x = _keepout_x(end_x, row_y)
 
 	var approach := Vector2(start_x, row_y)
 	var tween_in := create_tween()
@@ -156,7 +160,7 @@ func attack_slam() -> void:
 			shadow.modulate.a = lerpf(0.35, 0.7, 0.5 + 0.5 * sin(elapsed * 10.0))
 
 	_slam_shadow_locked = true
-	_slam_shadow_target = shadow.global_position if shadow != null else global_position
+	_slam_shadow_target = _keepout_point(shadow.global_position if shadow != null else global_position)
 	if shadow != null:
 		shadow.global_position = _slam_shadow_target
 		shadow.modulate = Color(0.05, 0.05, 0.08, 0.85)
@@ -200,6 +204,40 @@ func _recovery_duration(base: float) -> float:
 	# Longer trips keep the slow start readable before the acceleration kicks in.
 	var dist := global_position.distance_to(_home_position)
 	return maxf(base, dist / 280.0)
+
+
+func _active_button() -> Node2D:
+	for node in get_tree().get_nodes_in_group("boss_button"):
+		if node is Node2D and (node as Node2D).is_visible_in_tree():
+			return node as Node2D
+	return null
+
+
+## Push a landing/telegraph point out of the button's safe pocket.
+func _keepout_point(point: Vector2) -> Vector2:
+	var button := _active_button()
+	if button == null:
+		return point
+	var center := button.global_position
+	var away := point - center
+	if away.length() >= button_keepout_radius:
+		return point
+	if away == Vector2.ZERO:
+		away = _home_position - center
+	if away == Vector2.ZERO:
+		away = Vector2.UP
+	return center + away.normalized() * button_keepout_radius
+
+
+## Sweeps keep a fixed row, so only shift their end along X around the button.
+func _keepout_x(x: float, y: float) -> float:
+	var button := _active_button()
+	if button == null:
+		return x
+	var center := button.global_position
+	if absf(y - center.y) >= button_keepout_radius or absf(x - center.x) >= button_keepout_radius:
+		return x
+	return center.x + (button_keepout_radius if x >= center.x else -button_keepout_radius)
 
 
 func _tremble(duration: float) -> bool:

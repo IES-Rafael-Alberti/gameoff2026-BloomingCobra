@@ -31,6 +31,19 @@ extends Room
 ## Pressing the layout button switches back to nightmare automatically.
 @export var button_switches_to_nightmare: bool = true
 
+@export_group("Spike Contrast")
+## Boss-only dark underlay: spike tiles are hard to read far from the camera.
+@export var spike_underlay_enabled: bool = true
+## Extra dark margin (in spike-tile local pixels) around spike clusters.
+@export var spike_underlay_padding: float = 14.0
+@export_range(0.0, 1.0, 0.05) var spike_underlay_alpha: float = 0.10
+
+@export_group("Return Spawn")
+## Keep this much distance from boss parts when shifting back into the arena.
+@export var spawn_clearance: float = 64.0
+## Brief invulnerability so a hand crossing the spawn can't hit you instantly.
+@export var spawn_iframes: float = 0.9
+
 @export_group("Ending")
 @export var light_orb_scene: PackedScene = preload("res://assets/scenes/boss/boss_light_orb.tscn")
 @export var main_menu_scene: String = "res://assets/scenes/HUD/main_menu.tscn"
@@ -51,6 +64,8 @@ var _boss_music_owned: bool = false
 var _light_orb: Node2D = null
 var _ending_started: bool = false
 
+const _SPIKE_UNDERLAY_SCRIPT: GDScript = preload("res://assets/scripts/props/static/spike_contrast_underlay.gd")
+
 
 func _ready() -> void:
 	super._ready()
@@ -62,6 +77,7 @@ func _ready() -> void:
 		_boss.manage_button = false
 	if not WorldMode.mode_changed.is_connected(_on_world_mode_changed):
 		WorldMode.mode_changed.connect(_on_world_mode_changed)
+	_install_spike_contrast()
 	_clear_layout()
 
 
@@ -92,7 +108,9 @@ func on_player_entered(player: Node2D) -> void:
 
 func on_player_exited(player: Node2D) -> void:
 	_cancel_intro(player)
-	_unlock_boss_camera()
+	# Once defeated, hold the ending framing until the scene changes.
+	if not _boss_defeated:
+		_unlock_boss_camera()
 	_end_vigilia_layout()
 	_stop_boss_music()
 
@@ -147,7 +165,8 @@ func _on_boss_defeated() -> void:
 	_intro_running = false
 	_intro_token += 1
 	_end_vigilia_layout()
-	_unlock_boss_camera()
+	# Keep the arena framed while the light orb plays: unlocking here snaps the
+	# camera back to the play zoom right when the ending glow should breathe.
 	mark_room_cleared()
 	cancel_pending_door_close()
 	set_all_doors_open(true)
@@ -256,6 +275,28 @@ func _layouts() -> Array[Node2D]:
 	return result
 
 
+## Boss arena only: paint a dark halo under every spike layer so the spikes read
+## at the locked-out camera distance. The underlay is a sibling inserted before
+## the spike layer, so it sits above the floor but below the spike tiles.
+func _install_spike_contrast() -> void:
+	if not spike_underlay_enabled:
+		return
+	for node in find_children("*", "TileMapLayer", true, false):
+		var layer := node as TileMapLayer
+		if layer == null or layer.tile_set == null:
+			continue
+		if not _tile_set_has_spike_data(layer.tile_set):
+			continue
+		var parent := layer.get_parent()
+		if parent == null or parent.get_node_or_null("SpikeContrastUnderlay") != null:
+			continue
+		var underlay: Node2D = _SPIKE_UNDERLAY_SCRIPT.new()
+		underlay.name = "SpikeContrastUnderlay"
+		parent.add_child(underlay)
+		underlay.call("setup", layer, spike_underlay_padding, spike_underlay_alpha)
+		parent.move_child(underlay, layer.get_index())
+
+
 func _hide_all_layouts() -> void:
 	for layout in _layouts():
 		layout.visible = false
@@ -349,8 +390,11 @@ func _spawn_layout_button(layout: Node2D) -> void:
 	if _layout_button == null:
 		return
 	_layout_button.name = "LayoutButton"
-	# Layout spike layers use z_index = 1, so keep the button above them.
-	_layout_button.z_index = 5
+	# Above spike layers (1) and boss hands (3+), with absolute z so it stays
+	# visible even when the layout node is nested under other CanvasItems.
+	_layout_button.z_index = 10
+	_layout_button.z_as_relative = false
+	_layout_button.add_to_group("boss_button")
 	layout.add_child(_layout_button)
 	_layout_button.global_position = marker.global_position
 	if _layout_button.has_signal("pressed"):
@@ -395,12 +439,15 @@ func _teleport_player_to_arena() -> void:
 	# The fallback Teleport marker is the arena's known-safe return point.
 	var target := get_node_or_null(fallback_teleport_path) as Node2D
 	var destination: Vector2 = target.global_position if target != null else get_default_spawn()
+	destination = _safe_spawn_position(destination)
 	player.global_position = destination
 	if player is CharacterBody2D:
 		var body := player as CharacterBody2D
 		body.velocity = Vector2.ZERO
 		if "_knockback" in body:
 			body.set("_knockback", Vector2.ZERO)
+		if body.has_method("grant_spawn_iframes"):
+			body.call("grant_spawn_iframes", spawn_iframes)
 	var cam := _player_camera()
 	if cam != null and cam.has_method("snap_to_room"):
 		cam.call("snap_to_room", self)
@@ -427,6 +474,43 @@ func _stop_boss_music() -> void:
 	if sfx != null and sfx.has_method("clear_room_music"):
 		sfx.call("clear_room_music")
 	_boss_music_owned = false
+
+
+func _boss_parts() -> Array[Node2D]:
+	var parts: Array[Node2D] = []
+	if _boss == null or not is_instance_valid(_boss):
+		return parts
+	for part in [_boss.head, _boss.left_hand, _boss.right_hand]:
+		if part is Node2D and is_instance_valid(part):
+			parts.append(part as Node2D)
+	return parts
+
+
+## Try nearby spots when a hand (or the head) is sitting on the return point.
+func _safe_spawn_position(preferred: Vector2) -> Vector2:
+	var parts := _boss_parts()
+	if parts.is_empty():
+		return preferred
+	var arena := Rect2()
+	if _boss != null and _boss.head != null:
+		arena = _boss.head.get_arena()
+	var offsets: Array[Vector2] = [
+		Vector2.ZERO,
+		Vector2(0.0, -72.0), Vector2(72.0, 0.0), Vector2(-72.0, 0.0), Vector2(0.0, 72.0),
+		Vector2(64.0, -64.0), Vector2(-64.0, -64.0), Vector2(64.0, 64.0), Vector2(-64.0, 64.0)
+	]
+	for offset in offsets:
+		var point := preferred + offset
+		if arena.size != Vector2.ZERO and not arena.grow(-4.0).has_point(point):
+			continue
+		var clear := true
+		for part in parts:
+			if point.distance_to(part.global_position) < spawn_clearance:
+				clear = false
+				break
+		if clear:
+			return point
+	return preferred
 
 
 func _spawn_light_orb() -> void:
