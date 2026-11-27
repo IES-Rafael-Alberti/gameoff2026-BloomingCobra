@@ -164,7 +164,7 @@ func _perform(kind: AttackKind) -> void:
 			await _activate_melee(
 				_slash_hitbox,
 				facing,
-				slash_damage + _melee_damage_bonus(),
+				slash_damage,
 				slash_active_time,
 				_slash_sf,
 				slash_texture,
@@ -176,7 +176,7 @@ func _perform(kind: AttackKind) -> void:
 			await _activate_melee(
 				_thrust_hitbox,
 				facing,
-				thrust_damage + _melee_damage_bonus(),
+				thrust_damage,
 				thrust_active_time,
 				_thrust_sf,
 				thrust_texture,
@@ -330,7 +330,9 @@ func _spawn_projectile(facing: Vector2) -> void:
 		parent = _player
 	parent.add_child(bolt)
 	bolt.global_position = _player.global_position + facing * 8.0
-	bolt.set("damage", projectile_damage + _projectile_damage_bonus())
+	bolt.set("damage", projectile_damage)
+	# Charge bonus is consumed on impact, not on fire.
+	bolt.set_meta("buffs", _player_buffs())
 	if bolt.has_method("launch"):
 		bolt.call("launch", facing, projectile_speed)
 
@@ -341,17 +343,10 @@ func _player_buffs() -> Node:
 	return _player.get_node_or_null("Buffs")
 
 
-func _melee_damage_bonus() -> int:
+func _consume_melee_charge_bonus() -> int:
 	var buffs := _player_buffs()
-	if buffs != null and buffs.has_method("get_melee_damage_bonus"):
-		return int(buffs.call("get_melee_damage_bonus"))
-	return 0
-
-
-func _projectile_damage_bonus() -> int:
-	var buffs := _player_buffs()
-	if buffs != null and buffs.has_method("get_projectile_damage_bonus"):
-		return int(buffs.call("get_projectile_damage_bonus"))
+	if buffs != null and buffs.has_method("consume_melee_charge"):
+		return int(buffs.call("consume_melee_charge"))
 	return 0
 
 
@@ -540,6 +535,8 @@ func _try_hit_target(target: Node2D, hitbox: Area2D) -> void:
 		return
 	_hit_ids[id] = true
 	var amount := int(hitbox.get_meta("damage", slash_damage))
+	# Consume one attack charge on a landed hit and add its bonus.
+	amount += _consume_melee_charge_bonus()
 	_play_hit_sfx()
 	_apply_hit(target, amount)
 

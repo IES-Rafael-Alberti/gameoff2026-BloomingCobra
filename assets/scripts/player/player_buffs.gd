@@ -9,6 +9,9 @@ signal buffs_changed
 @export var default_attack_stacks: int = 1
 @export var default_projectile_stacks: int = 1
 @export var default_shield_hits: int = 3
+## Damage added by each consumed attack/projectile charge (per hit landed).
+@export var melee_bonus_per_charge: int = 1
+@export var projectile_bonus_per_charge: int = 1
 
 var _attack_stacks: int = 0
 var _projectile_stacks: int = 0
@@ -68,3 +71,21 @@ func try_absorb_hit() -> bool:
 	_shield_hits -= 1
 	buffs_changed.emit()
 	return true
+
+
+## Consumes one attack charge on a landed hit. Returns the damage bonus to add (0 if none).
+func consume_melee_charge() -> int:
+	if _attack_stacks <= 0:
+		return 0
+	_attack_stacks -= 1
+	buffs_changed.emit()
+	return maxi(melee_bonus_per_charge, 0)
+
+
+## Consumes one projectile charge on a landed hit. Returns the damage bonus to add (0 if none).
+func consume_projectile_charge() -> int:
+	if _projectile_stacks <= 0:
+		return 0
+	_projectile_stacks -= 1
+	buffs_changed.emit()
+	return maxi(projectile_bonus_per_charge, 0)

@@ -18,14 +18,12 @@ const MENU_LABELS: PackedStringArray = ["Play", "Options", "Exit"]
 @onready var _scroll_bg: TextureRect = $Background/ScrollBackground
 @onready var _ui: Control = $UI
 @onready var _logo: TextureRect = $UI/Logo
-@onready var _colgantes: Node = $UI/Colgantes
 @onready var _brand: TextureRect = $UI/BloomingCobra
 @onready var _menu_row: HBoxContainer = $UI/MenuRow
 @onready var _selector_left: TextureRect = $UI/SelectorLeft
 @onready var _selector_right: TextureRect = $UI/SelectorRight
 @onready var _welcome: TextureRect = $"Welcome title/Logoblanco"
 @onready var _welcome_text: Label = $"Welcome title/Label"
-@onready var bajan_colgantes: AnimationPlayer = $"UI/Colgantes/bajan colgantes"
 
 
 var _menu_items: Array[Label] = []

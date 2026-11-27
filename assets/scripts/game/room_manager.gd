@@ -45,8 +45,10 @@ func go_to(scene_path: String, entry_door_id: StringName = &"") -> void:
 
 	_player = _get_player()
 	if current_room != null:
-		current_room.save_state(RunState)
+		# Deactivate first so on_player_exited() commits button/door progress,
+		# then persist that committed state (plus any still-pressed buttons).
 		current_room.set_active(false, _player)
+		current_room.save_state(RunState)
 		current_room.queue_free()
 		current_room = null
 		await get_tree().process_frame

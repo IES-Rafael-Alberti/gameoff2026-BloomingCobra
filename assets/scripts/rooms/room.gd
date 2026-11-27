@@ -280,6 +280,12 @@ func save_state(_run_state: Node = null) -> void:
 			committed.append(String(door.door_id))
 	state["committed_doors"] = committed
 	state["buttons_committed"] = _button_unlock_committed or bool(state.get("buttons_committed", false))
+	# Per-button pressed state (partial puzzle progress), keyed by path relative to the room.
+	var buttons_state := {}
+	for button in get_buttons():
+		if button.is_pressed():
+			buttons_state[String(get_path_to(button))] = true
+	state["buttons"] = buttons_state
 	_register_links_with_run_state()
 	RunState.register_room_meta(room_id, scene_file_path, map_cell, int(map_shape))
 
@@ -292,6 +298,12 @@ func load_state(_run_state: Node = null) -> void:
 	for door in get_button_unlock_doors():
 		if committed.has(String(door.door_id)):
 			door.commit_buttons()
+	# Restore individually pressed buttons (partial puzzle progress).
+	var buttons_state: Dictionary = state.get("buttons", {})
+	for button in get_buttons():
+		var key := String(get_path_to(button))
+		if buttons_state.has(key) and bool(buttons_state[key]):
+			button.force_pressed(false)
 	_button_unlock_committed = _are_all_button_doors_committed(get_button_unlock_doors())
 	_button_unlock_done = _are_all_button_doors_unlocked(get_button_unlock_doors())
 
@@ -579,6 +591,20 @@ func _collect_doors(node: Node, out: Array[Door]) -> void:
 			out.append(child as Door)
 		else:
 			_collect_doors(child, out)
+
+
+func get_buttons() -> Array[PropButton]:
+	var found: Array[PropButton] = []
+	_collect_buttons(self, found)
+	return found
+
+
+func _collect_buttons(node: Node, out: Array[PropButton]) -> void:
+	for child in node.get_children():
+		if child is PropButton:
+			out.append(child as PropButton)
+		else:
+			_collect_buttons(child, out)
 
 
 func get_spawn_points() -> Array[EnemySpawnPoint]:
