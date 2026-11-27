@@ -11,6 +11,7 @@ const OVERLAY_COLOR := Color(0.02, 0.02, 0.05, 1.0)
 const TEXT_COLOR := Color(0.96, 0.92, 0.86, 1.0)
 
 var _busy: bool = false
+var _show_loading: bool = true
 var _overlay: ColorRect
 var _label: Label
 var _dot_index: int = 0
@@ -29,7 +30,8 @@ func is_busy() -> bool:
 	return _busy
 
 
-func change_to(scene_path: String) -> void:
+## Pass show_loading = false for a plain fade to black (ending → title).
+func change_to(scene_path: String, show_loading: bool = true) -> void:
 	if _busy:
 		return
 	if scene_path.is_empty():
@@ -37,6 +39,7 @@ func change_to(scene_path: String) -> void:
 		return
 	# Keep the coroutine owned by this autoload (survives change_scene).
 	_busy = true
+	_show_loading = show_loading
 	_run_transition(scene_path)
 
 
@@ -65,7 +68,7 @@ func _build_ui() -> void:
 
 
 func _process(delta: float) -> void:
-	if not _busy or _label == null or _label.modulate.a < 0.01:
+	if not _busy or not _show_loading or _label == null or _label.modulate.a < 0.01:
 		return
 	_dot_accum += delta
 	if _dot_accum < 0.35:
@@ -81,13 +84,13 @@ func _run_transition(scene_path: String) -> void:
 	_label.text = LOADING_BASE
 	_dot_index = 0
 	_dot_accum = 0.0
-	set_process(true)
+	set_process(_show_loading)
 
 	await _fade_overlay(1.0)
 	if not is_inside_tree():
 		_busy = false
 		return
-	_label.modulate.a = 1.0
+	_label.modulate.a = 1.0 if _show_loading else 0.0
 
 	var load_started_msec := Time.get_ticks_msec()
 	var packed := await _load_packed(scene_path)

@@ -23,6 +23,7 @@ size = Vector2(12, 40)
 
 [node name="BossRoom" type="Node2D" unique_id=1712451473]
 script = ExtResource("1_room")
+fallback_teleport_path = NodePath("Switchable/Sueño/Layout1/Teleport")
 room_id = &"boss_room"
 map_cell = Vector2i(1, 4)
 
@@ -39,7 +40,6 @@ tile_set = ExtResource("3_quqxi")
 [node name="Sueño" type="Node2D" parent="Switchable" unique_id=1522624834]
 
 [node name="Layout1" type="Node2D" parent="Switchable/Sueño" unique_id=1733288233]
-visible = false
 
 [node name="Spikes" type="TileMapLayer" parent="Switchable/Sueño/Layout1" unique_id=2082357055]
 z_index = 1
@@ -50,6 +50,9 @@ script = ExtResource("7_spikes_scr")
 
 [node name="Button1" type="Marker2D" parent="Switchable/Sueño/Layout1" unique_id=1539037382]
 position = Vector2(-177, -57)
+
+[node name="Teleport" type="Marker2D" parent="Switchable/Sueño/Layout1" unique_id=1550064661]
+position = Vector2(89, 39)
 
 [node name="Layout2" type="Node2D" parent="Switchable/Sueño" unique_id=1787450856]
 
@@ -67,7 +70,6 @@ position = Vector2(-52, -58)
 position = Vector2(-166, -30)
 
 [node name="Layout3" type="Node2D" parent="Switchable/Sueño" unique_id=232830767]
-visible = false
 
 [node name="Spikes3" type="TileMapLayer" parent="Switchable/Sueño/Layout3" unique_id=88264107]
 z_index = 1
@@ -131,6 +133,3 @@ shape = SubResource("RectangleShape2D_door")
 
 [node name="Boss" parent="." unique_id=754355959 instance=ExtResource("8_boss")]
 position = Vector2(-42, 0)
-
-[node name="Teleport" type="Marker2D" parent="." unique_id=1550064661]
-position = Vector2(89, 39)

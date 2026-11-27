@@ -31,6 +31,10 @@ extends Room
 ## Pressing the layout button switches back to nightmare automatically.
 @export var button_switches_to_nightmare: bool = true
 
+@export_group("Ending")
+@export var light_orb_scene: PackedScene = preload("res://assets/scenes/boss/boss_light_orb.tscn")
+@export var main_menu_scene: String = "res://assets/scenes/HUD/main_menu.tscn"
+
 var _boss: Boss = null
 var _fight_started: bool = false
 var _boss_defeated: bool = false
@@ -41,8 +45,11 @@ var _intro_token: int = 0
 var _layout_bag: Array[Node2D] = []
 var _active_layout: Node2D = null
 var _layout_button: Area2D = null
-## True only while this room is the one holding the world-mode lock.
-var _layout_lock_owned: bool = false
+var _sfx_general: Node = null
+## Avoid clearing an override that another system (or a later room) owns.
+var _boss_music_owned: bool = false
+var _light_orb: Node2D = null
+var _ending_started: bool = false
 
 
 func _ready() -> void:
@@ -75,6 +82,9 @@ func on_player_entered(player: Node2D) -> void:
 	if _boss_defeated:
 		set_all_doors_open(true)
 		return
+	# The fight always begins in pesadilla, even when arriving from a vigilia room.
+	if WorldMode.get_mode() != WorldMode.MODE_PESADILLA:
+		WorldMode.set_mode(WorldMode.MODE_PESADILLA)
 	close_doors_after_delay()
 	if auto_start_fight and not _fight_started and not _intro_running:
 		call_deferred("_start_boss_fight", player)
@@ -84,6 +94,7 @@ func on_player_exited(player: Node2D) -> void:
 	_cancel_intro(player)
 	_unlock_boss_camera()
 	_end_vigilia_layout()
+	_stop_boss_music()
 
 
 func _start_boss_fight(player: Node2D) -> void:
@@ -92,6 +103,11 @@ func _start_boss_fight(player: Node2D) -> void:
 	_boss = get_node_or_null(boss_path) as Boss
 	if _boss == null:
 		return
+	if WorldMode.get_mode() != WorldMode.MODE_PESADILLA:
+		WorldMode.set_mode(WorldMode.MODE_PESADILLA)
+	# A previous room may have left the switch locked (safe room / parkour).
+	WorldMode.set_locked(false)
+	_start_boss_music()
 
 	_intro_running = true
 	_intro_token += 1
@@ -123,9 +139,6 @@ func _start_boss_fight(player: Node2D) -> void:
 	_intro_running = false
 	_set_player_intro_locked(player, false)
 	_boss.start_fight(arena, slots)
-	# Entered the arena already in vigilia: drop them straight onto a layout.
-	if WorldMode.get_mode() == WorldMode.MODE_SUENO:
-		_begin_vigilia_layout()
 
 
 func _on_boss_defeated() -> void:
@@ -138,6 +151,8 @@ func _on_boss_defeated() -> void:
 	mark_room_cleared()
 	cancel_pending_door_close()
 	set_all_doors_open(true)
+	_stop_boss_music()
+	_spawn_light_orb()
 
 
 func _play_camera_intro(arena: Rect2) -> void:
@@ -261,11 +276,16 @@ func _on_world_mode_changed(index: int) -> void:
 	if index == WorldMode.MODE_SUENO:
 		_begin_vigilia_layout()
 	elif index == WorldMode.MODE_PESADILLA:
+		var had_layout := _active_layout != null
 		_end_vigilia_layout()
+		# Free switching: leaving a layout returns the player to the arena without
+		# breaking the current boss phase.
+		if had_layout and is_active() and not _boss_defeated:
+			_teleport_player_to_arena()
 
 
-## Shifting into vigilia: lock the mode, pick a non-repeating layout, teleport the
-## player onto it and drop the button that sends them back to nightmare.
+## Shifting into vigilia: pick a non-repeating layout, teleport the player onto
+## it and drop the button that exposes the weakpoint and returns to nightmare.
 func _begin_vigilia_layout() -> void:
 	if _boss_defeated or is_room_cleared() or not is_active():
 		return
@@ -273,8 +293,6 @@ func _begin_vigilia_layout() -> void:
 	if layouts.is_empty():
 		return
 	_end_vigilia_layout()
-	WorldMode.set_locked(true)
-	_layout_lock_owned = true
 	_active_layout = _pick_layout()
 	_hide_all_layouts()
 	_show_layout(_active_layout)
@@ -283,9 +301,6 @@ func _begin_vigilia_layout() -> void:
 
 
 func _end_vigilia_layout() -> void:
-	if _layout_lock_owned:
-		WorldMode.set_locked(false)
-		_layout_lock_owned = false
 	if _layout_button != null and is_instance_valid(_layout_button):
 		_layout_button.queue_free()
 	_layout_button = null
@@ -334,6 +349,8 @@ func _spawn_layout_button(layout: Node2D) -> void:
 	if _layout_button == null:
 		return
 	_layout_button.name = "LayoutButton"
+	# Layout spike layers use z_index = 1, so keep the button above them.
+	_layout_button.z_index = 5
 	layout.add_child(_layout_button)
 	_layout_button.global_position = marker.global_position
 	if _layout_button.has_signal("pressed"):
@@ -343,7 +360,9 @@ func _spawn_layout_button(layout: Node2D) -> void:
 
 
 func _on_layout_button_pressed() -> void:
-	if _boss != null and is_instance_valid(_boss):
+	# If the weakpoint was already exposed before re-entering vigilia, only send
+	# the player back; re-triggering would leave them with a useless button.
+	if _boss != null and is_instance_valid(_boss) and _boss.can_trigger_weakpoint():
 		_boss.trigger_weakpoint()
 	if button_switches_to_nightmare:
 		WorldMode.set_mode(WorldMode.MODE_PESADILLA)
@@ -367,6 +386,82 @@ func _teleport_player_to_layout(layout: Node2D) -> void:
 	var cam := _player_camera()
 	if cam != null and cam.has_method("snap_to_room"):
 		cam.call("snap_to_room", self)
+
+
+func _teleport_player_to_arena() -> void:
+	var player := get_tree().get_first_node_in_group("player") as Node2D
+	if player == null:
+		return
+	# The fallback Teleport marker is the arena's known-safe return point.
+	var target := get_node_or_null(fallback_teleport_path) as Node2D
+	var destination: Vector2 = target.global_position if target != null else get_default_spawn()
+	player.global_position = destination
+	if player is CharacterBody2D:
+		var body := player as CharacterBody2D
+		body.velocity = Vector2.ZERO
+		if "_knockback" in body:
+			body.set("_knockback", Vector2.ZERO)
+	var cam := _player_camera()
+	if cam != null and cam.has_method("snap_to_room"):
+		cam.call("snap_to_room", self)
+
+
+func _get_sfx_general() -> Node:
+	if _sfx_general == null or not is_instance_valid(_sfx_general):
+		_sfx_general = get_tree().get_first_node_in_group(&"sfx_general")
+	return _sfx_general
+
+
+func _start_boss_music() -> void:
+	var sfx := _get_sfx_general()
+	if sfx == null or not sfx.has_method("set_room_music"):
+		return
+	sfx.call("set_room_music", &"boss")
+	_boss_music_owned = true
+
+
+func _stop_boss_music() -> void:
+	if not _boss_music_owned:
+		return
+	var sfx := _get_sfx_general()
+	if sfx != null and sfx.has_method("clear_room_music"):
+		sfx.call("clear_room_music")
+	_boss_music_owned = false
+
+
+func _spawn_light_orb() -> void:
+	if light_orb_scene == null:
+		_start_ending()
+		return
+	var orb := light_orb_scene.instantiate()
+	if orb == null:
+		_start_ending()
+		return
+	var parent := get_parent()
+	if parent == null:
+		parent = self
+	parent.add_child(orb)
+	_light_orb = orb as Node2D
+	if _light_orb != null:
+		var pos := get_default_spawn()
+		if _boss != null and is_instance_valid(_boss):
+			pos = _boss.global_position
+		_light_orb.global_position = pos
+	if orb.has_signal(&"finished") and not orb.is_connected(&"finished", Callable(self, "_start_ending")):
+		orb.connect(&"finished", Callable(self, "_start_ending"))
+
+
+func _start_ending() -> void:
+	if _ending_started or not is_inside_tree():
+		return
+	_ending_started = true
+	if RunState != null and RunState.has_method("reset"):
+		RunState.call("reset")
+	if SceneTransition != null and SceneTransition.has_method("change_to"):
+		# Plain fade to black: no "Loading..." label for the ending.
+		SceneTransition.call("change_to", main_menu_scene, false)
+	else:
+		get_tree().change_scene_to_file(main_menu_scene)
 
 
 func _clear_layout() -> void:
