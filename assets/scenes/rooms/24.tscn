@@ -7,9 +7,8 @@
 [ext_resource type="PackedScene" uid="uid://cb5rvks5i5aea" path="res://assets/scenes/props/vigilia/interactive/doorVigilia.tscn" id="5_ob0b1"]
 [ext_resource type="PackedScene" uid="uid://biuk4fta6kx8k" path="res://assets/scenes/props/pickups/pickup_heal.tscn" id="6_6q5ra"]
 
-[node name="24" type="Node2D" unique_id=1556955998 node_paths=PackedStringArray("exit_door", "respawn_point")]
+[node name="24" type="Node2D" unique_id=1556955998 node_paths=PackedStringArray("respawn_point")]
 script = ExtResource("1_cmo6r")
-exit_door = NodePath("Switchable/Sueño/DoorNorte2")
 respawn_point = NodePath("SpawnPoint")
 room_id = &"24"
 map_cell = Vector2i(4, 4)
