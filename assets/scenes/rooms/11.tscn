@@ -13,6 +13,33 @@
 [ext_resource type="PackedScene" uid="uid://d12fgvm4yareu" path="res://assets/scenes/props/pickups/pickup_projectile_boost.tscn" id="9_pfl8e"]
 [ext_resource type="PackedScene" uid="uid://vq6imnpmh2sw" path="res://assets/scenes/props/pickups/pickup_attack_boost.tscn" id="10_6ai2q"]
 [ext_resource type="Script" uid="uid://cgr461snah57y" path="res://assets/scripts/rooms/enemy_spawn_point.gd" id="11_6ai2q"]
+[ext_resource type="Texture2D" uid="uid://chy5pa84snsoq" path="res://assets/sprittesheets/props/definitivo/Vigil props.png" id="13_lidx6"]
+[ext_resource type="PackedScene" uid="uid://cm16eeyma7gae" path="res://assets/scenes/props/vigilia/interactive/buttonVigilia.tscn" id="14_16e4l"]
+[ext_resource type="PackedScene" uid="uid://tvq6u6rrx621" path="res://assets/scenes/props/pesadilla/interactive/buttonPesadilla.tscn" id="15_n08en"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_he7pc"]
+texture = ExtResource("13_lidx6")
+texture_region_size = Vector2i(675, 675)
+0:1/0 = 0
+0:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-46.70331, -269.10013, -43.93802, 320.1198, 13.809082, 307.5661, 11.119873, 162.34967, 295.78778, 126.766174, 309.1316, -126.766174, 51.151306, -122.31824, 28.911621, -255.75632)
+1:1/0 = 0
+1:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-350.88895, -138.22897, -59.240997, -144.30496, -72.65704, -277.17313, 79.03357, -262.83255, 45.74701, -137.24109, 309.46515, -153.38708, 340.02814, 170.93307, -347.38007, 170.93307)
+2:1/0 = 0
+2:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-353.6109, -149.00586, -73.39093, -149.00586, -82.286804, -260.20425, 64.32965, -255.48059, 68.35501, 356.96497, -59.240997, 347.85095, -53.164978, 147.34302, -358.40802, 145.2012)
+1:2/0 = 0
+1:2/0/physics_layer_0/polygon_0/points = PackedVector2Array(-86.38553, 163.58115, -86.38553, -277.53647, 86.38556, -251.80461, 101.08948, 156.22916)
+0:2/0 = 0
+0:2/0/physics_layer_0/polygon_0/points = PackedVector2Array(-73.39093, -335.81915, -46.70331, 362.50677, 60.04718, 358.05884, 46.70337, -344.71503)
+0:3/0 = 0
+0:3/0/physics_layer_0/polygon_0/points = PackedVector2Array(-60.653656, 189.31296, 329.00018, 156.22916, 351.0561, -137.84924, 56.977722, -148.87717, 15.56781, -340.2671, -55.599182, -340.2671)
+2:3/0 = 0
+2:3/0/physics_layer_0/polygon_0/points = PackedVector2Array(66.5347, 179.51816, -347.38007, 141.52524, -347.38007, -141.5252, -71.68161, -137.84924, -78.039, -357.90317, 40.36505, -352.52118)
+
+[sub_resource type="TileSet" id="TileSet_s5hde"]
+tile_size = Vector2i(675, 675)
+physics_layer_0/collision_layer = 1
+physics_layer_0/collision_mask = 0
+sources/0 = SubResource("TileSetAtlasSource_he7pc")
 
 [node name="11" type="Node2D" unique_id=1556955998]
 script = ExtResource("1_fo5il")
@@ -29,25 +56,28 @@ scale = Vector2(0.3, 0.3)
 tile_map_data = PackedByteArray("AAD+//v/AAABAAAAAAD///v/AAABAAMAAAAAAPv/AAABAAMAAAABAPv/AAABAAMAAAACAPv/AAABAAAAAAADAPv/AAABAAAAAAAEAPv/AAABAAAAAAAFAPv/AAACAAAAAAAFAPz/AAACAAEAAAAFAP3/AAACAAIAAAAFAAIAAAACAAEAAAAFAAMAAAACAAIAAAD8/wMAAAABAAIAAAD9/wMAAAABAAIAAAD+/wMAAAABAAIAAAD//wMAAAABAAUAAAAAAAMAAAABAAUAAAABAAMAAAABAAUAAAACAAMAAAABAAIAAAADAAMAAAABAAIAAAAEAAMAAAABAAIAAAD7/wMAAAAAAAIAAAD7//7/AAAAAAEAAAD7////AAAAAAEAAAD7/wAAAAAAAAEAAAD7/wEAAAAAAAEAAAD7/wIAAAAAAAEAAAD9////AAABAAEAAAD9//7/AAABAAEAAAD9//3/AAABAAEAAAD9//z/AQAGAAIAAAD8//3/AQAGAAIAAAD8//7/AAABAAEAAAD8////AAABAAEAAAD8/wAAAAABAAEAAAD8/wEAAAABAAEAAAD8/wIAAAABAAEAAAD9/wIAAAABAAEAAAD9/wEAAAABAAEAAAD9/wAAAAABAAEAAAD+/wAAAAABAAEAAAD+////AAABAAEAAAD+//7/AAABAAEAAAD+//3/AAABAAEAAAD+//z/AAABAAEAAAD///z/AAAAAAcAAAD///3/AAAAAAcAAAD///7/AAAAAAcAAAD/////AAAAAAcAAAD//wAAAAAAAAcAAAD//wEAAAAAAAcAAAD+/wEAAAABAAEAAAD+/wIAAAABAAEAAAD//wIAAAAAAAcAAAAAAAIAAAABAAQAAAAAAAEAAAABAAQAAAAAAAAAAAABAAQAAAAAAP//AAABAAQAAAAAAP7/AAABAAQAAAAAAP3/AAABAAQAAAAAAPz/AAABAAQAAAABAPz/AAAAAAcAAAABAP3/AAAAAAcAAAABAP7/AAAAAAcAAAABAP//AAAAAAcAAAABAAAAAAAAAAcAAAABAAEAAAAAAAcAAAABAAIAAAAAAAcAAAACAAIAAAABAAEAAAACAAEAAAABAAEAAAACAAAAAAABAAEAAAACAP//AAABAAEAAAACAP7/AAABAAEAAAACAP3/AAABAAEAAAACAPz/AAABAAEAAAADAPz/AAABAAEAAAADAP3/AAABAAEAAAADAP7/AQAEAAAAAAADAP//AAACAAEAAAADAAAAAQAEAAIAAAADAAEAAAABAAEAAAADAAIAAAABAAEAAAAEAAIAAAABAAEAAAAEAAEAAQAEAAIAAAAEAP7/AAACAAIAAAAEAP3/AQAEAAAAAAAEAPz/AAABAAEAAAAFAAEAAAACAAAAAAAEAAAAAAACAAAAAAD7//3/AAAAAAAAAAD8//z/AAAAAAAAAAD9//v/AAAAAAAAAAA=")
 tile_set = ExtResource("3_010oi")
 
-[node name="DoorSur" parent="Switchable/Pesadilla" unique_id=268869019 instance=ExtResource("4_010oi")]
+[node name="DoorSur" parent="Switchable/Pesadilla" unique_id=268869019 node_paths=PackedStringArray("unlock_buttons") instance=ExtResource("4_010oi")]
 position = Vector2(21, 136)
 collision_layer = 8
 door_id = &"11S"
 target_room = "uid://cly78kf0hwlsn"
 target_door_id = &"17N"
-starts_open = true
+unlock_buttons = [NodePath("../ButtonPesadilla")]
+require_all_buttons = false
 orientation = 2
 
-[node name="DoorNorte" parent="Switchable/Pesadilla" unique_id=1385927023 instance=ExtResource("4_010oi")]
+[node name="DoorNorte" parent="Switchable/Pesadilla" unique_id=1385927023 node_paths=PackedStringArray("unlock_buttons") instance=ExtResource("4_010oi")]
 position = Vector2(21, -167.115)
 collision_layer = 8
 door_id = &"11N"
 target_room = "uid://mpsapmarxum7"
 target_door_id = &"1S"
-starts_open = true
+unlock_buttons = [NodePath("../../Sueño/ButtonVigilia")]
+require_all_buttons = false
 
 [node name="BarreraPesadilla" type="TileMapLayer" parent="Switchable/Pesadilla" unique_id=269492456]
 scale = Vector2(0.05, 0.05)
+tile_map_data = PackedByteArray("AAAEAPz/AAAAAAMAAAAFAPz/AAABAAEAAAAEAPv/AAAAAAIAAAA=")
 tile_set = ExtResource("5_3prkr")
 
 [node name="Spike" type="TileMapLayer" parent="Switchable/Pesadilla" unique_id=849315676]
@@ -84,6 +114,9 @@ position = Vector2(-159, -32)
 [node name="PickupAttackBoost" parent="Switchable/Pesadilla" unique_id=1610691848 instance=ExtResource("10_6ai2q")]
 position = Vector2(-104, -113)
 
+[node name="ButtonPesadilla" parent="Switchable/Pesadilla" unique_id=1335373054 instance=ExtResource("15_n08en")]
+position = Vector2(179, -147)
+
 [node name="Sueño" type="Node2D" parent="Switchable" unique_id=1018947006]
 visible = false
 
@@ -93,7 +126,7 @@ scale = Vector2(0.3, 0.3)
 tile_map_data = PackedByteArray("AAD8//v/AAAAAAAAAAD9//v/AAABAAAAAAD+//v/AAABAAAAAAD///v/AAABAAAAAAAAAPv/AAABAAAAAAABAPv/AAABAAAAAAACAPv/AAABAAAAAAADAPv/AAABAAAAAAAEAPv/AAACAAAAAAAEAPz/AAACAAEAAAAEAP3/AAACAAIAAAAEAAIAAAACAAEAAAAEAAMAAAACAAIAAAD7/wMAAAABAAIAAAD8/wMAAAABAAIAAAD9/wMAAAABAAIAAAD+/wMAAAABAAIAAAD//wMAAAABAAIAAAAAAAMAAAABAAIAAAABAAMAAAABAAIAAAACAAMAAAABAAIAAAADAAMAAAABAAIAAAD6/wMAAAAAAAIAAAD6//3/AAAAAAAAAAD6//7/AAAAAAEAAAD6////AAAAAAEAAAD6/wAAAAAAAAEAAAD6/wEAAAAAAAEAAAD6/wIAAAAAAAEAAAD+////AAACAAYAAAD+//7/AAACAAUAAAD+//3/AAACAAQAAAD+//z/AAABAAEAAAD9//z/AAABAAEAAAD8//z/AAAGAAIAAAD7//z/AAAAAAAAAAD7//3/AAAGAAIAAAD7//7/AAABAAEAAAD7////AAABAAEAAAD7/wAAAAABAAEAAAD7/wEAAAABAAEAAAD7/wIAAAABAAEAAAD8/wIAAAABAAEAAAD8/wEAAAABAAEAAAD8/wAAAAABAAEAAAD8////AAAAAAYAAAD8//7/AAAAAAUAAAD8//3/AAAAAAQAAAD9//3/AAABAAQAAAD9//7/AAABAAUAAAD9////AAABAAYAAAD9/wAAAAABAAEAAAD9/wEAAAABAAEAAAD9/wIAAAABAAEAAAD+/wIAAAABAAEAAAD+/wEAAAABAAEAAAD+/wAAAAABAAEAAAD//wAAAAAFAAQAAAD/////AAABAAEAAAD///7/AAABAAEAAAD///3/AAABAAEAAAD///z/AAABAAEAAAAAAPz/AAABAAEAAAAAAP3/AAABAAEAAAAAAP7/AAABAAEAAAAAAP//AAABAAEAAAAAAAAAAAAGAAQAAAAAAAEAAAAGAAUAAAD//wEAAAAFAAUAAAD//wIAAAAFAAYAAAAAAAIAAAAGAAYAAAABAAIAAAAHAAYAAAABAAEAAAAHAAUAAAABAAAAAAAHAAQAAAABAP//AAABAAEAAAABAP7/AAABAAEAAAABAP3/AAABAAEAAAABAPz/AAABAAEAAAACAPz/AAABAAEAAAACAP3/AAABAAEAAAACAP7/AAAEAAAAAAACAP//AAACAAEAAAACAAEAAAABAAEAAAACAAIAAAABAAEAAAADAAIAAAABAAEAAAADAAEAAAAEAAIAAAADAP7/AAACAAIAAAADAP3/AAAEAAAAAAADAPz/AAABAAEAAAAEAAEAAAACAAAAAAACAAAAAAAEAAIAAAADAAAAAAACAAAAAAA=")
 tile_set = ExtResource("4_4ujhj")
 
-[node name="DoorSur" parent="Switchable/Sueño" unique_id=173168588 instance=ExtResource("6_4ujhj")]
+[node name="DoorSur" parent="Switchable/Sueño" unique_id=173168588 node_paths=PackedStringArray("unlock_buttons") instance=ExtResource("6_4ujhj")]
 process_mode = 3
 position = Vector2(21, 136)
 disable_mode = 2
@@ -101,10 +134,11 @@ collision_layer = 8
 door_id = &"11S"
 target_room = "uid://cly78kf0hwlsn"
 target_door_id = &"17N"
-starts_open = true
+unlock_buttons = [NodePath("../../Pesadilla/ButtonPesadilla")]
+require_all_buttons = false
 orientation = 2
 
-[node name="DoorNorte" parent="Switchable/Sueño" unique_id=1530242687 instance=ExtResource("6_4ujhj")]
+[node name="DoorNorte" parent="Switchable/Sueño" unique_id=1530242687 node_paths=PackedStringArray("unlock_buttons") instance=ExtResource("6_4ujhj")]
 process_mode = 3
 position = Vector2(21, -167)
 disable_mode = 2
@@ -112,7 +146,16 @@ collision_layer = 8
 door_id = &"11N"
 target_room = "uid://mpsapmarxum7"
 target_door_id = &"1S"
-starts_open = true
+unlock_buttons = [NodePath("../ButtonVigilia")]
+require_all_buttons = false
+
+[node name="BarreraVigila" type="TileMapLayer" parent="Switchable/Sueño" unique_id=1870023140]
+scale = Vector2(0.05, 0.05)
+tile_map_data = PackedByteArray("AAAEAAIAAAAAAAEAAAAFAAIAAAABAAEAAAAEAAMAAAAAAAIAAAA=")
+tile_set = SubResource("TileSet_s5hde")
+
+[node name="ButtonVigilia" parent="Switchable/Sueño" unique_id=1756562350 instance=ExtResource("14_16e4l")]
+position = Vector2(183, 117)
 
 [node name="Walls" type="StaticBody2D" parent="." unique_id=1872382948]
 
