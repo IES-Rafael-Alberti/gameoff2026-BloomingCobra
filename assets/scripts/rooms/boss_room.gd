@@ -21,6 +21,15 @@ extends Room
 @export var intro_camera_duration: float = 1.7
 ## Beat after the pullback before attacks begin.
 @export var intro_hold_duration: float = 0.55
+@export_group("Vigilia Layouts")
+## Parent holding the Layout* nodes (each with spike tiles + Button/Teleport markers).
+@export var layouts_path: NodePath = NodePath("Switchable/Sueño")
+## Button spawned on the chosen layout's Button marker.
+@export var layout_button_scene: PackedScene = preload("res://assets/scenes/props/vigilia/interactive/buttonVigilia.tscn")
+## Teleport marker used when a layout has none of its own.
+@export var fallback_teleport_path: NodePath = NodePath("Teleport")
+## Pressing the layout button switches back to nightmare automatically.
+@export var button_switches_to_nightmare: bool = true
 
 var _boss: Boss = null
 var _fight_started: bool = false
@@ -28,6 +37,12 @@ var _boss_defeated: bool = false
 var _camera_locked: bool = false
 var _intro_running: bool = false
 var _intro_token: int = 0
+## Layouts not yet used in the current shuffle bag (avoids repeats until exhausted).
+var _layout_bag: Array[Node2D] = []
+var _active_layout: Node2D = null
+var _layout_button: Area2D = null
+## True only while this room is the one holding the world-mode lock.
+var _layout_lock_owned: bool = false
 
 
 func _ready() -> void:
@@ -35,6 +50,12 @@ func _ready() -> void:
 	_boss = get_node_or_null(boss_path) as Boss
 	if _boss != null and not _boss.defeated.is_connected(_on_boss_defeated):
 		_boss.defeated.connect(_on_boss_defeated)
+	# The vigilia layouts own the weak-point button, so the boss must not spawn one.
+	if _boss != null and not _layouts().is_empty():
+		_boss.manage_button = false
+	if not WorldMode.mode_changed.is_connected(_on_world_mode_changed):
+		WorldMode.mode_changed.connect(_on_world_mode_changed)
+	_clear_layout()
 
 
 ## Prefer wall collision over TileMapLayer used_rect (tileset tile_size may not match atlas 128).
@@ -48,6 +69,7 @@ func get_camera_bounds() -> Rect2:
 
 
 func on_player_entered(player: Node2D) -> void:
+	_refresh_layout_visibility()
 	if is_room_cleared():
 		_boss_defeated = true
 	if _boss_defeated:
@@ -61,6 +83,7 @@ func on_player_entered(player: Node2D) -> void:
 func on_player_exited(player: Node2D) -> void:
 	_cancel_intro(player)
 	_unlock_boss_camera()
+	_end_vigilia_layout()
 
 
 func _start_boss_fight(player: Node2D) -> void:
@@ -100,6 +123,9 @@ func _start_boss_fight(player: Node2D) -> void:
 	_intro_running = false
 	_set_player_intro_locked(player, false)
 	_boss.start_fight(arena, slots)
+	# Entered the arena already in vigilia: drop them straight onto a layout.
+	if WorldMode.get_mode() == WorldMode.MODE_SUENO:
+		_begin_vigilia_layout()
 
 
 func _on_boss_defeated() -> void:
@@ -107,6 +133,7 @@ func _on_boss_defeated() -> void:
 	_fight_started = false
 	_intro_running = false
 	_intro_token += 1
+	_end_vigilia_layout()
 	_unlock_boss_camera()
 	mark_room_cleared()
 	cancel_pending_door_close()
@@ -200,6 +227,153 @@ func _set_player_intro_locked(player: Node2D, locked: bool) -> void:
 		return
 	if player.has_method("set_cutscene_locked"):
 		player.call("set_cutscene_locked", locked)
+
+
+## Layout* nodes under the vigilia root (each: spike tiles + Button/Teleport markers).
+func _layouts() -> Array[Node2D]:
+	var result: Array[Node2D] = []
+	var root := get_node_or_null(layouts_path)
+	if root == null:
+		return result
+	for child in root.get_children():
+		if child is Node2D and String(child.name).begins_with("Layout"):
+			result.append(child as Node2D)
+	return result
+
+
+func _hide_all_layouts() -> void:
+	for layout in _layouts():
+		layout.visible = false
+		for node in layout.find_children("*", "TileMapLayer", true, false):
+			(node as TileMapLayer).collision_enabled = false
+
+
+## Called on enter: layouts start hidden until the player shifts into vigilia.
+func _refresh_layout_visibility() -> void:
+	if _active_layout == null or WorldMode.get_mode() != WorldMode.MODE_SUENO:
+		_hide_all_layouts()
+
+
+func _on_world_mode_changed(index: int) -> void:
+	# Only during the fight: the intro is a scripted camera moment.
+	if not _fight_started or _boss_defeated:
+		return
+	if index == WorldMode.MODE_SUENO:
+		_begin_vigilia_layout()
+	elif index == WorldMode.MODE_PESADILLA:
+		_end_vigilia_layout()
+
+
+## Shifting into vigilia: lock the mode, pick a non-repeating layout, teleport the
+## player onto it and drop the button that sends them back to nightmare.
+func _begin_vigilia_layout() -> void:
+	if _boss_defeated or is_room_cleared() or not is_active():
+		return
+	var layouts := _layouts()
+	if layouts.is_empty():
+		return
+	_end_vigilia_layout()
+	WorldMode.set_locked(true)
+	_layout_lock_owned = true
+	_active_layout = _pick_layout()
+	_hide_all_layouts()
+	_show_layout(_active_layout)
+	_spawn_layout_button(_active_layout)
+	_teleport_player_to_layout(_active_layout)
+
+
+func _end_vigilia_layout() -> void:
+	if _layout_lock_owned:
+		WorldMode.set_locked(false)
+		_layout_lock_owned = false
+	if _layout_button != null and is_instance_valid(_layout_button):
+		_layout_button.queue_free()
+	_layout_button = null
+	_active_layout = null
+	_hide_all_layouts()
+
+
+## Shuffle bag: every layout is used once before any can repeat.
+func _pick_layout() -> Node2D:
+	var layouts := _layouts()
+	var remaining: Array[Node2D] = []
+	for entry in _layout_bag:
+		if is_instance_valid(entry) and layouts.has(entry):
+			remaining.append(entry)
+	_layout_bag = remaining
+	if _layout_bag.is_empty():
+		_layout_bag = layouts.duplicate()
+		_layout_bag.shuffle()
+	return _layout_bag.pop_back()
+
+
+func _show_layout(layout: Node2D) -> void:
+	if layout == null:
+		return
+	layout.visible = true
+	for node in layout.find_children("*", "TileMapLayer", true, false):
+		(node as TileMapLayer).collision_enabled = true
+
+
+func _layout_marker(layout: Node2D, prefix: String) -> Node2D:
+	if layout == null:
+		return null
+	for child in layout.get_children():
+		if child is Node2D and String(child.name).begins_with(prefix):
+			return child as Node2D
+	return null
+
+
+func _spawn_layout_button(layout: Node2D) -> void:
+	if layout_button_scene == null:
+		return
+	var marker := _layout_marker(layout, "Button")
+	if marker == null:
+		return
+	_layout_button = layout_button_scene.instantiate() as Area2D
+	if _layout_button == null:
+		return
+	_layout_button.name = "LayoutButton"
+	layout.add_child(_layout_button)
+	_layout_button.global_position = marker.global_position
+	if _layout_button.has_signal("pressed"):
+		_layout_button.pressed.connect(_on_layout_button_pressed)
+	if "permanent_press" in _layout_button:
+		_layout_button.permanent_press = false
+
+
+func _on_layout_button_pressed() -> void:
+	if _boss != null and is_instance_valid(_boss):
+		_boss.trigger_weakpoint()
+	if button_switches_to_nightmare:
+		WorldMode.set_mode(WorldMode.MODE_PESADILLA)
+
+
+func _teleport_player_to_layout(layout: Node2D) -> void:
+	var player := get_tree().get_first_node_in_group("player") as Node2D
+	if player == null or layout == null:
+		return
+	var target := _layout_marker(layout, "Teleport")
+	if target == null:
+		target = get_node_or_null(fallback_teleport_path) as Node2D
+	if target == null:
+		return
+	player.global_position = target.global_position
+	if player is CharacterBody2D:
+		var body := player as CharacterBody2D
+		body.velocity = Vector2.ZERO
+		if "_knockback" in body:
+			body.set("_knockback", Vector2.ZERO)
+	var cam := _player_camera()
+	if cam != null and cam.has_method("snap_to_room"):
+		cam.call("snap_to_room", self)
+
+
+func _clear_layout() -> void:
+	_layout_bag.clear()
+	_active_layout = null
+	_layout_button = null
+	_hide_all_layouts()
 
 
 func _unlock_boss_camera() -> void:
