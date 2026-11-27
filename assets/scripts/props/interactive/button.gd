@@ -14,6 +14,9 @@ signal released
 ## If true, stays down after stepping off until reset() (e.g. void fall) or commit().
 @export var stay_pressed: bool = true
 @export var one_shot: bool = false
+## When true, a single press commits the button permanently for the run (survives
+## death) and its state is persisted. Disable for transient buttons (boss weak point).
+@export var permanent_press: bool = true
 
 @onready var animated_sprite: AnimatedSprite2D = get_node_or_null("AnimatedSprite2D") as AnimatedSprite2D
 
@@ -67,6 +70,8 @@ func reset() -> void:
 func force_pressed(emit_pressed_signal: bool = false) -> void:
 	var was_pressed := _is_pressed
 	_is_pressed = true
+	if permanent_press:
+		_committed = true
 	_update_visual()
 	if emit_pressed_signal and not was_pressed:
 		pressed.emit()
@@ -96,6 +101,9 @@ func _set_pressed(value: bool) -> void:
 	if value == _is_pressed:
 		return
 	_is_pressed = value
+	# Once pressed, a permanent button stays pressed for the rest of the run (survives death).
+	if _is_pressed and permanent_press:
+		_committed = true
 	_update_visual()
 	if _is_pressed:
 		pressed.emit()

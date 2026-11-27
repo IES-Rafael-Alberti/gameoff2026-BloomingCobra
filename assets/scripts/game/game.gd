@@ -23,6 +23,7 @@ var _bg_anchor: Vector2 = Vector2.ZERO
 var _bg_anchor_ready: bool = false
 var _debug_room_panel: VBoxContainer = null
 var _debug_room_menu_open: bool = false
+var _debug_room_label: Label = null
 
 @onready var sfx_general: Node = get_node_or_null("SfxGeneral")
 @onready var room_manager: Node = get_node_or_null("RoomManager")
@@ -39,6 +40,8 @@ func _ready() -> void:
 	if room_manager != null and room_manager.has_signal("room_changed"):
 		if not room_manager.room_changed.is_connected(_on_room_changed_backgrounds):
 			room_manager.room_changed.connect(_on_room_changed_backgrounds)
+		if not room_manager.room_changed.is_connected(_on_room_changed_room_label):
+			room_manager.room_changed.connect(_on_room_changed_room_label)
 	set_process(true)
 
 
@@ -155,6 +158,22 @@ func _setup_debug_room_ui() -> void:
 	_debug_room_panel.add_theme_constant_override("separation", 2)
 	layer.add_child(_debug_room_panel)
 	_rebuild_debug_room_list()
+
+	_debug_room_label = Label.new()
+	_debug_room_label.name = "DebugCurrentRoom"
+	_debug_room_label.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	_debug_room_label.offset_left = -220.0
+	_debug_room_label.offset_top = 12.0
+	_debug_room_label.offset_right = -12.0
+	_debug_room_label.offset_bottom = 44.0
+	_debug_room_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	_debug_room_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_debug_room_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_debug_room_label.add_theme_font_size_override("font_size", 22)
+	_debug_room_label.add_theme_color_override("font_outline_color", Color(0, 0, 0))
+	_debug_room_label.add_theme_constant_override("outline_size", 6)
+	_debug_room_label.text = "Sala: -"
+	layer.add_child(_debug_room_label)
 
 
 func _toggle_debug_room_menu() -> void:
@@ -384,3 +403,14 @@ func _recenter_backgrounds(pos: Vector2) -> void:
 
 func _on_room_changed_backgrounds(_previous: Room, _next: Room) -> void:
 	_recenter_backgrounds(_background_follow_target())
+
+
+func _on_room_changed_room_label(_previous: Room, next: Room) -> void:
+	if _debug_room_label == null:
+		return
+	var room_name := "-"
+	if next != null and is_instance_valid(next):
+		room_name = String(next.room_id)
+		if room_name.is_empty():
+			room_name = next.scene_file_path.get_file().get_basename()
+	_debug_room_label.text = "Sala: %s" % room_name

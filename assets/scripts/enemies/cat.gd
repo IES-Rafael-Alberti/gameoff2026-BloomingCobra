@@ -19,6 +19,7 @@ var _idle_flip_h: bool = false
 func _ready() -> void:
 	add_to_group("cat")
 	add_to_group("enemy")
+	z_index = maxi(z_index, 2)
 	# Catchable by proximity; no solid push vs player.
 	collision_layer = 0
 	collision_mask = (1 << 0) | (1 << 3) | (1 << 5) # world + door_enemy + spikes_enemy
