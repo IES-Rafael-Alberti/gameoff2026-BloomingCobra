@@ -8,9 +8,11 @@
 [ext_resource type="TileSet" uid="uid://ca112a4s4rpwe" path="res://assets/resources/tilesets/barreraPesadilla.tres" id="5_p81wj"]
 [ext_resource type="TileSet" uid="uid://cod5hqlj1hrki" path="res://assets/resources/tilesets/tileset_spikes_pesadilla.tres" id="6_7jrlm"]
 [ext_resource type="PackedScene" uid="uid://cb5rvks5i5aea" path="res://assets/scenes/props/vigilia/interactive/doorVigilia.tscn" id="6_p81wj"]
+[ext_resource type="PackedScene" uid="uid://biuk4fta6kx8k" path="res://assets/scenes/props/pickups/pickup_heal.tscn" id="7_oxyln"]
 [ext_resource type="Texture2D" uid="uid://chy5pa84snsoq" path="res://assets/sprittesheets/props/definitivo/Vigil props.png" id="9_6si2c"]
 [ext_resource type="TileSet" uid="uid://cod5hqrnop0ki" path="res://assets/resources/tilesets/tileset_spikes_vigilia.tres" id="10_5k3u7"]
 [ext_resource type="Script" uid="uid://cgr461snah57y" path="res://assets/scripts/rooms/enemy_spawn_point.gd" id="11_uge44"]
+[ext_resource type="PackedScene" uid="uid://dhsch6rnimlsn" path="res://assets/scenes/props/pickups/pickup_shield.tscn" id="12_qchol"]
 [ext_resource type="PackedScene" uid="uid://cbt3w2furilt1" path="res://assets/scenes/enemies/hunter.tscn" id="12_yyn4g"]
 [ext_resource type="PackedScene" uid="uid://biqe6ous6m14k" path="res://assets/scenes/enemies/roamer.tscn" id="13_oxyln"]
 
@@ -80,7 +82,11 @@ scale = Vector2(0.3, 0.3)
 tile_map_data = PackedByteArray("AAAAAP7/AAAAAAAAAAAAAP3/AAAAAAAAAAAAAAAAAAAAAAAAAAA=")
 tile_set = ExtResource("6_7jrlm")
 
+[node name="PickupHeal" parent="Switchable/Pesadilla" unique_id=1245818749 instance=ExtResource("7_oxyln")]
+position = Vector2(18, -21)
+
 [node name="Sueño" type="Node2D" parent="Switchable" unique_id=1018947006]
+visible = false
 
 [node name="Tiles" type="TileMapLayer" parent="Switchable/Sueño" unique_id=1715976387]
 position = Vector2(35.6, 6)
@@ -118,6 +124,9 @@ tile_set = SubResource("TileSet_uge44")
 scale = Vector2(0.3, 0.3)
 tile_map_data = PackedByteArray("AAD8////AAAAAAAAAAD9//7/AAAAAAAAAAD9/wAAAAAAAAAAAAD+/wEAAAAAAAAAAAD//wIAAAAAAAAAAAAAAAIAAAAAAAAAAAABAAIAAAAAAAAAAAACAAEAAAAAAAAAAAADAAAAAAAAAAAAAAADAP7/AAAAAAAAAAACAP3/AAAAAAAAAAABAPz/AAAAAAAAAAD///z/AAAAAAAAAAD+//3/AAAAAAAAAAD///7/AAAAAAAAAAD/////AAAAAAAAAAAAAP7/AAAAAAAAAAABAP7/AAAAAAAAAAABAP//AAAAAAAAAAD//wAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAA=")
 tile_set = ExtResource("10_5k3u7")
+
+[node name="PickupShield" parent="Switchable/Sueño" unique_id=2141312564 instance=ExtResource("12_qchol")]
+position = Vector2(17, -16)
 
 [node name="Walls" type="StaticBody2D" parent="." unique_id=1872382948]
 visible = false

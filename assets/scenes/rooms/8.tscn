@@ -7,10 +7,12 @@
 [ext_resource type="PackedScene" uid="uid://b41468s5i5aea" path="res://assets/scenes/props/pesadilla/interactive/doorPesadilla.tscn" id="4_iut3s"]
 [ext_resource type="TileSet" uid="uid://ca112a4s4rpwe" path="res://assets/resources/tilesets/barreraPesadilla.tres" id="5_8s2xh"]
 [ext_resource type="PackedScene" uid="uid://cb5rvks5i5aea" path="res://assets/scenes/props/vigilia/interactive/doorVigilia.tscn" id="6_7cmth"]
+[ext_resource type="PackedScene" uid="uid://biuk4fta6kx8k" path="res://assets/scenes/props/pickups/pickup_heal.tscn" id="6_8e145"]
 [ext_resource type="Texture2D" uid="uid://chy5pa84snsoq" path="res://assets/sprittesheets/props/definitivo/Vigil props.png" id="8_3xpf3"]
 [ext_resource type="Script" uid="uid://cgr461snah57y" path="res://assets/scripts/rooms/enemy_spawn_point.gd" id="8_6fnjy"]
 [ext_resource type="TileSet" uid="uid://cod5hqrnop0ki" path="res://assets/resources/tilesets/tileset_spikes_vigilia.tres" id="9_8e145"]
 [ext_resource type="PackedScene" uid="uid://bv4cgmj36fw4k" path="res://assets/scenes/enemies/cat.tscn" id="9_8s2xh"]
+[ext_resource type="PackedScene" uid="uid://vq6imnpmh2sw" path="res://assets/scenes/props/pickups/pickup_attack_boost.tscn" id="13_4ye45"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_4ye45"]
 texture = ExtResource("8_3xpf3")
@@ -81,7 +83,11 @@ scale = Vector2(0.05, 0.05)
 tile_map_data = PackedByteArray("AAD8//z/AAACAAMAAAD7//z/AAABAAEAAAD8//v/AAAAAAIAAAD6//z/AAABAAEAAAD8//r/AAAAAAIAAAADAAEAAAAAAAEAAAADAAIAAAAAAAIAAAADAAMAAAAAAAIAAAAEAAEAAAABAAEAAAAFAAEAAAABAAEAAAA=")
 tile_set = ExtResource("5_8s2xh")
 
+[node name="PickupHeal" parent="Switchable/Pesadilla" unique_id=1245818749 instance=ExtResource("6_8e145")]
+position = Vector2(-141, -141)
+
 [node name="Sueño" type="Node2D" parent="Switchable" unique_id=1018947006]
+visible = false
 
 [node name="Tiles" type="TileMapLayer" parent="Switchable/Sueño" unique_id=1715976387]
 position = Vector2(35.6, 6)
@@ -113,6 +119,7 @@ orientation = 1
 
 [node name="BarreraVigila" type="TileMapLayer" parent="Switchable/Sueño" unique_id=1069543643]
 scale = Vector2(0.05, 0.05)
+tile_map_data = PackedByteArray("AAD///7/AAAAAAEAAAAAAP7/AAABAAEAAAABAP7/AAACAAEAAAD/////AAAAAAIAAAD//wAAAAAAAAMAAAAAAAAAAAABAAEAAAABAAAAAAACAAMAAAABAP//AAAAAAIAAAA=")
 tile_set = SubResource("TileSet_6lyhn")
 
 [node name="SpikeVigilia" type="TileMapLayer" parent="Switchable/Sueño" unique_id=1914128959]
@@ -163,3 +170,6 @@ enemy_scene = ExtResource("9_8s2xh")
 position = Vector2(13, -51)
 script = ExtResource("8_6fnjy")
 enemy_type = 5
+
+[node name="PickupAttackBoost" parent="." unique_id=1610691848 instance=ExtResource("13_4ye45")]
+position = Vector2(179, 103)

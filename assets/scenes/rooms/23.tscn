@@ -9,6 +9,7 @@
 [ext_resource type="PackedScene" uid="uid://cb5rvks5i5aea" path="res://assets/scenes/props/vigilia/interactive/doorVigilia.tscn" id="6_t85wq"]
 [ext_resource type="TileSet" uid="uid://cod5hqrnop0ki" path="res://assets/resources/tilesets/tileset_spikes_vigilia.tres" id="8_4g2t3"]
 [ext_resource type="Script" uid="uid://cgr461snah57y" path="res://assets/scripts/rooms/enemy_spawn_point.gd" id="9_4g2t3"]
+[ext_resource type="PackedScene" uid="uid://biuk4fta6kx8k" path="res://assets/scenes/props/pickups/pickup_heal.tscn" id="9_txor8"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_rihe3"]
 size = Vector2(208, 16)
@@ -89,6 +90,9 @@ orientation = 1
 scale = Vector2(0.3, 0.3)
 tile_map_data = PackedByteArray("AAD8//z/AAAAAAAAAAD8//3/AAAAAAAAAAD8//7/AAAAAAAAAAD9//z/AAAAAAAAAAD+//z/AAAAAAAAAAD///z/AAAAAAAAAAAAAPz/AAAAAAAAAAABAPz/AAAAAAAAAAACAPz/AAAAAAAAAAADAPz/AAAAAAAAAAAEAPz/AAAAAAAAAAAEAP3/AAAAAAAAAAAEAP7/AAAAAAAAAAAEAAAAAAAAAAAAAAAEAAEAAAAAAAAAAAAEAAIAAAAAAAAAAAD8/wIAAAAAAAAAAAD9/wIAAAAAAAAAAAD+/wIAAAAAAAAAAAD//wIAAAAAAAAAAAAAAAIAAAAAAAAAAAABAAIAAAAAAAAAAAACAAIAAAAAAAAAAAADAAIAAAAAAAAAAAD8/wAAAAAAAAAAAAD8/wEAAAAAAAAAAAA=")
 tile_set = ExtResource("8_4g2t3")
+
+[node name="PickupHeal" parent="Switchable/Sueño" unique_id=1245818749 instance=ExtResource("9_txor8")]
+position = Vector2(8, -14)
 
 [node name="Walls" type="StaticBody2D" parent="." unique_id=1872382948]
 

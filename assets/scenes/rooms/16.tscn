@@ -9,10 +9,12 @@
 [ext_resource type="PackedScene" uid="uid://dw3rcxopoegnt" path="res://assets/scenes/props/pesadilla/static/breakable/box2.tscn" id="6_dqovt"]
 [ext_resource type="PackedScene" uid="uid://cb5rvks5i5aea" path="res://assets/scenes/props/vigilia/interactive/doorVigilia.tscn" id="6_ng6g8"]
 [ext_resource type="PackedScene" uid="uid://b307o8qw1clqg" path="res://assets/scenes/props/pesadilla/static/breakable/box1.tscn" id="7_80qtr"]
+[ext_resource type="PackedScene" uid="uid://d12fgvm4yareu" path="res://assets/scenes/props/pickups/pickup_projectile_boost.tscn" id="8_80qtr"]
 [ext_resource type="PackedScene" uid="uid://cak7kwxdxkomd" path="res://assets/scenes/props/vigilia/static/breakable/box1.tscn" id="8_stoy8"]
 [ext_resource type="PackedScene" uid="uid://bv020hxmjok3d" path="res://assets/scenes/props/vigilia/static/breakable/box2.tscn" id="9_dqovt"]
 [ext_resource type="Script" uid="uid://cgr461snah57y" path="res://assets/scripts/rooms/enemy_spawn_point.gd" id="10_80qtr"]
 [ext_resource type="PackedScene" uid="uid://bv4cgmj36fw4k" path="res://assets/scenes/enemies/cat.tscn" id="11_pjrvl"]
+[ext_resource type="PackedScene" uid="uid://cm16eeyma7gae" path="res://assets/scenes/props/vigilia/interactive/buttonVigilia.tscn" id="13_pjrvl"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_rihe3"]
 size = Vector2(208, 16)
@@ -32,6 +34,7 @@ map_cell = Vector2i(6, 2)
 script = ExtResource("2_54a5c")
 
 [node name="Pesadilla" type="Node2D" parent="Switchable" unique_id=966715375]
+visible = false
 
 [node name="Tiles" type="TileMapLayer" parent="Switchable/Pesadilla" unique_id=891083346]
 scale = Vector2(0.3, 0.3)
@@ -47,13 +50,13 @@ target_door_id = &"15E"
 starts_open = true
 orientation = 3
 
-[node name="DoorNorte" parent="Switchable/Pesadilla" unique_id=703991051 instance=ExtResource("4_ylfcf")]
+[node name="DoorNorte" parent="Switchable/Pesadilla" unique_id=703991051 node_paths=PackedStringArray("unlock_buttons") instance=ExtResource("4_ylfcf")]
 position = Vector2(21, -167.115)
 collision_layer = 8
 door_id = &"16N"
 target_room = "uid://bcqy01nkfeyn1"
 target_door_id = &"10S"
-starts_open = true
+unlock_buttons = [NodePath("../../Sueño/ButtonVigilia")]
 
 [node name="Spike" type="TileMapLayer" parent="Switchable/Pesadilla" unique_id=2140485302]
 scale = Vector2(0.3, 0.3)
@@ -72,8 +75,10 @@ position = Vector2(-58, 117)
 [node name="BreakableProp4" parent="Switchable/Pesadilla" unique_id=1611613385 instance=ExtResource("7_80qtr")]
 position = Vector2(92, -67)
 
+[node name="PickupProjectileBoost" parent="Switchable/Pesadilla" unique_id=1175823970 instance=ExtResource("8_80qtr")]
+position = Vector2(186, -34)
+
 [node name="Sueño" type="Node2D" parent="Switchable" unique_id=1018947006]
-visible = false
 
 [node name="Tiles" type="TileMapLayer" parent="Switchable/Sueño" unique_id=1715976387]
 position = Vector2(35.6, 6)
@@ -92,7 +97,7 @@ target_door_id = &"15E"
 starts_open = true
 orientation = 3
 
-[node name="DoorNorte" parent="Switchable/Sueño" unique_id=26908483 instance=ExtResource("6_ng6g8")]
+[node name="DoorNorte" parent="Switchable/Sueño" unique_id=26908483 node_paths=PackedStringArray("unlock_buttons") instance=ExtResource("6_ng6g8")]
 process_mode = 3
 position = Vector2(21, -167)
 disable_mode = 2
@@ -100,7 +105,7 @@ collision_layer = 8
 door_id = &"16N"
 target_room = "uid://bcqy01nkfeyn1"
 target_door_id = &"10S"
-starts_open = true
+unlock_buttons = [NodePath("../ButtonVigilia")]
 
 [node name="BreakableProp" parent="Switchable/Sueño" unique_id=483780846 instance=ExtResource("8_stoy8")]
 position = Vector2(-149, -134)
@@ -116,6 +121,9 @@ position = Vector2(-44, -88)
 
 [node name="BreakableProp4" parent="Switchable/Sueño" unique_id=1751899609 instance=ExtResource("9_dqovt")]
 position = Vector2(-43, -140)
+
+[node name="ButtonVigilia" parent="Switchable/Sueño" unique_id=1756562350 instance=ExtResource("13_pjrvl")]
+position = Vector2(180, -34)
 
 [node name="Walls" type="StaticBody2D" parent="." unique_id=1872382948]
 

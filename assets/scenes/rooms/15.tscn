@@ -11,6 +11,9 @@
 [ext_resource type="Texture2D" uid="uid://chy5pa84snsoq" path="res://assets/sprittesheets/props/definitivo/Vigil props.png" id="9_miwsv"]
 [ext_resource type="TileSet" uid="uid://cod5hqrnop0ki" path="res://assets/resources/tilesets/tileset_spikes_vigilia.tres" id="10_qwb1f"]
 [ext_resource type="Script" uid="uid://cgr461snah57y" path="res://assets/scripts/rooms/enemy_spawn_point.gd" id="11_0ufbw"]
+[ext_resource type="PackedScene" uid="uid://belkw4urryhch" path="res://assets/scenes/props/pickups/pickup_max_health.tscn" id="12_miwsv"]
+[ext_resource type="PackedScene" uid="uid://vq6imnpmh2sw" path="res://assets/scenes/props/pickups/pickup_attack_boost.tscn" id="13_6rgmr"]
+[ext_resource type="PackedScene" uid="uid://biuk4fta6kx8k" path="res://assets/scenes/props/pickups/pickup_heal.tscn" id="14_o2lhi"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_6rgmr"]
 texture = ExtResource("9_miwsv")
@@ -95,6 +98,15 @@ tile_set = ExtResource("5_844ai")
 [node name="Spike" type="TileMapLayer" parent="Switchable/Pesadilla" unique_id=1288904454]
 scale = Vector2(0.3, 0.3)
 tile_set = ExtResource("6_0ufbw")
+
+[node name="PickupAttackBoost" parent="Switchable/Pesadilla" unique_id=1610691848 instance=ExtResource("13_6rgmr")]
+position = Vector2(-31, -75)
+
+[node name="PickupHeal" parent="Switchable/Pesadilla" unique_id=1245818749 instance=ExtResource("14_o2lhi")]
+position = Vector2(34, -132)
+
+[node name="PickupMaxHealth" parent="Switchable/Pesadilla" unique_id=464626054 instance=ExtResource("12_miwsv")]
+position = Vector2(455, -360)
 
 [node name="Sueño" type="Node2D" parent="Switchable" unique_id=1018947006]
 visible = false
