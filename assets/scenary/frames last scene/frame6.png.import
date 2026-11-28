@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bwyuracbgb3q1"
-path="res://.godot/imported/plano2.png-29f941817b5a053e2beb4410c5d2fb73.ctex"
+uid="uid://bcb0ctwns618n"
+path="res://.godot/imported/frame6.png-7c7b434f3e8480ab828ea7ab90649e53.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/scenary/plano2.png"
-dest_files=["res://.godot/imported/plano2.png-29f941817b5a053e2beb4410c5d2fb73.ctex"]
+source_file="res://assets/scenary/frames last scene/frame6.png"
+dest_files=["res://.godot/imported/frame6.png-7c7b434f3e8480ab828ea7ab90649e53.ctex"]
 
 [params]
 
