@@ -39,7 +39,6 @@ tile_set = ExtResource("3_hrwun")
 
 [node name="DoorOeste" parent="Switchable/Pesadilla" unique_id=268869019 node_paths=PackedStringArray("unlock_buttons") instance=ExtResource("4_hrwun")]
 position = Vector2(-162.745, -18)
-collision_layer = 8
 door_id = &"9O"
 target_room = "uid://bwkaa8ycbdfuy"
 target_door_id = &"8E"
@@ -48,7 +47,6 @@ orientation = 3
 
 [node name="DoorEste" parent="Switchable/Pesadilla" unique_id=2023157406 node_paths=PackedStringArray("unlock_buttons") instance=ExtResource("4_hrwun")]
 position = Vector2(618.78, -18)
-collision_layer = 8
 door_id = &"9E"
 target_room = "uid://chprvm6r3s76p"
 target_door_id = &"5O2"
@@ -57,6 +55,7 @@ orientation = 1
 
 [node name="DoorSur" parent="Switchable/Pesadilla" unique_id=2050324716 instance=ExtResource("4_hrwun")]
 position = Vector2(21, 136)
+collision_layer = 8
 door_id = &"9S"
 target_room = "uid://kv7i6kto1a57"
 target_door_id = &"14N"
@@ -66,7 +65,6 @@ orientation = 2
 
 [node name="DoorNorte" parent="Switchable/Pesadilla" unique_id=1066036128 node_paths=PackedStringArray("unlock_buttons") instance=ExtResource("4_hrwun")]
 position = Vector2(21, -167.115)
-collision_layer = 8
 door_id = &"9N"
 target_room = "uid://dsg86uppu8dpf"
 target_door_id = &"4S"
@@ -108,7 +106,7 @@ tile_set = ExtResource("4_nd3df")
 process_mode = 3
 position = Vector2(-163, -18)
 disable_mode = 2
-collision_layer = 8
+collision_layer = 24
 door_id = &"17O"
 target_room = "uid://bubx6cfyi03av"
 target_door_id = &"1E"
@@ -119,7 +117,7 @@ orientation = 3
 process_mode = 3
 position = Vector2(619.015, -18)
 disable_mode = 2
-collision_layer = 8
+collision_layer = 24
 door_id = &"9E"
 target_room = "uid://chprvm6r3s76p"
 target_door_id = &"5O2"
@@ -130,7 +128,7 @@ orientation = 1
 process_mode = 3
 position = Vector2(21, 136)
 disable_mode = 2
-collision_layer = 24
+collision_layer = 8
 door_id = &"9S"
 target_room = "uid://kv7i6kto1a57"
 target_door_id = &"14N"
@@ -142,7 +140,7 @@ orientation = 2
 process_mode = 3
 position = Vector2(21, -167)
 disable_mode = 2
-collision_layer = 8
+collision_layer = 24
 door_id = &"9N"
 target_room = "uid://dsg86uppu8dpf"
 target_door_id = &"4S"
@@ -227,6 +225,6 @@ script = ExtResource("7_frht8")
 enemy_scene = ExtResource("8_4ka5l")
 
 [node name="EnemySpawnpoint5" type="Marker2D" parent="." unique_id=1968489339]
-position = Vector2(-117, -117)
+position = Vector2(0, -128)
 script = ExtResource("7_frht8")
 enemy_scene = ExtResource("8_4ka5l")

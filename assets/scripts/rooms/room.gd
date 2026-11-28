@@ -248,15 +248,17 @@ func _collect_preplaced_enemies(node: Node) -> void:
 
 
 func get_door_by_id(id: StringName) -> Door:
-	if id == &"":
+	var needle := String(id).strip_edges()
+	if needle.is_empty():
 		return null
 	for door in get_doors():
-		if door != null and door.door_id == id:
+		# Tolerate stray whitespace in authored door IDs (e.g. "14N ").
+		if door != null and String(door.door_id).strip_edges() == needle:
 			return door
 	# Fallback: match node name case-insensitively.
-	var needle := String(id).to_lower()
+	var lower_needle := needle.to_lower()
 	for door in get_doors():
-		if door != null and String(door.name).to_lower() == needle:
+		if door != null and String(door.name).to_lower() == lower_needle:
 			return door
 	return null
 
