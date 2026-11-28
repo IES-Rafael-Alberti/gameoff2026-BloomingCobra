@@ -25,6 +25,9 @@ const MenuNavGate := preload("res://assets/scripts/hud/menu_nav_gate.gd")
 @export var paper_color: Color = Color(0.12, 0.10, 0.14, 1.0)
 @export var paper_border_color: Color = Color(0.55, 0.48, 0.40, 0.85)
 @export var shadow_color: Color = Color(0.02, 0.01, 0.03, 0.55)
+## Freeze the player while this prompt is open. Disable it for passive notices
+## that auto-hide on proximity, since the player cannot walk away while frozen.
+@export var lock_player: bool = true
 
 var _open: bool = false
 var _index: int = 1
@@ -38,6 +41,7 @@ var _option_selectors_left: Array[TextureRect] = []
 var _option_selectors_right: Array[TextureRect] = []
 var _built: bool = false
 var _nav := MenuNavGate.new()
+var _player_locked_by_us: bool = false
 
 
 func _ready() -> void:
@@ -64,6 +68,45 @@ func open() -> void:
 	call_deferred("_fit_panel")
 	_update_visuals()
 	_play_fade_in()
+	_lock_player(true)
+
+
+func _lock_player(locked: bool) -> void:
+	## Freeze the player while a choice is on screen, but never fight another
+	## owner of the cutscene lock (boss intro, transitions).
+	if not lock_player:
+		return
+	if locked:
+		if _player_locked_by_us:
+			return
+		var player := _get_player()
+		if player == null or not player.has_method("set_cutscene_locked"):
+			return
+		if player.has_method("is_cutscene_locked") and bool(player.call("is_cutscene_locked")):
+			return
+		player.call("set_cutscene_locked", true)
+		_player_locked_by_us = true
+		return
+	if not _player_locked_by_us:
+		return
+	_player_locked_by_us = false
+	var player := _get_player()
+	if player != null and is_instance_valid(player) and player.has_method("set_cutscene_locked"):
+		player.call("set_cutscene_locked", false)
+
+
+func _get_player() -> Node2D:
+	if not is_inside_tree():
+		return null
+	var tree := get_tree()
+	if tree == null:
+		return null
+	return tree.get_first_node_in_group("player") as Node2D
+
+
+func _exit_tree() -> void:
+	# Room changes free this overlay; never leave the player frozen.
+	_lock_player(false)
 
 
 func _play_fade_in() -> void:
@@ -80,6 +123,7 @@ func close() -> void:
 	visible = false
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	modulate.a = 1.0
+	_lock_player(false)
 	closed.emit()
 
 

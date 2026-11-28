@@ -118,6 +118,8 @@ func set_cutscene_locked(locked: bool) -> void:
 		_knockback = Vector2.ZERO
 		_stop_steps()
 		cancel_attack_charge()
+		if animated_sprite != null:
+			_play_idle_animation()
 		if attack != null and attack.has_method("set_enabled"):
 			attack.set_enabled(false)
 	elif not _dead and not _void_falling:

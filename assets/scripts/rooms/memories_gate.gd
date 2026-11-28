@@ -151,6 +151,8 @@ func _ensure_message() -> void:
 	_message.set("default_index", 0)
 	_message.set("quit_on_confirm", false)
 	_message.set("fade_in_seconds", 0.25)
+	# Passive proximity notice: freezing here would trap the player in the area.
+	_message.set("lock_player", false)
 	layer.add_child(_message)
 	_message.connect("confirmed", Callable(self, "_hide_message"))
 
