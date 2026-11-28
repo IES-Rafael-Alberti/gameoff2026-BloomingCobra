@@ -1,10 +1,11 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://cdigcu7dm3kop"]
 
-[ext_resource type="Script" path="res://assets/scripts/hud/intro.gd" id="1_intro"]
-[ext_resource type="PackedScene" path="res://assets/scenes/HUD/libro.tscn" id="2_book"]
-[ext_resource type="Texture2D" path="res://assets/scenary/plano1.png" id="3_bg"]
+[ext_resource type="Script" uid="uid://do0pcu4x2sgj8" path="res://assets/scripts/hud/intro.gd" id="1_intro"]
+[ext_resource type="PackedScene" uid="uid://dlwpso74rwfdd" path="res://assets/scenes/HUD/libro.tscn" id="2_book"]
+[ext_resource type="Texture2D" uid="uid://ruauxwc1vrug" path="res://assets/scenary/plano1.png" id="3_bg"]
+[ext_resource type="AudioStream" uid="uid://bv8ev74ib1res" path="res://assets/audio/general/hiqeui-single-lightning-bolt_1-640538.mp3" id="4_pxq4j"]
 
-[node name="Intro" type="Control"]
+[node name="Intro" type="Control" unique_id=1211884834]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -13,7 +14,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_intro")
 
-[node name="BlackBg" type="ColorRect" parent="."]
+[node name="BlackBg" type="ColorRect" parent="." unique_id=1230180695]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -23,7 +24,8 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0, 0, 0, 1)
 
-[node name="Background" type="TextureRect" parent="."]
+[node name="Background" type="TextureRect" parent="." unique_id=77294711]
+modulate = Color(1, 1, 1, 0)
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -34,25 +36,23 @@ mouse_filter = 2
 texture = ExtResource("3_bg")
 expand_mode = 1
 stretch_mode = 5
-modulate = Color(1, 1, 1, 0)
 
-[node name="Book" parent="." instance=ExtResource("2_book")]
+[node name="Book" parent="." unique_id=297000003 instance=ExtResource("2_book")]
 
-[node name="FlashLayer" type="CanvasLayer" parent="."]
+[node name="FlashLayer" type="CanvasLayer" parent="." unique_id=1526264223]
 layer = 10
 
-[node name="Flash" type="ColorRect" parent="FlashLayer"]
-layout_mode = 1
+[node name="Flash" type="ColorRect" parent="FlashLayer" unique_id=638726544]
+modulate = Color(1, 1, 1, 0)
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(1, 1, 1, 1)
-modulate = Color(1, 1, 1, 0)
 
-[node name="ThunderPlayer" type="AudioStreamPlayer" parent="."]
+[node name="ThunderPlayer" type="AudioStreamPlayer" parent="." unique_id=1849058826]
+stream = ExtResource("4_pxq4j")
 
-[node name="ConfirmLayer" type="CanvasLayer" parent="."]
+[node name="ConfirmLayer" type="CanvasLayer" parent="." unique_id=661250597]
 layer = 20
