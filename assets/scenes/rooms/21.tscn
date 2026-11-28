@@ -95,10 +95,10 @@ gradient = SubResource("Gradient_c4bcj")
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_qwh66"]
 size = Vector2(100, 120)
 
-[node name="2" type="Node2D" unique_id=1650967006]
+[node name="21" type="Node2D" unique_id=1650967006]
 script = ExtResource("1_blrkg")
-room_id = &"2"
-map_cell = Vector2i(1, 0)
+room_id = &"21"
+map_cell = Vector2i(0, 4)
 
 [node name="DoorEste2" parent="." unique_id=300450223 instance=ExtResource("2_blrkg")]
 position = Vector2(134, -14)

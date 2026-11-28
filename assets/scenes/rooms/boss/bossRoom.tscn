@@ -129,6 +129,9 @@ starts_open = true
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Door" unique_id=707785605]
 shape = SubResource("RectangleShape2D_door")
 
+[node name="Spawn" type="Marker2D" parent="Door" unique_id=1550064999]
+position = Vector2(188, 0)
+
 [node name="ButtonSlots" type="Node2D" parent="." unique_id=232522831]
 
 [node name="Boss" parent="." unique_id=754355959 instance=ExtResource("8_boss")]

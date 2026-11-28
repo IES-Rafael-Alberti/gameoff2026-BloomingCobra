@@ -6,7 +6,8 @@ const CONFIG_PATH := "user://settings.cfg"
 const SECTION := "settings"
 const SECTION_INPUT := "input_bindings"
 ## Bump when project.godot defaults change incompatibly (arrows moved to attack).
-const INPUT_BINDINGS_VERSION := 2
+## v3: attack no longer binds the left mouse button.
+const INPUT_BINDINGS_VERSION := 3
 const _ARROW_BINDINGS := [
 	"key:4194319", "key:4194321", "key:4194320", "key:4194322"
 ]
@@ -317,6 +318,10 @@ func _clear_event_from_other_actions(keep_action: StringName, event: InputEvent,
 		var other: StringName = entry[&"action"]
 		if other == keep_action or not InputMap.has_action(other):
 			continue
+		# Attack and aim_* share the arrow keys by design (arrows aim + charge).
+		# Stealing those keys here used to gut `attack` one direction at a time.
+		if _action_shares_directional_keys(other):
+			continue
 		for existing in InputMap.action_get_events(other):
 			if not _events_match(existing, event):
 				continue
@@ -324,6 +329,10 @@ func _clear_event_from_other_actions(keep_action: StringName, event: InputEvent,
 				InputMap.action_erase_event(other, existing)
 			elif not gamepad and is_keyboard_event(existing):
 				InputMap.action_erase_event(other, existing)
+
+
+func _action_shares_directional_keys(action: StringName) -> bool:
+	return action == &"attack" or String(action).begins_with("aim_")
 
 
 func _events_match(a: InputEvent, b: InputEvent) -> bool:

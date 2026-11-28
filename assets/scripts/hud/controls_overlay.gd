@@ -154,6 +154,16 @@ func _update_scheme_from_event(event: InputEvent) -> void:
 		_update_scheme_label()
 
 
+## Store bindings the way project.godot does: physical key only, not pressed.
+## A raw captured event keeps keycode + pressed=true, which then gets saved and
+## makes the binding's label and matching depend on the capture session.
+func _clean_key_event(event: InputEventKey) -> InputEventKey:
+	var clean := InputEventKey.new()
+	var code := event.physical_keycode if event.physical_keycode != KEY_NONE else event.keycode
+	clean.physical_keycode = code
+	return clean
+
+
 func _try_capture(event: InputEvent) -> bool:
 	if GameSettings == null:
 		_listening = false
@@ -168,7 +178,7 @@ func _try_capture(event: InputEvent) -> bool:
 
 	var usable: InputEvent = null
 	if event is InputEventKey and event.pressed and not event.echo:
-		usable = event
+		usable = _clean_key_event(event as InputEventKey)
 	elif event is InputEventMouseButton and event.pressed:
 		usable = event
 	elif event is InputEventJoypadButton and event.pressed:
@@ -431,7 +441,7 @@ func _refresh_values() -> void:
 		if action == &"":
 			_value_labels[i].text = ""
 		elif action == RESET_ACTION:
-			_value_labels[i].text = "A / Enter"
+			_value_labels[i].text = "Press Confirm"
 		elif _listening and i == _index:
 			_value_labels[i].text = "…"
 		elif GameSettings != null:

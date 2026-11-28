@@ -17,11 +17,13 @@ func _ready() -> void:
 
 
 ## Guarantees gameplay actions exist even if Project Settings input map failed to load.
+## Arrows are intentionally NOT added to move_*: since the key-bind rework they
+## belong to attack/aim, and re-adding them made arrows move *and* attack at once.
 func _ensure_input_actions() -> void:
-	_bind_key_action(&"move_left", [KEY_A, KEY_LEFT])
-	_bind_key_action(&"move_right", [KEY_D, KEY_RIGHT])
-	_bind_key_action(&"move_up", [KEY_W, KEY_UP])
-	_bind_key_action(&"move_down", [KEY_S, KEY_DOWN])
+	_bind_key_action(&"move_left", [KEY_A])
+	_bind_key_action(&"move_right", [KEY_D])
+	_bind_key_action(&"move_up", [KEY_W])
+	_bind_key_action(&"move_down", [KEY_S])
 	_bind_joypad_axis_action(&"move_left", JOY_AXIS_LEFT_X, -1.0)
 	_bind_joypad_axis_action(&"move_right", JOY_AXIS_LEFT_X, 1.0)
 	_bind_joypad_axis_action(&"move_up", JOY_AXIS_LEFT_Y, -1.0)
@@ -44,7 +46,6 @@ func _ensure_input_actions() -> void:
 	_bind_key_action(&"debug_hitboxes", [KEY_F1])
 	_bind_key_action(&"debug_god_mode", [KEY_F2])
 	_bind_key_action(&"debug_boss_room", [KEY_F3])
-	_bind_mouse_action(&"attack", MOUSE_BUTTON_LEFT)
 
 
 func _bind_key_action(action: StringName, keycodes: Array) -> void:
@@ -70,15 +71,6 @@ func _rebind_key_action(action: StringName, keycodes: Array) -> void:
 		ev.physical_keycode = keycode as Key
 		if not InputMap.action_has_event(action, ev):
 			InputMap.action_add_event(action, ev)
-
-
-func _bind_mouse_action(action: StringName, button: MouseButton) -> void:
-	if not InputMap.has_action(action):
-		InputMap.add_action(action)
-	var ev := InputEventMouseButton.new()
-	ev.button_index = button
-	if not InputMap.action_has_event(action, ev):
-		InputMap.action_add_event(action, ev)
 
 
 func _bind_joypad_axis_action(action: StringName, axis: JoyAxis, axis_value: float) -> void:
