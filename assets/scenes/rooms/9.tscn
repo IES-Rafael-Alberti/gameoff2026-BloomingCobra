@@ -131,9 +131,9 @@ process_mode = 3
 position = Vector2(-163, -18)
 disable_mode = 2
 collision_layer = 24
-door_id = &"17O"
-target_room = "uid://bubx6cfyi03av"
-target_door_id = &"1E"
+door_id = &"9O"
+target_room = "uid://bwkaa8ycbdfuy"
+target_door_id = &"8E"
 unlock_buttons = [NodePath("../../Pesadilla/ButtonPesadilla")]
 orientation = 3
 
