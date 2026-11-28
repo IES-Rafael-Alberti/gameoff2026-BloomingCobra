@@ -25,6 +25,8 @@ const MENU_LABELS: PackedStringArray = ["Play", "Options", "Exit"]
 @onready var _selector_right: TextureRect = $UI/SelectorRight
 @onready var _welcome: TextureRect = $"Welcome title/Logoblanco"
 @onready var _welcome_text: Label = $"Welcome title/Label"
+@onready var _night_ambience_player: AudioStreamPlayer = $NightAmbiencePlayer
+@onready var _button_sting_player: AudioStreamPlayer = $ButtonPianoStingPlayer
 
 
 var _menu_items: Array[Label] = []
@@ -55,8 +57,9 @@ func _ready() -> void:
 	_selector_right.visible = false
 	resized.connect(_on_resized)
 	_on_resized()
-	
-	
+
+	_start_night_ambience()
+
 	await _play_intro()
 	_input_enabled = true
 	_update_selection_visuals()
@@ -97,6 +100,29 @@ func _mark_input_handled() -> void:
 	var viewport := get_viewport()
 	if viewport != null:
 		viewport.set_input_as_handled()
+
+
+func _start_night_ambience() -> void:
+	if _night_ambience_player == null:
+		return
+	# Dedicated player: this is never stopped or replaced by the piano sting.
+	if _night_ambience_player.stream != null and not _night_ambience_player.playing:
+		_night_ambience_player.play()
+
+
+func _play_button_sting_once() -> void:
+	if _button_sting_player == null or _button_sting_player.stream == null:
+		return
+	# Duplicate so disabling loop does not mutate a track used somewhere else.
+	var sting_stream := _button_sting_player.stream.duplicate() as AudioStream
+	if sting_stream is AudioStreamWAV:
+		(sting_stream as AudioStreamWAV).loop_mode = AudioStreamWAV.LOOP_DISABLED
+	elif sting_stream is AudioStreamOggVorbis:
+		(sting_stream as AudioStreamOggVorbis).loop = false
+	elif sting_stream is AudioStreamMP3:
+		(sting_stream as AudioStreamMP3).loop = false
+	_button_sting_player.stream = sting_stream
+	_button_sting_player.play()
 
 
 signal interacted
@@ -146,7 +172,8 @@ func _play_intro() -> void:
 	
 	# wait for any key pressed
 	await interacted
-	
+	_play_button_sting_once()
+
 	# remove welcome text
 	#_welcome_text.modulate.a = 0.0
 	

@@ -17,6 +17,8 @@
 [ext_resource type="Shader" uid="uid://bjd6ggty5r8x0" path="res://assets/shaders/bounce_selector.gdshader" id="13_1481d"]
 [ext_resource type="Shader" uid="uid://bak538msrbjhb" path="res://assets/shaders/luz_menu.gdshader" id="15_ae2ix"]
 [ext_resource type="Texture2D" uid="uid://cl0bcbmbrrvvn" path="res://icon.svg" id="16_1rvki"]
+[ext_resource type="AudioStream" uid="uid://bdpkrc7shnsha" path="res://assets/audio/music/freesound_community-night-ambience-17064.mp3" id="18_5a3l3"]
+[ext_resource type="AudioStream" uid="uid://b3cw8tc2mnvjr" path="res://assets/audio/music/PIANO1.wav" id="19_5eu3w"]
 
 [sub_resource type="Animation" id="Animation_ijtlv"]
 length = 0.001
@@ -624,3 +626,11 @@ offset_right = 2062.0
 offset_bottom = 1431.0
 rotation = 3.1408134
 texture = ExtResource("16_1rvki")
+
+[node name="NightAmbiencePlayer" type="AudioStreamPlayer" parent="." unique_id=1782403117]
+stream = ExtResource("18_5a3l3")
+volume_db = -8.0
+
+[node name="ButtonPianoStingPlayer" type="AudioStreamPlayer" parent="." unique_id=1246803579]
+stream = ExtResource("19_5eu3w")
+volume_db = -4.0
