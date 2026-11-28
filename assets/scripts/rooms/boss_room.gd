@@ -542,8 +542,9 @@ func _start_ending() -> void:
 	if RunState != null and RunState.has_method("reset"):
 		RunState.call("reset")
 	if SceneTransition != null and SceneTransition.has_method("change_to"):
-		# Plain fade to black: no "Loading..." label for the ending.
-		SceneTransition.call("change_to", main_menu_scene, false)
+		# The orb already faded the screen to white: keep that white through the
+		# scene swap instead of fading in a black overlay.
+		SceneTransition.call("change_to", main_menu_scene, false, Color.WHITE)
 	else:
 		get_tree().change_scene_to_file(main_menu_scene)
 

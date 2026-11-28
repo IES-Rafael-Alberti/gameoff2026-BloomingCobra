@@ -12,6 +12,7 @@ const TEXT_COLOR := Color(0.96, 0.92, 0.86, 1.0)
 
 var _busy: bool = false
 var _show_loading: bool = true
+var _overlay_color: Color = OVERLAY_COLOR
 var _overlay: ColorRect
 var _label: Label
 var _dot_index: int = 0
@@ -30,8 +31,9 @@ func is_busy() -> bool:
 	return _busy
 
 
-## Pass show_loading = false for a plain fade to black (ending → title).
-func change_to(scene_path: String, show_loading: bool = true) -> void:
+## Pass show_loading = false for a plain fade (ending → title).
+## overlay_color keeps endings that already faded to white visually continuous.
+func change_to(scene_path: String, show_loading: bool = true, overlay_color: Color = OVERLAY_COLOR) -> void:
 	if _busy:
 		return
 	if scene_path.is_empty():
@@ -40,6 +42,7 @@ func change_to(scene_path: String, show_loading: bool = true) -> void:
 	# Keep the coroutine owned by this autoload (survives change_scene).
 	_busy = true
 	_show_loading = show_loading
+	_overlay_color = overlay_color
 	_run_transition(scene_path)
 
 
@@ -80,6 +83,7 @@ func _process(delta: float) -> void:
 
 func _run_transition(scene_path: String) -> void:
 	visible = true
+	_overlay.color = Color(_overlay_color.r, _overlay_color.g, _overlay_color.b, 0.0)
 	_overlay.mouse_filter = Control.MOUSE_FILTER_STOP
 	_label.text = LOADING_BASE
 	_dot_index = 0

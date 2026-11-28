@@ -254,6 +254,6 @@ script = ExtResource("7_frht8")
 enemy_scene = ExtResource("8_4ka5l")
 
 [node name="EnemySpawnpoint5" type="Marker2D" parent="." unique_id=1968489339]
-position = Vector2(-117, -117)
+position = Vector2(0, -128)
 script = ExtResource("7_frht8")
 enemy_scene = ExtResource("8_4ka5l")
